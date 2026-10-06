@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import type { RefObject } from 'react'
 import type { Map as MapLibreMap } from 'maplibre-gl'
-import { Droplet, GlassWater, Waves } from 'lucide-react'
+import { Droplet, Droplets, GlassWater, Waves } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { MapMarker, MarkerContent, MarkerPopup, MarkerTooltip, useMap } from '@/components/ui/map'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
   CAN_PLACE, ISSUES, KINDS, ROLES,
-  fileReport, moveAsset, removeAsset, setRole, setStatus, useWaterStore,
+  fileReport, hasStatus, moveAsset, removeAsset, setStatus, useWaterStore,
 } from '@/lib/WaterStore'
 import type { Asset, AssetKind, Issue, Role } from '@/lib/WaterStore'
 
-const ICONS: Record<AssetKind, LucideIcon> = { pump: Droplet, reservoir: Waves, station: GlassWater }
+const ICONS: Record<AssetKind, LucideIcon> = { pump: Droplet, well: Droplets, reservoir: Waves, station: GlassWater }
 const field = 'w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm'
 
 // Hands the MapLibre instance to the page so a drop can be turned into coordinates.
@@ -32,22 +32,9 @@ export function RolePanel() {
   const current = ROLES.find((r) => r.id === role)!
   return (
     <div className="mt-6 rounded-2xl border border-line bg-white p-4">
-      <div role="group" aria-label="Choose a role" className="flex flex-wrap gap-2">
-        {ROLES.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            aria-pressed={r.id === role}
-            onClick={() => setRole(r.id)}
-            className={cn(
-              'rounded-lg border px-4 py-2 text-sm font-bold',
-              r.id === role ? 'border-ink bg-ink text-white' : 'border-line hover:bg-sky',
-            )}
-          >
-            {r.label}
-          </button>
-        ))}
-      </div>
+      <p className="text-sm">
+        Signed in as <span className="rounded-lg bg-ink px-3 py-1 font-bold text-white">{current.label}</span>
+      </p>
       <p className="mt-3 text-sm text-ink/70">{current.hint}</p>
       {CAN_PLACE[role].length > 0 && (
         <ul className="mt-3 flex flex-wrap gap-2">
@@ -82,7 +69,12 @@ export function AssetMarkers() {
         const canEdit = CAN_PLACE[role].includes(a.kind)
         const Icon = ICONS[a.kind]
         const count = reports.filter((r) => r.assetId === a.id).length
-        const tone = a.kind === 'reservoir' ? 'bg-deep' : a.kind === 'station' ? 'bg-aqua' : a.status === 'empty' ? 'bg-red-600' : 'bg-well'
+        const tone =
+          a.kind === 'reservoir' ? 'bg-deep'
+          : a.kind === 'station' ? 'bg-aqua'
+          : a.status === 'empty' ? 'bg-red-600'
+          : a.kind === 'well' ? 'bg-teal-600'
+          : 'bg-well'
         return (
           // The key changes with edit rights so MapLibre rebuilds the marker with the right draggable setting.
           <MapMarker
@@ -119,7 +111,7 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
   const [issue, setIssue] = useState<Issue>('empty')
   const [note, setNote] = useState('')
   const [sent, setSent] = useState(false)
-  const isPump = asset.kind === 'pump'
+  const isPump = hasStatus(asset.kind) // pumps and wells
 
   return (
     <div className="space-y-3 text-sm">
@@ -161,7 +153,7 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
       {role === 'official' && isPump && (
         <div className="space-y-2">
           <p className="font-semibold">Reports ({mine.length})</p>
-          {mine.length === 0 && <p className="text-ink/70">No reports for this pump.</p>}
+          {mine.length === 0 && <p className="text-ink/70">No reports yet.</p>}
           <ul className="max-h-32 space-y-1.5 overflow-y-auto">
             {mine.map((r) => (
               <li key={r.id} className="rounded-md bg-mist px-2 py-1.5">

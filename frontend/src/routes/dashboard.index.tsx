@@ -4,16 +4,16 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { SupplyOutlook } from '@/components/SupplyOutlook'
 import { useBarangays } from '@/lib/barangays'
-import { ISSUES, setRole, setStatus, useWaterStore } from '@/lib/WaterStore'
+import { ISSUES, hasStatus, setStatus, useWaterStore } from '@/lib/WaterStore'
 import type { Asset, Role } from '@/lib/WaterStore'
 
 export const Route = createFileRoute('/dashboard/')({ component: Page })
 
-// Same four roles as the map page. Switching here switches there too, because both read the store.
+// The four roles. The user's role comes from their profile in Supabase (set in dashboard.tsx).
 const PERSONAS: { role: Role; label: string; blurb: string }[] = [
-  { role: 'lgu', label: 'LGU', blurb: 'Water pumps that barangay officials have marked as empty.' },
+  { role: 'lgu', label: 'LGU', blurb: 'Water pumps and wells that barangay officials have marked as empty.' },
   { role: 'official', label: 'Barangay official', blurb: 'Problems reported by households, newest first.' },
-  { role: 'drrm', label: 'DRRM', blurb: 'Barangays with the most empty or reported pumps.' },
+  { role: 'drrm', label: 'DRRM', blurb: 'Barangays with the most empty or reported pumps and wells.' },
   { role: 'citizen', label: 'Household', blurb: 'Pumps near you that are empty or have problems.' },
 ]
 
@@ -44,22 +44,9 @@ function Page() {
         <SupplyOutlook />
       </div>
 
-      <div role="group" aria-label="Choose who you are" className="mt-5 flex flex-wrap gap-2">
-        {PERSONAS.map((p) => (
-          <button
-            key={p.role}
-            type="button"
-            aria-pressed={p.role === role}
-            onClick={() => setRole(p.role)}
-            className={cn(
-              'rounded-lg border px-4 py-2 text-sm font-bold',
-              p.role === role ? 'border-ink bg-ink text-white' : 'border-line bg-white hover:bg-sky',
-            )}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <p className="mt-5 text-sm">
+        Viewing as <span className="rounded-lg bg-ink px-3 py-1 font-bold text-white">{current.label}</span>
+      </p>
       <p className="mt-3 max-w-xl text-ink/70">{current.blurb}</p>
 
       <section aria-label={current.label} className="mt-6">
@@ -85,8 +72,8 @@ function MapLink() {
 // LGU: pumps the barangay officials have marked empty.
 function LguView({ barangayOf }: ViewProps) {
   const { assets, reports } = useWaterStore()
-  const rows = assets.filter((a) => a.kind === 'pump' && a.status === 'empty')
-  if (rows.length === 0) return empty('No pumps are marked empty right now.')
+  const rows = assets.filter((a) => hasStatus(a.kind) && a.status === 'empty')
+  if (rows.length === 0) return empty('No pumps or wells are marked empty right now.')
   return (
     <ul className="space-y-3">
       {rows.map((a) => (
@@ -125,9 +112,9 @@ function OfficialView({ barangayOf }: ViewProps) {
             <p className="font-semibold">{ISSUES[r.issue]}</p>
             {r.note && <p className="text-sm">{r.note}</p>}
             {a.status === 'ok' ? (
-              <Button size="sm" variant="destructive" onClick={() => setStatus(a.id, 'empty')}>Mark pump as empty</Button>
+              <Button size="sm" variant="destructive" onClick={() => setStatus(a.id, 'empty')}>Mark as empty</Button>
             ) : (
-              <Button size="sm" onClick={() => setStatus(a.id, 'ok')}>Mark pump as working</Button>
+              <Button size="sm" onClick={() => setStatus(a.id, 'ok')}>Mark as working</Button>
             )}
           </li>
         )
@@ -142,7 +129,7 @@ function DrrmView({ barangayOf }: ViewProps) {
   const rows = useMemo(() => {
     const m = new Map<string, { name: string; pumps: number; emptyPumps: number; reports: number }>()
     for (const a of assets) {
-      if (a.kind !== 'pump') continue
+      if (!hasStatus(a.kind)) continue
       const name = barangayOf(a) ?? 'Barangay unknown'
       const row = m.get(name) ?? { name, pumps: 0, emptyPumps: 0, reports: 0 }
       row.pumps++
@@ -163,7 +150,7 @@ function DrrmView({ barangayOf }: ViewProps) {
           <div>
             <p className="font-extrabold">{i + 1}. {r.name}</p>
             <p className="text-sm text-ink/70">
-              {r.emptyPumps} of {r.pumps} pump(s) empty · {r.reports} report(s)
+              {r.emptyPumps} of {r.pumps} pump(s)/well(s) empty · {r.reports} report(s)
             </p>
           </div>
           <MapLink />
@@ -189,7 +176,7 @@ function HouseholdView({ barangayOf }: ViewProps) {
       () => setDenied(true),
     ) ?? setDenied(true)
 
-  const pumps = assets.filter((a) => a.kind === 'pump')
+  const pumps = assets.filter((a) => hasStatus(a.kind)) // pumps and wells
   const dist = (a: Asset) => km(origin, a)
   const problems = pumps
     .filter((a) => a.status === 'empty' || reports.some((r) => r.assetId === a.id))
@@ -208,13 +195,13 @@ function HouseholdView({ barangayOf }: ViewProps) {
 
       {nearestWorking && (
         <p className={cn(card, 'text-sm')}>
-          Nearest working pump: <strong>{nearestWorking.name}</strong> ({barangayOf(nearestWorking) ?? 'barangay unknown'}),{' '}
+          Nearest working pump or well: <strong>{nearestWorking.name}</strong> ({barangayOf(nearestWorking) ?? 'barangay unknown'}),{' '}
           {dist(nearestWorking).toFixed(1)} km away.
         </p>
       )}
 
       {problems.length === 0 ? (
-        empty('No empty pumps or problems reported near you.')
+        empty('No empty pumps, wells or problems reported near you.')
       ) : (
         <ul className="space-y-3">
           {problems.map((a) => (
