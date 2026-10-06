@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: wellpoint-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-wellpoint}
+      POSTGRES_USER: ${POSTGRES_USER:-wellpoint}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-wellpoint}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - wellpoint-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-wellpoint} -d ${POSTGRES_DB:-wellpoint}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  wellpoint-pgdata:
