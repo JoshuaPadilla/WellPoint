@@ -41,6 +41,7 @@ body,
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 80px;
+  overflow-x: clip;
 }
 
 body {
@@ -48,6 +49,14 @@ body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: var(--color-mist);
+}
+
+/* Remove the grey tap flash on touch devices and avoid double-tap zoom on controls. */
+a,
+button,
+select,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
 }
 
 :focus-visible {

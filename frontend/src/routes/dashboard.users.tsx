@@ -25,40 +25,44 @@ function Row({ id, name, email, role, barangayPsgc }: { id: string; name: string
   const [err, setErr] = useState('')
 
   return (
-    <li className={cn(card, 'flex flex-wrap items-center gap-3')}>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-extrabold">{name || '(unnamed)'}</p>
-        <p className="truncate text-xs text-ink/60">{email}</p>
+    <li className={cn(card, 'space-y-3')}>
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-extrabold">{name || '(unnamed)'}</p>
+          <p className="truncate text-xs text-ink/60">{email}</p>
+        </div>
+        <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-xs font-bold', ROLE_TONE[r])}>{r}</span>
       </div>
-      <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', ROLE_TONE[r])}>{r}</span>
-      <select className={field} value={r} onChange={(e) => setR(e.target.value as Role)} aria-label={`Role for ${name}`}>
-        {ROLES.map((x) => (
-          <option key={x.id} value={x.id}>{x.label}</option>
-        ))}
-      </select>
-      <select className={cn(field, 'max-w-48')} value={b} onChange={(e) => setB(e.target.value)} aria-label={`Barangay for ${name}`}>
-        <option value="">No barangay</option>
-        {barangays.map((x) => (
-          <option key={x.psgcCode} value={x.psgcCode}>{x.name}</option>
-        ))}
-      </select>
-      <button
-        type="button"
-        className="rounded-lg bg-well px-3 py-1.5 text-sm font-bold text-white hover:bg-deep"
-        onClick={async () => {
-          setErr('')
-          const error = await setUserRole(id, r, b)
-          if (error) setErr(error)
-          else {
-            setSaved(true)
-            window.setTimeout(() => setSaved(false), 2000)
-          }
-        }}
-      >
-        Save
-      </button>
-      {saved && <span className="text-xs font-semibold text-emerald-700">Saved</span>}
-      {err && <span className="text-xs text-orange-700">{err}</span>}
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <select className={cn(field, 'w-full sm:w-auto')} value={r} onChange={(e) => setR(e.target.value as Role)} aria-label={`Role for ${name}`}>
+          {ROLES.map((x) => (
+            <option key={x.id} value={x.id}>{x.label}</option>
+          ))}
+        </select>
+        <select className={cn(field, 'w-full sm:max-w-48')} value={b} onChange={(e) => setB(e.target.value)} aria-label={`Barangay for ${name}`}>
+          <option value="">No barangay</option>
+          {barangays.map((x) => (
+            <option key={x.psgcCode} value={x.psgcCode}>{x.name}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="w-full rounded-lg bg-well px-3 py-1.5 text-sm font-bold text-white hover:bg-deep sm:w-auto"
+          onClick={async () => {
+            setErr('')
+            const error = await setUserRole(id, r, b)
+            if (error) setErr(error)
+            else {
+              setSaved(true)
+              window.setTimeout(() => setSaved(false), 2000)
+            }
+          }}
+        >
+          Save
+        </button>
+        {saved && <span className="text-xs font-semibold text-emerald-700">Saved</span>}
+        {err && <span className="text-xs text-orange-700">{err}</span>}
+      </div>
     </li>
   )
 }

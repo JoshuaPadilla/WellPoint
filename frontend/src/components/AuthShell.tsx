@@ -8,7 +8,7 @@ const perks = ['Water access status for your barangay', 'Early-warning alerts be
 export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (
     <main className="grid min-h-screen lg:grid-cols-[1fr_1.1fr]">
-      <section className="flex flex-col justify-between bg-gradient-to-br from-ink via-deep to-well p-8 text-white lg:p-12">
+      <section className="hidden flex-col justify-between bg-gradient-to-br from-ink via-deep to-well p-8 text-white lg:flex lg:p-12">
         <Logo light />
         <div className="my-12 max-w-md">
           <p className="text-3xl font-bold leading-tight lg:text-4xl">
@@ -25,6 +25,9 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
 
       <section className="flex items-center justify-center p-6 sm:p-8">
         <div className="w-full max-w-sm">
+          <div className="mb-8 lg:hidden">
+            <Logo />
+          </div>
           <div className="mb-8 grid grid-cols-2 rounded-xl bg-sky p-1 text-center text-sm font-bold">
             <Link to="/login" className="rounded-lg py-2" activeProps={{ className: 'bg-white text-ink shadow' }}>
               Log in

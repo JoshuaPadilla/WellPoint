@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSun, Sun } from 'lucide-react'
+import {
+  Cloud,
+  CloudDrizzle,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSun,
+  Sun,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/LoadingScreen'
 import { cn } from '@/lib/utils'
 import { RESERVOIR, STAGES, project } from '@/lib/supply'
 import type { DayForecast } from '@/lib/supply'
@@ -32,7 +41,11 @@ function useForecast() {
     const ctrl = new AbortController()
     setError(false)
     fetch(URL, { signal: ctrl.signal })
-      .then((r) => (r.ok ? (r.json() as Promise<Raw>) : Promise.reject(new Error(String(r.status)))))
+      .then((r) =>
+        r.ok
+          ? (r.json() as Promise<Raw>)
+          : Promise.reject(new Error(String(r.status))),
+      )
       .then(({ daily: d }) =>
         setDays(
           d.time.map((date, i) => ({
@@ -65,7 +78,12 @@ function sky(code: number): { Icon: LucideIcon; label: string } {
   return { Icon: CloudRain, label: 'Rain' }
 }
 
-const dayLabel = (iso: string) => new Date(`${iso}T00:00:00`).toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' })
+const dayLabel = (iso: string) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString('en-PH', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
 const pct = (n: number) => `${Math.round(n)}%`
 
 export function SupplyOutlook() {
@@ -74,31 +92,72 @@ export function SupplyOutlook() {
   const stage = outlook ? STAGES[outlook.stage] : null
 
   return (
-    <section aria-label="Water supply outlook" className="rounded-2xl border border-line bg-white p-5">
+    <section
+      aria-label="Water supply outlook"
+      className="rounded-2xl border border-line bg-white p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-extrabold">Water supply outlook</h2>
-          <p className="text-sm text-ink/70">{RESERVOIR.name}, next 6 days of weather</p>
+          <p className="text-sm text-ink/70">
+            {RESERVOIR.name}, next 6 days of weather
+          </p>
         </div>
-        {stage && <span className={cn('rounded-full px-3 py-1 text-sm font-bold', stage.tone)}>{stage.label}</span>}
+        {stage && (
+          <span
+            className={cn(
+              'rounded-full px-3 py-1 text-sm font-bold',
+              stage.tone,
+            )}
+          >
+            {stage.label}
+          </span>
+        )}
       </div>
 
       <div className="mt-4">
         <div className="flex items-baseline justify-between text-sm">
           <span className="font-semibold">Stored now</span>
-          <span>{pct((RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100)} ({RESERVOIR.storageM3.toLocaleString('en')} of {RESERVOIR.capacityM3.toLocaleString('en')} m³)</span>
+          <span>
+            {pct((RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100)} (
+            {RESERVOIR.storageM3.toLocaleString('en')} of{' '}
+            {RESERVOIR.capacityM3.toLocaleString('en')} m³)
+          </span>
         </div>
-        <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-sky" role="img" aria-label={`Reservoir ${pct((RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100)} full`}>
-          <div className="h-full bg-well" style={{ width: `${(RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100}%` }} />
+        <div
+          className="mt-1 h-2.5 overflow-hidden rounded-full bg-sky"
+          role="img"
+          aria-label={`Reservoir ${pct((RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100)} full`}
+        >
+          <div
+            className="h-full bg-well"
+            style={{
+              width: `${(RESERVOIR.storageM3 / RESERVOIR.capacityM3) * 100}%`,
+            }}
+          />
         </div>
-        <p className="mt-1 text-xs text-ink/60">Demo reading. Replace it with the real gauge reading.</p>
+        <p className="mt-1 text-xs text-ink/60">
+          Demo reading. Replace it with the real gauge reading.
+        </p>
       </div>
 
-      {!days && !error && <p className="mt-5 text-sm text-ink/70">Loading the forecast…</p>}
+      {!days && !error && (
+        <p className="mt-5 flex items-center gap-2 text-sm text-ink/70">
+          <Spinner className="size-4" /> Loading the forecast…
+        </p>
+      )}
       {error && (
-        <div role="alert" className="mt-5 flex flex-wrap items-center gap-3 text-sm">
-          <p>Couldn't load the weather forecast, so the outlook can't be worked out.</p>
-          <Button size="sm" variant="outline" onClick={retry}>Try again</Button>
+        <div
+          role="alert"
+          className="mt-5 flex flex-wrap items-center gap-3 text-sm"
+        >
+          <p>
+            Couldn't load the weather forecast, so the outlook can't be worked
+            out.
+          </p>
+          <Button size="sm" variant="outline" onClick={retry}>
+            Try again
+          </Button>
         </div>
       )}
 
@@ -112,9 +171,14 @@ export function SupplyOutlook() {
                   <p className="font-bold">{dayLabel(d.date)}</p>
                   <Icon className="my-2 size-6 text-well" aria-label={label} />
                   <p>{d.rainMm.toFixed(1)} mm rain</p>
-                  <p className="text-xs text-ink/60">{d.rainChance}% chance · {Math.round(d.tempMax)}°C</p>
+                  <p className="text-xs text-ink/60">
+                    {d.rainChance}% chance · {Math.round(d.tempMax)}°C
+                  </p>
                   <p className="mt-2 border-t border-line pt-2 text-xs text-ink/70">
-                    Reservoir <strong className="text-ink">{pct(outlook.days[i].pct)}</strong>
+                    Reservoir{' '}
+                    <strong className="text-ink">
+                      {pct(outlook.days[i].pct)}
+                    </strong>
                   </p>
                 </li>
               )
@@ -123,20 +187,43 @@ export function SupplyOutlook() {
 
           <div className="mt-5 space-y-2 text-sm">
             <p>
-              Over 6 days the forecast brings <strong>{outlook.totalRainMm.toFixed(0)} mm</strong> of rain. The reservoir goes from{' '}
-              <strong>{pct(outlook.nowPct)}</strong> to <strong>{pct(outlook.endPct)}</strong>
-              {outlook.minPct < Math.min(outlook.nowPct, outlook.endPct) - 0.5 && <> (lowest point {pct(outlook.minPct)})</>}.{' '}
-              {outlook.daysLeft === null
-                ? 'It is refilling faster than it is used.'
-                : <>If no more rain falls after that, what is left lasts about <strong>{Math.round(outlook.daysLeft)} days</strong>.</>}
+              Over 6 days the forecast brings{' '}
+              <strong>{outlook.totalRainMm.toFixed(0)} mm</strong> of rain. The
+              reservoir goes from <strong>{pct(outlook.nowPct)}</strong> to{' '}
+              <strong>{pct(outlook.endPct)}</strong>
+              {outlook.minPct <
+                Math.min(outlook.nowPct, outlook.endPct) - 0.5 && (
+                <> (lowest point {pct(outlook.minPct)})</>
+              )}
+              .{' '}
+              {outlook.daysLeft === null ? (
+                'It is refilling faster than it is used.'
+              ) : (
+                <>
+                  If no more rain falls after that, what is left lasts about{' '}
+                  <strong>{Math.round(outlook.daysLeft)} days</strong>.
+                </>
+              )}
             </p>
-            <p className="font-semibold">{outlook.stage >= 3 ? 'There is a danger to the water supply.' : outlook.stage === 2 ? 'The supply is tight. Conserve water.' : outlook.stage === 1 ? 'Keep an eye on the supply.' : 'No danger to the supply in the next 6 days.'}</p>
+            <p className="font-semibold">
+              {outlook.stage >= 3
+                ? 'There is a danger to the water supply.'
+                : outlook.stage === 2
+                  ? 'The supply is tight. Conserve water.'
+                  : outlook.stage === 1
+                    ? 'Keep an eye on the supply.'
+                    : 'No danger to the supply in the next 6 days.'}
+            </p>
             <ul className="list-disc pl-5">
-              {stage.advice.map((a) => <li key={a}>{a}</li>)}
+              {stage.advice.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
             </ul>
           </div>
           <p className="mt-3 text-xs text-ink/60">
-            Estimate from forecast rain, heat, and the demand of {RESERVOIR.servedPeople.toLocaleString('en')} people. Weather data from Open-Meteo. Reservoir figures are demo values.
+            Estimate from forecast rain, heat, and the demand of{' '}
+            {RESERVOIR.servedPeople.toLocaleString('en')} people. Weather data
+            from Open-Meteo. Reservoir figures are demo values.
           </p>
         </>
       )}

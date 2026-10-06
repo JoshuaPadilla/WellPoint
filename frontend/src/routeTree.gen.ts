@@ -17,6 +17,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardAddSourceRouteImport } from './routes/dashboard.add-source'
 import { Route as DashboardAlertsRouteImport } from './routes/dashboard.alerts'
 import { Route as DashboardDeliveriesRouteImport } from './routes/dashboard.deliveries'
+import { Route as DashboardInsightsRouteImport } from './routes/dashboard.insights'
 import { Route as DashboardMapRouteImport } from './routes/dashboard.map'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
@@ -64,6 +65,11 @@ const DashboardDeliveriesRoute = DashboardDeliveriesRouteImport.update({
   path: '/deliveries',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardInsightsRoute = DashboardInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardMapRoute = DashboardMapRouteImport.update({
   id: '/map',
   path: '/map',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/add-source': typeof DashboardAddSourceRoute
   '/dashboard/alerts': typeof DashboardAlertsRoute
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
+  '/dashboard/insights': typeof DashboardInsightsRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/dashboard/add-source': typeof DashboardAddSourceRoute
   '/dashboard/alerts': typeof DashboardAlertsRoute
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
+  '/dashboard/insights': typeof DashboardInsightsRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -135,6 +143,7 @@ export interface FileRoutesById {
   '/dashboard/add-source': typeof DashboardAddSourceRoute
   '/dashboard/alerts': typeof DashboardAlertsRoute
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
+  '/dashboard/insights': typeof DashboardInsightsRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/dashboard/add-source'
     | '/dashboard/alerts'
     | '/dashboard/deliveries'
+    | '/dashboard/insights'
     | '/dashboard/map'
     | '/dashboard/reports'
     | '/dashboard/settings'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/dashboard/add-source'
     | '/dashboard/alerts'
     | '/dashboard/deliveries'
+    | '/dashboard/insights'
     | '/dashboard/map'
     | '/dashboard/reports'
     | '/dashboard/settings'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/dashboard/add-source'
     | '/dashboard/alerts'
     | '/dashboard/deliveries'
+    | '/dashboard/insights'
     | '/dashboard/map'
     | '/dashboard/reports'
     | '/dashboard/settings'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDeliveriesRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/insights': {
+      id: '/dashboard/insights'
+      path: '/insights'
+      fullPath: '/dashboard/insights'
+      preLoaderRoute: typeof DashboardInsightsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/map': {
       id: '/dashboard/map'
       path: '/map'
@@ -307,6 +326,7 @@ interface DashboardRouteChildren {
   DashboardAddSourceRoute: typeof DashboardAddSourceRoute
   DashboardAlertsRoute: typeof DashboardAlertsRoute
   DashboardDeliveriesRoute: typeof DashboardDeliveriesRoute
+  DashboardInsightsRoute: typeof DashboardInsightsRoute
   DashboardMapRoute: typeof DashboardMapRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -320,6 +340,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAddSourceRoute: DashboardAddSourceRoute,
   DashboardAlertsRoute: DashboardAlertsRoute,
   DashboardDeliveriesRoute: DashboardDeliveriesRoute,
+  DashboardInsightsRoute: DashboardInsightsRoute,
   DashboardMapRoute: DashboardMapRoute,
   DashboardReportsRoute: DashboardReportsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,

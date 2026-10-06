@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type { Map as MapLibreMap } from 'maplibre-gl'
+import type { MapMouseEvent } from 'maplibre-gl'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { LocateFixed, Send } from 'lucide-react'
-import { Map, MapMarker, MarkerContent } from '@/components/ui/map'
-import { MapBridge } from '@/components/WaterAssets'
+import { Map, MapControls, MapMarker, MarkerContent, useMap } from '@/components/ui/map'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getUser } from '@/lib/auth'
@@ -15,6 +14,32 @@ export const Route = createFileRoute('/dashboard/add-source')({ component: Page 
 
 const card = 'rounded-xl border border-line bg-white p-4'
 const field = 'w-full rounded-lg border border-line bg-white px-2.5 py-1.5 text-sm'
+const ZOOM = 16
+
+// Lives inside <Map>: zooms in on the user once their location is known.
+function FlyTo({ to }: { to: { lng: number; lat: number } | null }) {
+  const { map, isLoaded } = useMap()
+  useEffect(() => {
+    if (map && isLoaded && to) map.flyTo({ center: [to.lng, to.lat], zoom: ZOOM, duration: 800 })
+  }, [map, isLoaded, to])
+  return null
+}
+
+// Lives inside <Map>: turns a click into a picked point, leaving the map free to pan and zoom.
+function ClickToPick({ onPick }: { onPick: (lng: number, lat: number) => void }) {
+  const { map, isLoaded } = useMap()
+  const pickRef = useRef(onPick)
+  pickRef.current = onPick
+  useEffect(() => {
+    if (!map || !isLoaded) return
+    const handle = (e: MapMouseEvent) => pickRef.current(e.lngLat.lng, e.lngLat.lat)
+    map.on('click', handle)
+    return () => {
+      map.off('click', handle)
+    }
+  }, [map, isLoaded])
+  return null
+}
 
 function Page() {
   const { role } = useWaterStore()
@@ -29,7 +54,6 @@ function Page() {
   const [err, setErr] = useState('')
 
   const { here, origin, locate, asking, denied } = useMyLocation(false)
-  const mapRef = useRef<MapLibreMap | null>(null)
 
   useEffect(() => {
     if (here) setPoint({ lng: here.lng, lat: here.lat })
@@ -97,8 +121,10 @@ function Page() {
       </section>
 
       <section className="relative mt-4 h-[360px] overflow-hidden rounded-2xl border border-line bg-sky/40">
-        <Map theme="light" center={[point?.lng ?? origin.lng, point?.lat ?? origin.lat]} zoom={14} className="h-full w-full">
-          <MapBridge mapRef={mapRef} />
+        <Map theme="light" center={[point?.lng ?? origin.lng, point?.lat ?? origin.lat]} zoom={ZOOM} className="h-full w-full cursor-crosshair">
+          <FlyTo to={here} />
+          <ClickToPick onPick={(lng, lat) => setPoint({ lng, lat })} />
+          <MapControls position="bottom-right" />
           {point && (
             <MapMarker longitude={point.lng} latitude={point.lat}>
               <MarkerContent>
@@ -107,18 +133,6 @@ function Page() {
             </MapMarker>
           )}
         </Map>
-        <button
-          type="button"
-          aria-label="Pick a point on the map"
-          className="absolute inset-0 cursor-crosshair"
-          onClick={(e) => {
-            const map = mapRef.current
-            if (!map) return
-            const r = e.currentTarget.getBoundingClientRect()
-            const ll = map.unproject([e.clientX - r.left, e.clientY - r.top])
-            setPoint({ lng: ll.lng, lat: ll.lat })
-          }}
-        />
       </section>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">

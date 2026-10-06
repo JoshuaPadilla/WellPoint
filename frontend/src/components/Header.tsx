@@ -1,6 +1,15 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
+const links = [
+  { href: "#features", label: "Features" },
+  { href: "#sources", label: "Water sources" },
+  { href: "#how", label: "How it works" },
+];
+
 export function Header() {
+  const [open, setOpen] = useState(false);
+
   return (
     <header>
       <div className="nav">
@@ -11,15 +20,32 @@ export function Header() {
           </span>
         </Link>
         <nav className="links">
-          <a href="#features">Features</a>
-          <a href="#sources">Water sources</a>
-          <a href="#how">How it works</a>
+          {links.map((l) => (
+            <a key={l.href} href={l.href}>{l.label}</a>
+          ))}
         </nav>
         <div className="right">
           <Link className="login" to="/login">Log in</Link>
           <Link className="btn p sm" to="/register">Sign up</Link>
+          <button
+            type="button"
+            className="menu"
+            aria-expanded={open}
+            aria-label="Toggle menu"
+            onClick={() => setOpen(!open)}
+          >
+            Menu
+          </button>
         </div>
       </div>
+      {open && (
+        <nav className="mlinks" aria-label="Main">
+          {links.map((l) => (
+            <a key={l.href} href={l.href} onClick={() => setOpen(false)}>{l.label}</a>
+          ))}
+          <Link to="/login" onClick={() => setOpen(false)}>Log in</Link>
+        </nav>
+      )}
     </header>
   );
 }
