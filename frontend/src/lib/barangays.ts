@@ -25,6 +25,7 @@ function inGeom(g: Geom, x: number, y: number) {
   return polys.some((p) => inRing(x, y, p[0]) && !p.slice(1).some((hole) => inRing(x, y, hole)))
 }
 
+<<<<<<< HEAD
 // Polygon / multi-polygon centroid (area-weighted), for distance-from-center.
 function ringCentroid(ring: number[][]): { cx: number; cy: number; area: number } {
   let area = 0
@@ -66,11 +67,32 @@ function centroid(g: Geom): { lat: number; lng: number } {
 
 // Loads the barangay boundaries once and exposes names, the full records (with
 // PSGC code, area, and centroid), and point-in-polygon lookup.
+=======
+// The boundary file is downloaded once and shared by every component that uses this hook.
+let cache: Promise<Feat[]> | null = null
+function loadFeatures(): Promise<Feat[]> {
+  cache ??= fetch(DATA_URL)
+    .then((r) => (r.ok ? (r.json() as Promise<Raw>) : Promise.reject(new Error(String(r.status)))))
+    .then((raw) =>
+      raw.features
+        .filter((f) => f.properties.ADM3_PCODE === CITY_PCODE)
+        .map((f) => ({ name: f.properties.ADM4_EN, geometry: f.geometry })),
+    )
+    .catch((e) => {
+      cache = null // allow a retry on the next mount
+      throw e
+    })
+  return cache
+}
+
+// `names` is every barangay A-Z; `barangayOf` names the one a point falls inside.
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 export function useBarangays() {
   const [feats, setFeats] = useState<Feat[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
+<<<<<<< HEAD
     const ctrl = new AbortController()
     fetch(DATA_URL, { signal: ctrl.signal })
       .then((r) => (r.ok ? (r.json() as Promise<Raw>) : Promise.reject(new Error(String(r.status)))))
@@ -90,18 +112,28 @@ export function useBarangays() {
               }
             }),
         )
+=======
+    let alive = true
+    loadFeatures()
+      .then((f) => {
+        if (!alive) return
+        setFeats(f)
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
         setLoaded(true)
       })
-      .catch((e) => {
-        if (e.name !== 'AbortError') setLoaded(true) // without the file the lists still work, just without barangay names
+      .catch(() => {
+        if (alive) setLoaded(true) // without the file the lists still work, just without barangay names
       })
-    return () => ctrl.abort()
+    return () => {
+      alive = false
+    }
   }, [])
 
   const barangays = useMemo<GeoBarangay[]>(
     () => feats.map(({ geometry: _geometry, ...rest }) => rest),
     [feats],
   )
+<<<<<<< HEAD
 
   const names = useMemo(() => barangays.map((f) => f.name).sort((a, b) => a.localeCompare(b, 'en', { numeric: true })), [barangays])
 
@@ -118,4 +150,7 @@ export function useBarangays() {
   const barangayOf = useCallback((a: { lng: number; lat: number }) => barangayAt(a)?.name ?? null, [barangayAt])
 
   return { names, barangays, barangayAt, barangayOf, loaded }
+=======
+  return { names, barangayOf, loaded }
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 }

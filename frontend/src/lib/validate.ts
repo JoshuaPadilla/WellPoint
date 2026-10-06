@@ -18,7 +18,11 @@ export function validateLogin(data: FormData): Errors {
 export function validateRegister(data: FormData): Errors {
   const errors: Errors = {}
   if (!text(data, 'name')) errors.name = 'Enter your full name.'
+<<<<<<< HEAD
   if (!text(data, 'barangay_psgc')) errors.barangay = 'Choose your barangay.'
+=======
+  if (!text(data, 'barangay')) errors.barangay = 'Select your barangay.'
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
   checkEmail(data, errors)
   if (text(data, 'password').length < 8) errors.password = 'Use at least 8 characters.'
   if (!data.get('terms')) errors.terms = 'Accept the terms to continue.'

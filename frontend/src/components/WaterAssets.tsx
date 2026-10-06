@@ -3,6 +3,8 @@ import type { RefObject } from 'react'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { Droplet, Droplets, GlassWater, Waves } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { useBarangays } from '@/lib/barangays'
 import { MapMarker, MarkerContent, MarkerPopup, MarkerTooltip, useMap } from '@/components/ui/map'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -67,7 +69,7 @@ export function AssetMarkers() {
             <MarkerContent>
               <div className={cn('relative grid size-9 place-items-center rounded-full border-2 border-white text-white shadow-md', tone)}>
                 <Icon className="size-4" aria-hidden="true" />
-                {role === 'official' && count > 0 && (
+                {(role === 'lgu' || role === 'official') && count > 0 && (
                   <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-signal text-[10px] font-bold text-ink">
                     {count}
                   </span>
@@ -87,9 +89,21 @@ export function AssetMarkers() {
 
 function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdit: boolean }) {
   const { reports } = useWaterStore()
+<<<<<<< HEAD
   const { barangayOf } = useBarangays()
   const area = barangayOf(asset) ?? asset.name
   const mine = reports.filter((r) => r.barangayPsgc === asset.barangayPsgc && r.status !== 'resolved')
+=======
+  const mine = reports.filter((r) => r.assetId === asset.id)
+  const [issue, setIssue] = useState<Issue>('empty')
+  const [note, setNote] = useState('')
+  const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState('')
+  const { barangayOf, loaded: boundariesLoaded } = useBarangays() // wait for boundaries so the report is tagged with its barangay
+  const canReadReports = role === 'lgu' || role === 'official' // officials only get their barangay's reports
+  const isPump = hasStatus(asset.kind) // pumps and wells
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 
   return (
     <div className="space-y-3 text-sm">
@@ -119,16 +133,66 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
         </div>
       )}
 
+<<<<<<< HEAD
       {role === 'official' && (
+=======
+      {role === 'citizen' && isPump &&
+        (sent ? (
+          <p className="font-semibold">
+            Report sent.{' '}
+            <Link to="/dashboard/my-reports" className="text-well underline">
+              Follow it in My reports
+            </Link>
+          </p>
+        ) : (
+          <form
+            className="space-y-2"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              setSending(true)
+              setSendError('')
+              const err = await fileReport(asset.id, issue, note.trim(), barangayOf(asset) ?? '')
+              setSending(false)
+              if (err) setSendError(err)
+              else setSent(true)
+            }}
+          >
+            <label htmlFor={`issue-${asset.id}`} className="block font-semibold">
+              What's wrong?
+            </label>
+            <select id={`issue-${asset.id}`} value={issue} onChange={(e) => setIssue(e.target.value as Issue)} className={field}>
+              {Object.entries(ISSUES).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+            <textarea aria-label="Note (optional)" placeholder="Add a note (optional)" rows={2} value={note} onChange={(e) => setNote(e.target.value)} className={field} />
+            {sendError && <p role="alert" className="text-orange-700">{sendError}</p>}
+            <Button type="submit" size="sm" disabled={sending || !boundariesLoaded}>{sending ? 'Sending…' : 'Send report'}</Button>
+          </form>
+        ))}
+
+      {canReadReports && isPump && (
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
         <div className="space-y-2">
           <p className="font-semibold">Reports in {area} ({mine.length})</p>
           {mine.length === 0 && <p className="text-ink/70">No open reports yet.</p>}
           <ul className="max-h-32 space-y-1.5 overflow-y-auto">
             {mine.map((r) => (
               <li key={r.id} className="rounded-md bg-mist px-2 py-1.5">
+<<<<<<< HEAD
                 <p className="font-semibold">{REPORT_TYPES[r.type]}</p>
                 {r.description && <p>{r.description}</p>}
                 <p className="text-xs text-ink/60">{new Date(r.createdAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+=======
+                <p className="font-semibold">{ISSUES[r.issue]}</p>
+                {r.note && <p>{r.note}</p>}
+                {r.reporterName && (
+                  <p className="text-xs text-ink/70">
+                    {r.reporterName}{r.reporterBarangay && ` · Brgy. ${r.reporterBarangay}`}
+                  </p>
+                )}
+                <p className="text-xs text-ink/60">{new Date(r.at).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
               </li>
             ))}
           </ul>

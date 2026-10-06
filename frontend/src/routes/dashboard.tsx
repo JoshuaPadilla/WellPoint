@@ -2,10 +2,17 @@ import { useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import type { LucideIcon } from 'lucide-react'
 import {
+<<<<<<< HEAD
   BarChart3, BellRing, LogOut, MapIcon,
   Megaphone, PanelLeftClose, PanelLeftOpen, Plus, SlidersHorizontal, Truck, Users as UsersIcon,
+=======
+  BarChart3, BellRing, ClipboardList, Droplets, LayoutGrid, LogOut, MapIcon,
+  PanelLeftClose, PanelLeftOpen, Settings, Truck, UserRound,
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 } from 'lucide-react'
 import { Logo } from '../components/Logo'
+import { ProfileButton } from '../components/ProfileButton'
+import { useProfile } from '@/lib/profile'
 import { cn } from '@/lib/utils'
 import { getUser, isLoggedIn, logout, refreshProfile } from '@/lib/auth'
 import type { User } from '@/lib/auth'
@@ -29,6 +36,7 @@ const ROLE_LABELS: Record<Role, string> = { citizen: 'Resident', official: 'Bara
 
 type NavItem = { to: string; label: string; icon: LucideIcon; exact?: boolean; roles?: Role[]; logout?: boolean }
 
+<<<<<<< HEAD
 const nav: NavItem[] = [
   { to: '/dashboard/map', label: 'Map', icon: MapIcon },
   { to: '/dashboard/alerts', label: 'Alerts', icon: BellRing },
@@ -41,10 +49,33 @@ const nav: NavItem[] = [
 
 const bottom: NavItem[] = [
   { to: '/dashboard/settings', label: 'Demo controls', icon: SlidersHorizontal, roles: ['lgu', 'drrm'] },
+=======
+// Residents get this instead of Reports.
+const myReports = { to: '/dashboard/my-reports', label: 'My reports', icon: ClipboardList } as const
+
+const bottom = [
+  { to: '/dashboard/profile', label: 'Profile', icon: UserRound },
+  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
   { to: '/login', label: 'Log out', icon: LogOut, logout: true },
 ]
 
+<<<<<<< HEAD
 function NavItem({ item, open }: { item: NavItem; open: boolean }) {
+=======
+type Item = (typeof nav)[number] | (typeof bottom)[number] | typeof myReports
+
+// Sidebar links per role: LGU and barangay officials work the Reports page, residents only
+// follow their own reports (My reports), DRRM can't read reports so gets neither.
+function navFor(role: User['role'] | undefined): readonly Item[] {
+  if (role === 'lgu' || role === 'official') return nav
+  const withoutReports = nav.filter((n) => n.to !== '/dashboard/reports')
+  if (role === 'citizen') return [...withoutReports.slice(0, 4), myReports, ...withoutReports.slice(4)]
+  return withoutReports
+}
+
+function NavItem({ item, open }: { item: Item; open: boolean }) {
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
   const Icon = item.icon
   return (
     <Link
@@ -69,7 +100,14 @@ function NavItem({ item, open }: { item: NavItem; open: boolean }) {
 
 // Who is signed in: full card when the sidebar is open, an initial bubble when closed.
 function UserBadge({ user, open }: { user: User; open: boolean }) {
+<<<<<<< HEAD
   const label = `${user.name} · ${user.barangay ? `Brgy. ${user.barangay}` : 'No barangay'} · ${ROLE_LABELS[user.role]}`
+=======
+  const profile = useProfile() // updates right after the Profile page saves
+  const name = profile.fullName || user.name
+  const barangay = profile.barangay || user.barangay
+  const label = `${name}, Brgy. ${barangay}, ${ROLE_LABELS[user.role]}`
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
   if (!open) {
     return (
       <span
@@ -77,14 +115,19 @@ function UserBadge({ user, open }: { user: User; open: boolean }) {
         aria-label={label}
         className="grid size-11 place-items-center rounded-full bg-sky text-sm font-extrabold uppercase text-well"
       >
-        {user.name.trim().charAt(0) || '?'}
+        {name.trim().charAt(0) || '?'}
       </span>
     )
   }
   return (
     <div className="mb-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm">
+<<<<<<< HEAD
       <p className="truncate font-semibold">{user.name}</p>
       <p className="truncate text-xs text-white/60">{user.barangay ? `Brgy. ${user.barangay}` : 'No barangay'}</p>
+=======
+      <p className="truncate font-semibold">{name}</p>
+      <p className="truncate text-xs text-white/60">Brgy. {barangay}</p>
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
       <span className="mt-1 inline-block rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold">
         {ROLE_LABELS[user.role]}
       </span>
@@ -96,9 +139,13 @@ function DashboardLayout() {
   const [open, setOpen] = useState(false)
   const Toggle = open ? PanelLeftClose : PanelLeftOpen
   const user = typeof window === 'undefined' ? null : getUser()
+<<<<<<< HEAD
   const role = user?.role ?? 'citizen'
   const mainNav = nav.filter((n) => !n.roles || n.roles.includes(role))
   const bottomNav = bottom.filter((n) => !n.roles || n.roles.includes(role))
+=======
+  const items = navFor(user?.role)
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 
   return (
     <div className="min-h-screen bg-mist md:flex md:gap-4 md:p-4">
@@ -133,7 +180,11 @@ function DashboardLayout() {
           aria-label="Main"
           className={cn('flex flex-col gap-1', open ? 'mt-6' : 'items-center rounded-full bg-white p-2 shadow-sm')}
         >
+<<<<<<< HEAD
           {mainNav.map((n) => <NavItem key={n.to} item={n} open={open} />)}
+=======
+          {items.map((n) => <NavItem key={n.to} item={n} open={open} />)}
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
         </nav>
 
         <div className={cn('mt-auto flex flex-col gap-1', !open && 'items-center rounded-full bg-white p-2 shadow-sm')}>
@@ -144,10 +195,17 @@ function DashboardLayout() {
 
       {/* Phones: icon bar across the top */}
       <nav aria-label="Main" className="flex gap-1 overflow-x-auto bg-deep p-2 md:hidden">
+<<<<<<< HEAD
         {[...mainNav, ...bottomNav].map((n) => <NavItem key={n.to} item={n} open={false} />)}
+=======
+        {[...items, ...bottom].map((n) => <NavItem key={n.to} item={n} open={false} />)}
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
       </nav>
 
       <main className="min-w-0 flex-1 p-4 lg:p-6">
+        <div className="mb-4 flex justify-end">
+          <ProfileButton />
+        </div>
         <StoreStatus />
         <Outlet />
       </main>

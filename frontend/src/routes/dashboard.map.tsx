@@ -7,10 +7,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SummaryPanel } from '@/components/SummaryPanel'
 import { cn } from '@/lib/utils'
+<<<<<<< HEAD
 import { AssetMarkers } from '@/components/WaterAssets'
 import { useWaterStore } from '@/lib/water-store'
 import { barangayDetail, useDomain } from '@/lib/store'
 import type { AccessState, VulnerabilityTier } from '@/data/types'
+=======
+import { AssetMarkers, MapBridge, RolePanel } from '@/components/WaterAssets'
+import { BarangayStats } from '@/components/BarangayStats'
+import { getUser } from '@/lib/auth'
+import { useBarangays } from '@/lib/barangays'
+import { addAsset, useWaterStore } from '@/lib/water-store'
+import type { Asset, AssetKind } from '@/lib/water-store'
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 
 export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap })
 
@@ -70,7 +79,48 @@ function BarangayMap() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [focus, setFocus] = useState<Focus | null>(null)
+<<<<<<< HEAD
   const [summaryOpen, setSummaryOpen] = useState(false)
+=======
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const mapRef = useRef<MapLibreMap | null>(null)
+  const { role, assets, reports } = useWaterStore()
+  const { barangayOf } = useBarangays()
+  const myBarangay = typeof window === 'undefined' ? '' : (getUser()?.barangay ?? '')
+
+  // Water sources grouped by the barangay their marker sits in.
+  const sourcesBy = useMemo(() => {
+    const m = new globalThis.Map<string, Asset[]>() // `Map` here is the map component
+    for (const a of assets) {
+      const name = barangayOf(a)
+      if (name) m.set(name, [...(m.get(name) ?? []), a])
+    }
+    return m
+  }, [assets, barangayOf])
+
+  // Open-report count for a barangay, or null when this viewer may not see that barangay's reports.
+  const openReportsIn = (name: string, list: Asset[]) => {
+    const visible = role === 'lgu' || (role === 'official' && name.trim().toLowerCase() === myBarangay.trim().toLowerCase())
+    if (!visible) return null
+    const ids = new Set(list.map((a) => a.id))
+    return reports.filter((r) => ids.has(r.assetId)).length
+  }
+  const statsFor = (name: string) => {
+    const list = sourcesBy.get(name) ?? []
+    return { name, sources: list, openReports: openReportsIn(name, list) }
+  }
+
+  // A palette item dropped on the map becomes an asset at the drop point (the store checks the role).
+  const onDrop = (e: DragEvent<HTMLElement>) => {
+    const kind = e.dataTransfer.getData('text/kind') as AssetKind
+    const map = mapRef.current
+    if (!kind || !map) return
+    e.preventDefault()
+    const r = e.currentTarget.getBoundingClientRect()
+    const ll = map.unproject([e.clientX - r.left, e.clientY - r.top])
+    addAsset(kind, ll.lng, ll.lat)
+  }
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -304,12 +354,165 @@ function BarangayMap() {
         </Button>
       </div>
 
+<<<<<<< HEAD
       {/* LGU summary overlay */}
       {summaryOpen && (
         <div className="absolute inset-0 z-20 flex flex-col bg-white/95 backdrop-blur-sm">
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <h2 className="text-lg font-extrabold">Water-security summary</h2>
             <button type="button" onClick={() => setSummaryOpen(false)} aria-label="Close" className="text-ink/50 hover:text-ink">✕</button>
+=======
+        {data && focus && (
+          <>
+            <Map theme="light" center={[124.89, 11.78]} zoom={11} className="h-full w-full">
+              <FitTo focus={focus} />
+              <MapBridge mapRef={mapRef} />
+              <MapControls position="bottom-right" />
+              <MapGeoJSON<Props>
+                data={data}
+                promoteId="ADM4_PCODE"
+                interactive
+                fillPaint={{ 'fill-color': colors.well, 'fill-opacity': fillOpacity }}
+                fillHoverPaint={{ 'fill-color': colors.foam, 'fill-opacity': 0.55 }}
+                linePaint={{
+                  'line-color': colors.well,
+                  'line-width': ['case', isSelected, 3, 1] as ExpressionSpecification,
+                }}
+                onHover={(e) => setHoverId(e?.feature.properties.ADM4_PCODE ?? null)}
+                onClick={(e) => {
+                  setSelectedId(e.feature.properties.ADM4_PCODE)
+                  setSheetOpen(true)
+                }}
+              />
+              <AssetMarkers />
+            </Map>
+
+            {/* Search sits on top of the map */}
+            <div className="absolute left-3 top-3 w-[min(22rem,calc(100%-9rem))]">
+              <Input
+                type="search"
+                aria-label="Find a barangay"
+                placeholder="Find a barangay"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setQuery('')
+                  if (e.key === 'Enter' && matches[0]) pick(matches[0].id)
+                }}
+                className="bg-white shadow-sm"
+              />
+              {filtering && (
+                <ul className="mt-1 max-h-72 overflow-y-auto rounded-lg border border-line bg-white p-1 shadow-md">
+                  {matches.slice(0, MAX_SUGGESTIONS).map((b) => (
+                    <li key={b.id}>
+                      <button
+                        type="button"
+                        onClick={() => pick(b.id)}
+                        className="w-full rounded-md px-3 py-1.5 text-left text-sm hover:bg-sky"
+                      >
+                        {b.name}
+                      </button>
+                    </li>
+                  ))}
+                  {matches.length === 0 && <li className="px-3 py-2 text-sm text-ink/70">No barangay matches "{query}".</li>}
+                  {matches.length > MAX_SUGGESTIONS && (
+                    <li className="px-3 py-1.5 text-xs text-ink/60">
+                      {matches.length - MAX_SUGGESTIONS} more. Keep typing to narrow the list.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSheetOpen(true)}
+              className="absolute right-3 top-3 bg-white shadow-sm"
+            >
+              {selected ? 'Details' : 'All barangays'}
+            </Button>
+
+            <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col items-start gap-2">
+              {hovered && (
+                <div aria-live="polite" className="w-72 max-w-[calc(100vw-3rem)] rounded-xl bg-white/95 p-3 shadow-md">
+                  <BarangayStats {...statsFor(hovered.name)} />
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => cityBounds && setFocus({ bounds: cityBounds, n: focus.n + 1 })}
+                className="pointer-events-auto bg-white shadow-sm"
+              >
+                Show whole city
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent className="bg-white/70 backdrop-blur-sm">
+          <SheetHeader>
+            <SheetTitle>{selected ? selected.name : 'Barangays'}</SheetTitle>
+            <SheetDescription>
+              {selected ? 'Barangay details' : 'Pick a barangay to zoom to it on the map.'}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex min-h-0 flex-1 flex-col gap-5 px-4">
+            {selected && (
+              <div>
+                <BarangayStats {...statsFor(selected.name)} className="mb-4 rounded-xl border border-line bg-white p-3" />
+                <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+                  <dt className="text-ink/70">City</dt>
+                  <dd className="font-semibold">Catbalogan</dd>
+                  <dt className="text-ink/70">PSGC code</dt>
+                  <dd className="font-semibold">{selected.id.replace('PH', '')}</dd>
+                  <dt className="text-ink/70">Area</dt>
+                  <dd className="font-semibold">{selected.areaSqKm.toLocaleString('en', { maximumFractionDigits: 2 })} km²</dd>
+                  {selected.parts > 1 && (
+                    <>
+                      <dt className="text-ink/70">Land areas</dt>
+                      <dd className="font-semibold">{selected.parts} separate parts</dd>
+                    </>
+                  )}
+                </dl>
+                <div className="mt-4 flex gap-2">
+                  <Button type="button" size="sm" onClick={() => pick(selected.id)}>
+                    Zoom to barangay
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setSelectedId(null)}>
+                    Clear selection
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex min-h-0 flex-1 flex-col">
+              <h3 className="text-sm font-bold">All barangays ({items.length})</h3>
+              <ul className="mt-2 min-h-0 flex-1 overflow-y-auto">
+                {items.map((b) => (
+                  <li key={b.id}>
+                    <button
+                      type="button"
+                      aria-pressed={b.id === selectedId}
+                      onClick={() => pick(b.id)}
+                      className={cn(
+                        'w-full rounded-md px-3 py-1.5 text-left text-sm',
+                        b.id === selectedId ? 'bg-well font-semibold text-white' : 'hover:bg-sky',
+                      )}
+                    >
+                      {b.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+>>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             <SummaryPanel />

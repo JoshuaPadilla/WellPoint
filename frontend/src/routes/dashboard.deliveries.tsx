@@ -1,122 +1,143 @@
-import { useEffect, useMemo } from 'react'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { GlassWater, Navigation } from 'lucide-react'
-import { Map, MapControls, MapMarker, MarkerContent, MarkerTooltip, useMap } from '@/components/ui/map'
+import { useEffect, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { CheckCircle2, Clock, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { useBarangays } from '@/lib/barangays'
-import { directionsUrl, formatKm, km, useMyLocation } from '@/lib/geo'
-import type { LatLng } from '@/lib/geo'
-import { STATUSES, useWaterStore } from '@/lib/water-store'
+import { getUser } from '@/lib/auth'
+import { useWaterStore } from '@/lib/water-store'
+import { useDeliveries, verifyDeliveryPayment } from '@/lib/deliveries'
+import { RequestDelivery } from '@/components/deliveries/RequestDelivery'
+import { MyDeliveries } from '@/components/deliveries/MyDeliveries'
+import { DeliveryQueue, forBarangay } from '@/components/deliveries/DeliveryQueue'
+import { NearbyStations } from '@/components/deliveries/NearbyStations'
 
 export const Route = createFileRoute('/dashboard/deliveries')({ component: Page })
 
-const card = 'rounded-xl border border-line bg-white p-4'
-
-// Lives inside <Map>: moves the view to the user once their location is known.
-function FlyTo({ to }: { to: LatLng | null }) {
-  const { map, isLoaded } = useMap()
-  useEffect(() => {
-    if (map && isLoaded && to) map.flyTo({ center: [to.lng, to.lat], zoom: 14, duration: 800 })
-  }, [map, isLoaded, to])
-  return null
-}
-
-// Filling stations placed by DRRM, nearest first. Working stations come before closed ones.
 function Page() {
-  const { assets, loading } = useWaterStore()
-  const { barangayOf } = useBarangays()
-  const { here, origin, locate, asking, denied } = useMyLocation(true)
-
-  const stations = useMemo(
-    () =>
-      assets
-        .filter((a) => a.kind === 'station')
-        .map((a) => ({ a, dist: km(origin, a), open: a.status === 'ok' || a.status === 'low' }))
-        .sort((x, y) => Number(y.open) - Number(x.open) || x.dist - y.dist),
-    [assets, origin],
-  )
-  const nearest = stations.find((s) => s.open)
+  const { role } = useWaterStore()
+  const { deliveries, loading, error } = useDeliveries()
+  const myBarangay = typeof window === 'undefined' ? '' : (getUser()?.barangay ?? '')
 
   return (
-    <div>
-      <h1 className="text-3xl font-extrabold">Deliveries</h1>
-      <p className="mt-2 max-w-xl text-ink/70">Filling stations set up by DRRM, nearest to you first.</p>
-
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <Button size="sm" variant="outline" onClick={locate} disabled={asking}>
-          {asking ? 'Finding you…' : here ? 'Update my location' : 'Use my location'}
-        </Button>
-        <p className="text-sm text-ink/70">
-          {here ? 'Distances are from your location.' : 'Distances are from the city center until you share your location.'}
-          {denied && ' Location is unavailable or blocked.'}
+    <div className="space-y-10">
+      <div>
+        <h1 className="text-3xl font-extrabold">Deliveries</h1>
+        <p className="mt-2 max-w-xl text-ink/70">
+          {role === 'citizen' && 'Get water brought to your home, and follow your requests.'}
+          {(role === 'lgu' || role === 'drrm') && 'Paid delivery requests from residents, and the filling stations.'}
+          {role === 'official' && 'Water deliveries to your barangay, and the filling stations.'}
         </p>
       </div>
 
-      {nearest && (
-        <div className={cn(card, 'mt-5 flex flex-wrap items-center justify-between gap-3 border-l-4 border-l-aqua')}>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-ink/60">Nearest open station</p>
-            <p className="text-lg font-extrabold">{nearest.a.name}</p>
-            <p className="text-sm text-ink/70">
-              {barangayOf(nearest.a) ?? 'Barangay unknown'} · {formatKm(nearest.dist)} away
-            </p>
-          </div>
-          <a href={directionsUrl(nearest.a)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-well px-4 py-2 text-sm font-bold text-white hover:bg-deep">
-            <Navigation className="size-4" aria-hidden="true" /> Directions
-          </a>
-        </div>
+      <PaymentReturn />
+
+      {role === 'citizen' && (
+        <>
+          <NearbyStations />
+          <RequestDelivery />
+          <MyDeliveries deliveries={deliveries} loading={loading} error={error} />
+        </>
+      )}
+      {(role === 'lgu' || role === 'drrm') && (
+        <DeliveryQueue
+          deliveries={deliveries}
+          loading={loading}
+          error={error}
+          title="Delivery queue"
+          blurb="Barangays with the least water come first, then whoever has waited longest."
+        />
+      )}
+      {role === 'official' && (
+        <DeliveryQueue
+          deliveries={forBarangay(deliveries, myBarangay)}
+          loading={loading}
+          error={error}
+          readOnly
+          title={`Deliveries in Brgy. ${myBarangay || '—'}`}
+          blurb="DRRM and the LGU schedule these. You can follow them here."
+        />
       )}
 
-      <section aria-label="Map of filling stations" className="relative mt-5 h-[360px] overflow-hidden rounded-2xl border border-line bg-sky/40">
-        <Map theme="light" center={[origin.lng, origin.lat]} zoom={13} className="h-full w-full">
-          <MapControls position="bottom-right" />
-          <FlyTo to={here} />
-          {here && (
-            <MapMarker longitude={here.lng} latitude={here.lat}>
-              <MarkerContent>
-                <div className="size-4 rounded-full border-2 border-white bg-blue-600 shadow-md ring-4 ring-blue-600/25" />
-              </MarkerContent>
-              <MarkerTooltip className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-ink shadow">You are here</MarkerTooltip>
-            </MapMarker>
-          )}
-          {stations.map(({ a, open }) => (
-            <MapMarker key={a.id} longitude={a.lng} latitude={a.lat}>
-              <MarkerContent>
-                <div className={cn('grid size-9 place-items-center rounded-full border-2 border-white text-white shadow-md', open ? 'bg-aqua' : 'bg-slate-500')}>
-                  <GlassWater className="size-4" aria-hidden="true" />
-                </div>
-              </MarkerContent>
-              <MarkerTooltip className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-ink shadow">{a.name}</MarkerTooltip>
-            </MapMarker>
-          ))}
-        </Map>
-      </section>
+      {role !== 'citizen' && <NearbyStations />}
+    </div>
+  )
+}
 
-      {loading ? null : stations.length === 0 ? (
-        <p className="mt-6 rounded-xl border border-dashed border-line p-6 text-sm text-ink/70">
-          No filling stations yet. DRRM adds them on the <Link to="/dashboard/map" className="font-semibold text-well underline">barangay map</Link>.
+type ReturnState =
+  | { kind: 'none' }
+  | { kind: 'checking' }
+  | { kind: 'paid' }
+  | { kind: 'waiting'; id: string }
+  | { kind: 'cancelled' }
+  | { kind: 'error'; message: string; id: string }
+
+// PayMongo sends residents back with ?paid=<id> or ?cancelled=<id>. For "paid" we ask the server
+// to confirm with PayMongo (the webhook may not have arrived yet) before saying it went through.
+function PaymentReturn() {
+  const [state, setState] = useState<ReturnState>({ kind: 'none' })
+
+  const check = async (id: string, attempt = 1) => {
+    setState({ kind: 'checking' })
+    try {
+      const status = await verifyDeliveryPayment(id)
+      if (status === 'pending_payment') {
+        if (attempt < 4) setTimeout(() => void check(id, attempt + 1), 2500) // give PayMongo a moment
+        else setState({ kind: 'waiting', id })
+      } else setState({ kind: 'paid' })
+    } catch (e) {
+      setState({ kind: 'error', message: (e as Error).message, id })
+    }
+  }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paid = params.get('paid')
+    const cancelled = params.get('cancelled')
+    if (!paid && !cancelled) return
+    window.history.replaceState(null, '', window.location.pathname) // a refresh shouldn't repeat this
+    if (paid) void check(paid)
+    else setState({ kind: 'cancelled' })
+  }, [])
+
+  if (state.kind === 'none') return null
+  const box = 'flex flex-wrap items-start gap-3 rounded-xl border px-4 py-3 text-sm'
+
+  if (state.kind === 'checking')
+    return (
+      <p role="status" className={`${box} border-line bg-white`}>
+        <Clock className="size-5 text-well" aria-hidden="true" /> Confirming your payment with PayMongo…
+      </p>
+    )
+  if (state.kind === 'paid')
+    return (
+      <div role="status" className={`${box} border-emerald-200 bg-emerald-50 text-emerald-900`}>
+        <CheckCircle2 className="size-5" aria-hidden="true" />
+        <p>
+          <strong>Payment received.</strong> Your delivery request is in the queue. You'll see it move to Scheduled
+          below once DRRM picks a time.
         </p>
-      ) : (
-        <ul className="mt-6 space-y-3">
-          {stations.map(({ a, dist, open }) => (
-            <li key={a.id} className={cn(card, 'flex flex-wrap items-center justify-between gap-3', !open && 'opacity-70')}>
-              <div>
-                <p className="font-extrabold">{a.name}</p>
-                <p className="text-sm text-ink/70">
-                  {barangayOf(a) ?? 'Barangay unknown'} · {formatKm(dist)} away
-                </p>
-                <p className={cn('mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold', STATUSES[a.status].badge)}>
-                  {STATUSES[a.status].label}
-                </p>
-              </div>
-              <a href={directionsUrl(a)} target="_blank" rel="noreferrer" className="text-sm font-semibold text-well underline">
-                Directions
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      </div>
+    )
+  if (state.kind === 'cancelled')
+    return (
+      <div role="status" className={`${box} border-line bg-white`}>
+        <XCircle className="size-5 text-ink/60" aria-hidden="true" />
+        <p>
+          Payment cancelled and you weren't charged. Your request is saved under My deliveries: pay for it there or cancel
+          it.
+        </p>
+      </div>
+    )
+  return (
+    <div role="alert" className={`${box} border-orange-200 bg-orange-50 text-orange-900`}>
+      <Clock className="size-5" aria-hidden="true" />
+      <p className="flex-1">
+        {state.kind === 'waiting'
+          ? "PayMongo hasn't confirmed your payment yet. If you completed it, it will show as Paid within a few minutes."
+          : `Couldn't confirm your payment: ${state.message}`}
+      </p>
+      <Button size="sm" variant="outline" onClick={() => void check(state.id)}>
+        Check again
+      </Button>
     </div>
   )
 }
