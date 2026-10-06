@@ -9,6 +9,7 @@ const nav = [
   { to: '/dashboard/alerts', label: 'Outage alerts' },
   { to: '/dashboard/deliveries', label: 'Deliveries' },
   { to: '/dashboard/reports', label: 'Reports' },
+     { to: '/dashboard/map', label: 'Barangay map' },
   { to: '/dashboard/settings', label: 'Settings' },
 ] as const
 
