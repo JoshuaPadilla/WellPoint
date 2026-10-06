@@ -1,120 +1,119 @@
-# RBAC Permission System
+# WellPoint — Authentication & Permissions
 
-> **Hackathon note.** This guide was originally written around a loan-domain
-> permission set. For the WellPoint water-app hackathon build the tokens were
-> **re-scoped** to the water domain (sources, alerts, deliveries, reports).
-> Everything below matches the code actually running in `backend/`.
+> **Scope.** This describes the RBAC and auth that actually run in `backend/`.
+> It replaced the earlier loan-domain guide (admin/manager/staff/viewer/pending);
+> those roles and files no longer exist.
 
 ## What kind of system is this?
 
-**Static Role-Based Access Control (RBAC) with string permission tokens.** It is **not CASL** and not attribute-based (ABAC). There is no CASL library, no wildcards (`*`), and no conditions or attributes — it is a fixed `role → permission[]` matrix enforced by a global guard.
+**Static Role-Based Access Control (RBAC) with string permission tokens.** No
+CASL, no wildcards, no attribute conditions. A fixed `role → permission[]`
+matrix is enforced by a global guard, plus **barangay scoping** (`:own`) so a
+barangay-scoped user only ever sees their own barangay.
 
-- A single union type `Permission` defines every capability as an atomic string in `resource:action` format, e.g. `'source:update'`, `'user:manage'`. There is no wildcard support.
-- A `Record<UserRoles, readonly Permission[]>` map statically grants each role its permission set. Permissions resolve to an empty list for `pending` users.
-- Authorization is checked per endpoint: handlers declare required permissions via a `@Permissions('source:update', ...)` decorator (metadata via `SetMetadata`), and a global `PermissionGuard` reads the caller's role from `req.user`, builds a `Set` of granted permissions, and allows the request if the handler's required list intersects it — `required.some((p) => granted.has(p))`, any-match semantics, not all-match.
-- Handlers with **no** `@Permissions(...)` decorator are allowed through (authenticated-only baseline).
-- Permission checks are **role-derived, not user-specific**: there is no per-user override and no ownership rules.
+- A single union type `Permission` defines every capability as an atomic
+  `resource:action` string, e.g. `'alert:read'`, `'report:ack'`.
+- `ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]>` statically
+  grants each role its set.
+- Authorization is checked per endpoint: handlers declare required permissions
+  via `@Permissions(...)`; `PermissionGuard` reads the caller's role and allows
+  if **any** required permission is granted (any-match, not all-match).
+- Handlers with **no** `@Permissions(...)` are authenticated-only (no extra
+  permission required).
+- **Deny by default:** a user with no active `Membership` (or an ambiguous
+  scope) gets `401`/`403`, never a partial view.
 
-Authentication is email/password: `POST /api/auth/register` and `POST /api/auth/login` return a signed JWT; `JwtAuthGuard` verifies the HS256 signature against `APP_JWT_SECRET` (falls back to `SUPABASE_JWT_SECRET`), loads the app `User` row by `sub`, and attaches `req.user = { id, email, name, role }`.
+## Source files
 
-## `Permission` type
+| File | Purpose |
+| :--- | :--- |
+| `src/common/rbac/permissions.ts` | `PERMISSIONS` union + `Permission` type |
+| `src/common/enum/user_roles.enum.ts` | `UserRoles` enum |
+| `src/common/rbac/role_permissions.ts` | role → permission grants |
+| `src/common/rbac/permissions.decorator.ts` | `@Permissions(...)` metadata |
+| `src/guards/jwt-auth.guard.ts` | `AuthGuard('jwt')` wrapper |
+| `src/guards/permission.guard.ts` | enforces `@Permissions(...)` |
+| `src/strategy/jwt.strategy.ts` | verifies JWT, loads user + membership |
+| `src/strategy/google.strategy.ts` | Google OIDC profile extraction |
 
-Source: `backend/src/common/rbac/permissions.ts`
+## Roles
 
 ```ts
-/** Every atomic capability in the system. Add here first, then grant. */
-export const PERMISSIONS = [
-  "dashboard:read",
-
-  "source:read",
-  "source:create",
-  "source:update",
-  "source:delete",
-
-  "alert:read",
-  "report:read",
-  "delivery:read",
-
-  "user:manage", // create users, change roles
-  "auditlog:read",
-] as const;
-
-export type Permission = (typeof PERMISSIONS)[number];
+enum UserRoles {
+  WATER_OFFICER = 'water-officer',
+  DRRM_OFFICER = 'drrm-officer',
+  BARANGAY_OFFICIAL = 'barangay-official',
+  RESIDENT = 'resident',
+  BARANGAY_ADMIN = 'barangay-admin',
+}
 ```
 
-## Role type
-
-Source: `backend/src/common/enum/user_roles.enum.ts`
+## Permission tokens
 
 ```ts
-export enum UserRoles {
-  ADMIN = "admin",
-  MANAGER = "manager", // ops lead: edits sources, manages users
-  STAFF = "staff", // field editor: reads + updates sources
-  VIEWER = "viewer", // read-only citizen/barangay member
-  PENDING = "pending", // self-onboarded, no access until a role is granted
-}
+const PERMISSIONS = [
+  'dashboard:read',
+  'barangay:read', 'vulnerability:read', 'alert:read', 'source:read',
+  'report:read', 'report:ack', 'report:resolve',
+  'demo:simulate', 'demo:reset',
+  // barangay-scoped ("own") equivalents
+  'barangay:read:own', 'vulnerability:read:own', 'alert:read:own',
+  'source:read:own', 'report:read:own', 'report:create',
+  'status:read:public',
+] as const;
 ```
 
 ## Role → permission grants
 
-Source: `backend/src/common/rbac/role_permissions.ts`
-
-```ts
-export const ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]> = {
-  admin: [...PERMISSIONS], // all
-
-  manager: [
-    "dashboard:read",
-    "source:read",
-    "source:create",
-    "source:update",
-    "alert:read",
-    "report:read",
-    "delivery:read",
-    "user:manage",
-    "auditlog:read",
-  ],
-
-  staff: [
-    "dashboard:read",
-    "source:read",
-    "source:create",
-    "source:update",
-    "alert:read",
-    "delivery:read",
-  ],
-
-  viewer: ["dashboard:read", "source:read", "alert:read", "delivery:read"],
-
-  pending: [], // zero grants until an admin/manager assigns a real role
-};
-```
+| Role | Grants |
+| :--- | :--- |
+| `water-officer` | dashboard, barangay, vulnerability, alert, source, report (read/ack/resolve), demo (simulate/reset) |
+| `drrm-officer` | dashboard, barangay, vulnerability, alert, source, demo (simulate/reset) |
+| `barangay-official` | own barangay/vulnerability/alert/source/report read, `report:create` |
+| `barangay-admin` | same as `barangay-official` |
+| `resident` | `status:read:public` only |
 
 ## Guard semantics
 
-Source: `backend/src/guards/permission.guard.ts`
+- `JwtAuthGuard` runs first: verifies the JWT (Bearer header or `access_token`
+  cookie), loads the `User` + active `Membership`, and attaches
+  `req.user = { id, email, name, role, lguId, barangayId, permissions }`.
+- `PermissionGuard` then reads `@Permissions(...)` and allows if any required
+  permission is in `req.user.permissions`. Missing user → `401`; insufficient →
+  `403`.
+- **Scoping:** city-wide roles (`water-officer`, `drrm-officer`) have no
+  `barangayId` and see everything. Barangay-scoped roles have a `barangayId`
+  (PSGC) and the controllers filter list/detail results to that barangay. The
+  server always derives the barangay from `Membership`, never from client
+  input.
 
-- Global guards run in registration order: `JwtAuthGuard` first (attaches `req.user` from a verified Bearer token), then `PermissionGuard`.
-- `PermissionGuard` reads `@Permissions(...)` metadata from the handler and class (controller-level fallback).
-- No declared permissions → allow (authenticated-only baseline).
-- Builds a `Set` from `ROLE_PERMISSIONS[user.role] ?? []`; the request passes if any required permission is present (`required.some(...)`).
-- Fails with `UnauthorizedException` if there is no `req.user`, `ForbiddenException('Insufficient permissions')` otherwise.
+## Sign-in flow (Google OIDC + JWT cookie)
 
-## Email/password login flow
+1. `GET /api/auth/google` → redirects to Google.
+2. `GET /api/auth/google/callback` → resolves/creates the `User` via
+   `ExternalIdentity` (provider `google`, subject = Google `sub`), issues an
+   access + refresh JWT, sets them as `httpOnly` cookies, redirects to the SPA.
+3. `GET /api/auth/me` → returns the current `AuthUser` (profile + permissions).
+4. `POST /api/auth/logout` → clears the cookies (stateless).
+5. `POST /api/auth/dev-login` → **dev-only** (disabled when
+   `NODE_ENV=production`): signs in as a pre-seeded demo account, for demos
+   where the venue blocks Google OIDC.
 
-1. `POST /api/auth/register` `{ name, email, password }` → hashes the password (Node `scrypt`, `salt:hash`), creates the `User` row, and returns `{ token, user }`.
-2. `POST /api/auth/login` `{ email, password }` → verifies the scrypt hash and returns `{ token, user }`.
-3. The client sends the token as `Authorization: Bearer <token>`; `JwtAuthGuard` verifies it (HS256, signed with `APP_JWT_SECRET`), loads the user by `sub`, and `PermissionGuard` enforces the handler's `@Permissions(...)`.
-4. `GET /api/auth/me` returns the profile + granted permissions.
+## Demo account seeding
 
-Other endpoints: `POST /api/auth/logout` (stateless — client discards the token), `PATCH /api/users/:id/role` (`user:manage`).
+`src/db/seed/auth-seed.ts` pre-seeds four demo accounts (upsert-by-email on
+boot) so the RBAC is demonstrable without real Google accounts:
 
-**Hackathon-only rules** (change before a real launch):
-- The **first** registered account becomes `ADMIN`; every later registration becomes `STAFF`. Assign roles afterwards via `PATCH /api/users/:id/role` (requires `user:manage`).
-- JWT expiry is 7 days.
-- `synchronize: true` auto-creates/updates the `users` table from the entity.
+| Email | Role | Barangay |
+| :--- | :--- | :--- |
+| `water.officer@wellpoint.demo` | water-officer | — |
+| `drrm.officer@wellpoint.demo` | drrm-officer | — |
+| `barangay.official@wellpoint.demo` | barangay-official | San Andres |
+| `resident@wellpoint.demo` | resident | Canlapwas |
 
 ## Porting to another project
 
-Copy the three blocks above verbatim (`Permission` union, role enum, grants map). Guard route handlers with a `RequirePermission`/`@Permissions` decorator and gate UI elements with `roleHasPermission(role, 'source:update')`. Keep the convention "add the token to `PERMISSIONS` first, then grant it in `ROLE_PERMISSIONS`" so the union and the grants stay in sync.
+Copy the permission union, role enum, and grants map. Guard handlers with
+`@Permissions(...)` and gate UI with `permissions.includes('...')`. Keep the
+convention "add the token to `PERMISSIONS` first, then grant it in
+`ROLE_PERMISSIONS`".
