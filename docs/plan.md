@@ -25,6 +25,29 @@ The challenge statement is explicit: water security is an **access** problem, no
 
 Region VIII's economy leans on agriculture, fisheries, aquaculture, and natural-resource livelihoods, so water disruptions hit household income and food security directly (`hackathon_guidelines.md` §V.b). At the same time, LGUs are being asked to move toward higher service levels and smart systems while operating with thin budgets and limited technical staff (`§V.c`). A lightweight tool that makes the access gap visible — and predicts it before it becomes a crisis — is both timely and adoptable.
 
+### Problem → solution chain (how the app closes the gap)
+
+The core issue is that water **exists** near a community but people cannot reliably **access** it. Every feature traces to that gap, step by step:
+
+1. **Model access, not availability.** For every barangay, access is measured as four queryable signals: service reach (system level + coverage), current reliability & safety (`available` / `flow` / `quality`), affordability, and resident reports. A barangay can be *covered by a system* yet still *insecure* — exactly the challenge's distinction.
+2. **Know the place.** All 57 real barangay boundaries are imported, and isolation/structural vulnerability is **computed** from the actual polygons (area, distance from the Poblacion cluster) plus service level and source capacity — so "geographically isolated and underserved" is a derived property, not a label.
+3. **One live picture.** The dashboard turns the four signals into KPI cards and a coverage map colored by **derived access state**, so the LGU sees who is secure, who is at risk, and *why*.
+4. **Early warning before crisis.** Alerts derive from the same signals and are weighted by structural vulnerability, so warnings are forward-looking and explainable: *isolated barangay + Level I service + flow trending down → act now*.
+5. **Communities as sensors.** Barangay officials submit reports that join to real places via PSGC codes and immediately re-derive alerts — the community feedback loop the challenge asks for.
+6. **Equitable response.** Every alert names a plain-language action; response priority is severity-weighted and underserved-first, turning detection into fair relief.
+7. **Proof under stress.** Simulating a typhoon, drought, or contamination drives the whole chain and shows it react; Reset demo restores a known-good state.
+
+### Six context areas → concrete outputs
+
+| Challenge context area | WellPoint input | Output surface |
+| :--- | :--- | :--- |
+| Climate & environmental risk | disruption types (typhoon/drought/contamination) + vulnerability tier | status band, risk flags |
+| Infrastructure & service coverage | system service level, `flow`/`available` | coverage % + reliability KPIs, map color |
+| Water availability | source status/capacity | source markers, shortage alerts |
+| Community access | affordability, service hours, reports | derived access state, per-barangay 5-second answer |
+| Livelihoods & food security | vulnerability tier × disruption severity | impact note on alerts ("disrupts fishing/farming income") |
+| Disasters & emergencies | damage/no-water reports, disruption sim | outage alerts, emergency response priority |
+
 ---
 
 ## 2. Personas
@@ -48,18 +71,18 @@ Every Must-have feature maps to a scoring criterion. Features that do not score 
 
 | Criterion | Weight | How WellPoint scores it |
 | :--- | :-: | :--- |
-| **Feasibility & Implementability** | 40% | Static client-only app, no DB, no server, no hardware; runs offline from bundled deterministic seed data; deployable to any static host or an LGU laptop. |
+| **Feasibility & Implementability** | 40% | Full-stack but simple: NestJS API + Postgres run locally via one command (Docker Compose), seeded deterministically on boot; no external services, no API keys; deployable to a single VPS or an LGU server. |
 | **Problem Relevance & Impact** | 25% | Directly models the access gap named in the challenge; surfaces served vs underserved barangays and predicts shortages. |
-| **Technical Viability** | 15% | Typed domain model, pure deterministic simulation, documented derived-alert rules, route-based architecture, lint + build green. |
-| **Innovation & Creativity** | 10% | Fuses service status, source health, coverage, affordability, and community reports into one explainable early-warning view with a live "simulate disruption" demo. |
+| **Technical Viability** | 15% | Typed domain model (TypeORM entities), Zod-validated API boundary, deterministic seed, documented derived-alert rules run server-side, lint + build green for both apps. |
+| **Innovation & Creativity** | 10% | Fuses service status, source health, coverage, affordability, and community reports — plus real barangay geography — into one explainable early-warning view with a live "simulate disruption" demo. |
 | **Sustainability & Scalability** | 10% | Data scoped by LGU/barangay; features are independent; plain web stack; documented production path. |
 
 ### Level 2 — Professional End-User Judges
 
 | Criterion | Weight | How WellPoint scores it |
 | :--- | :-: | :--- |
-| **Technical Functionality & Feasibility** | 27% | Deterministic demo that never depends on venue Wi-Fi; "Reset demo" guarantees a clean run. |
-| **Innovation & Creativity** | 17% | Explainable thresholds + predictive warning rather than a black-box score. |
+| **Technical Functionality & Feasibility** | 27% | One-command local start (Postgres + API + UI); deterministic seed on boot; "Reset demo" guarantees a clean run. |
+| **Innovation & Creativity** | 17% | Explainable early warning: structural vulnerability (real geography) + live trend, not a black-box score. |
 | **Relevance to Assigned Challenge** | 17% | Persona, place, and pain point are taken from the challenge text; local barangay names. |
 | **User Experience & Design** | 13% | 5-second status answer, plain language, mobile-first, consistent labeled status colors. |
 | **Scalability & Sustainability** | 13% | New LGUs are records, not forks; documented data sources and runbook. |
@@ -74,11 +97,11 @@ Bias hard toward **feasibility (40%)**: a smaller, fully working demo beats a br
 ### Must (demo cannot ship without)
 
 1. **Water-security dashboard** — overall status banner for Catbalogan City plus KPI cards: coverage %, service reliability, active alerts, affordability indicator.
-2. **Coverage & status view** — a lightweight schematic map / coverage grid of 5 Region VIII barangays showing **served vs underserved**, source markers, and system service level (I/II/III).
+2. **Coverage & status view** — a map of **all 57 Catbalogan City barangays** (boundaries imported into Postgres from `seed-data/catbalogan-brgys.geojson`, served by the API, rendered as inline SVG — no map tiles), color-coded by **derived access state** (served / partial / underserved), with source markers, system service level (I/II/III), and a vulnerability tier per barangay.
 3. **Alerts & early-warning list** — derived from documented thresholds, with severity, area, time, reason, and a recommended action.
-4. **Community report submission** — area, type, description (3–4 fields) with a clear success confirmation; reports feed the alert view.
+4. **Community report submission** — area, type, description (3–4 fields) with a clear success confirmation; reports are saved to Postgres and feed the alert view.
 5. **Live demo controls** — `Simulate disruption` (typhoon / drought / contamination / maintenance) and `Reset demo` returning to a known-good state.
-6. **Deterministic seed data** — 5 barangays, 4+ sources, 5 systems, households, at least one active critical alert and one resolved alert.
+6. **Deterministic seed data** — **57 real barangay boundaries** (PSGC-coded, with area km²) imported from `seed-data/catbalogan-brgys.geojson` into Postgres on boot, plus 4+ water sources, 5 pilot systems, structural vulnerability computed from the polygons, at least one active critical alert and one resolved alert.
 
 ### Should (only if Must is done and verified)
 
@@ -88,10 +111,10 @@ Bias hard toward **feasibility (40%)**: a smaller, fully working demo beats a br
 
 ### Won't (explicitly out of scope)
 
-- Real authentication, real database, or a separate backend service.
-- Real map tile provider (schematic grid is safer and offline-proof).
+- Real authentication / multi-user roles (single-tenant prototype, no login).
+- Real map tile provider (inline SVG rendering of the GeoJSON boundaries).
 - SMS/email notifications and a native mobile app.
-- Live PAGASA/DOST or flow-meter integration (documented as the production path only).
+- Live PAGASA/DOST or flow-meter telemetry ingestion (documented as the production path only).
 
 ---
 
@@ -101,30 +124,35 @@ Hacking begins **10:00 AM, Day 1 (Oct 6)**; Level 1 submission is **8:00 AM, Day
 
 | Time | Milestone | Owner |
 | :--- | :--- | :--- |
-| T+0–2h | Plan + architecture locked; data contracts frozen | all |
-| T+2–10h | Data layer + dashboard working with seed data | data/dev lead |
-| T+10–18h | Coverage view, alerts, reports, demo controls; UX pass | frontend lead |
-| T+18–22h | QA, offline/fallback checks, **feature freeze** | QA lead |
+| T+0–2h | Plan + architecture locked; data contracts + Zod schemas frozen | all |
+| T+2–10h | Backend: TypeORM entities, seed importer (GeoJSON + water data), NestJS API | backend lead |
+| T+4–12h | Frontend: TanStack Query hooks, dashboard wired to API | frontend lead |
+| T+10–18h | Coverage view (57 brgys), alerts, reports, demo controls; shadcn/ui UX pass | frontend lead |
+| T+18–22h | QA: fresh-seed boot, Reset demo, API smoke tests, **feature freeze** | QA lead |
 | T+22–24h | Deck + demo rehearsal; submit by 8:00 AM | all |
 
 ---
 
 ## 6. Proposed tech stack
 
-The repo is already scaffolded as a **TanStack Router (React 19) client-only SPA** — there is no server runtime installed. That is the right call for this challenge: the app must render with **no network and no database**, and a static SPA is the most reliable thing to demo and deploy.
+The repo already has two scaffolds: a **TanStack Router (React 19) SPA** in `frontend/` and a **NestJS 11 app** in `backend/`. We build a working full-stack prototype: a NestJS API backed by PostgreSQL (via TypeORM) feeds the React SPA through TanStack Query; Zod validates every request/response shape; the SPA renders the real 57-barangay GeoJSON boundaries as inline SVG.
 
 | Layer | Choice | Why |
 | :--- | :--- | :--- |
-| Framework | **React 19 + TanStack Router** (file-based routes) | Already scaffolded; type-safe routing; no server runtime to break. |
-| Build | **Vite 8** | Fast dev server on port 3000, tiny static build. |
-| Language | **TypeScript 6** (strict) | Stable data contracts the UI and simulator share. |
-| Styling | **Tailwind CSS v4** | Mobile-first utilities; no heavy UI library. |
-| State | **React `useSyncExternalStore`** module store | Zero dependencies; shared live state across routes. |
-| Data | **Bundled deterministic seed + pure simulator** | Offline-proof; identical on every run. |
-| Charts | **Hand-rolled inline SVG sparklines** | Avoids a chart dependency; fast first paint. |
-| Quality | **ESLint + Prettier + `vite build`** | Green build is a submission requirement. |
-| Deploy | **Static host** (Netlify / Vercel / Cloudflare Pages / GitHub Pages) or an LGU laptop | No server, no cost, works on venue Wi-Fi or offline. |
+| Frontend framework | **React 19 + TanStack Router** (file-based routes) | Already scaffolded; type-safe routing. |
+| Frontend UI | **shadcn/ui** (Tailwind CSS v4 + Radix primitives) | Accessible, mobile-first components without a heavy dependency; looks professional on demo day. |
+| Server state | **TanStack Query** | Caching, loading/error states, and invalidation for API data out of the box. |
+| Build | **Vite 8** | Fast dev server on port 3000, small production bundle. |
+| Backend | **NestJS 11** | Already scaffolded; modular services; familiar to judges. |
+| ORM / DB | **TypeORM + PostgreSQL** | Entities mirror the domain model; real persistence for reports and status samples. |
+| Validation | **Zod** (shared schemas on the API boundary) | Same contract enforced on both sides; no silent shape drift. |
+| Language | **TypeScript** (strict, both apps) | One typed contract shared by entities, API, and UI. |
+| Maps | **Inline SVG projection of the GeoJSON boundaries** (served by the API) | Real PSGC-coded polygons; no tile provider, no API keys. |
+| Data | **Deterministic seed loaded into Postgres on boot** | Identical state every demo; `Reset demo` re-seeds. |
+| Quality | **ESLint + Prettier + `vite build` / `nest build`** | Green builds on both apps are a submission requirement. |
+| Local run | **Docker Compose** (Postgres + API + UI) | One command start; deterministic; works without venue Wi-Fi once images are pulled. |
+| Deploy | **Single VPS or LGU server** (API + built SPA behind one origin) | Near-zero cost, one box to maintain. |
 
-**Production path (documented, not built):** swap the client data layer for a thin API (Node/Fastify or TanStack Start server functions) backed by PostgreSQL, fed by LGU flow-meter records and PAGASA/DOST feeds; keep the same entity/API contracts so the UI is unchanged.
+**Production path (documented, not built):** keep the same entities/contracts, then add live telemetry ingestion (flow meters, PAGASA/DOST feeds) as scheduled jobs, multi-LGU scoping, and authentication — the UI and API surface are unchanged.
 
 See `docs/architecture.md` for the system diagram, entity schemas, derived-alert rules, feasibility, and scalability arguments.
