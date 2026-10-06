@@ -3,19 +3,28 @@ import { supabase } from './supabase'
 
 // Water sources live in Supabase (table public.water_sources, see supabase-water-sources.sql).
 // Changes show on screen right away and are then saved; if saving fails, the list is reloaded
-// from the database and an error is shown. Reports and the current role stay in this browser for now.
+// from the database and an error is shown. Citizen reports are in Supabase too (public.reports),
+// and only the LGU can read them — for everyone else `reports` stays empty.
 
 export type Role = 'lgu' | 'official' | 'drrm' | 'citizen'
 export type AssetKind = 'pump' | 'well' | 'reservoir' | 'station'
 export type Status = 'ok' | 'low' | 'empty' | 'repair' | 'unsafe'
 export type Issue = 'empty' | 'low' | 'dirty'
 export type Asset = { id: string; kind: AssetKind; name: string; lng: number; lat: number; status: Status }
-export type Report = { id: string; assetId: string; issue: Issue; note: string; at: number }
+export type Report = {
+  id: string
+  assetId: string
+  issue: Issue
+  note: string
+  at: number
+  reporterName: string
+  reporterBarangay: string
+}
 
 export const ROLES: { id: Role; label: string; hint: string }[] = [
   { id: 'citizen', label: 'Citizen', hint: 'Select a water pump or well on the map to report a problem.' },
-  { id: 'official', label: 'Barangay official', hint: 'Select a water pump or well to read its reports and change its status.' },
-  { id: 'lgu', label: 'LGU', hint: 'Drag pumps, wells and reservoirs onto the map. Drag a marker to move it. Select any marker to change its status.' },
+  { id: 'official', label: 'Barangay official', hint: 'Select a water pump or well to change its status.' },
+  { id: 'lgu', label: 'LGU', hint: 'Drag pumps, wells and reservoirs onto the map. Drag a marker to move it. Select any marker to change its status or read citizen reports.' },
   { id: 'drrm', label: 'DRRM', hint: 'Drag filling stations onto the map. Drag a marker to move it. Select a station to change its status.' },
 ]
 export const KINDS: Record<AssetKind, string> = { pump: 'Water pump', well: 'Well', reservoir: 'Reservoir', station: 'Filling station' }
@@ -60,40 +69,21 @@ type State = {
   error: string | null
 }
 
-// Demo reports point at the demo sources the SQL script inserts (same fixed ids).
-const demoId = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
-const ago = (minutes: number) => Date.now() - minutes * 60_000
-const seedReports: Report[] = [
-  { id: 'r1', assetId: demoId(2), issue: 'empty', note: 'Nothing comes out since this morning.', at: ago(35) },
-  { id: 'r2', assetId: demoId(2), issue: 'low', note: '', at: ago(180) },
-  { id: 'r3', assetId: demoId(6), issue: 'empty', note: 'Queue of about 20 households.', at: ago(95) },
-  { id: 'r4', assetId: demoId(8), issue: 'empty', note: '', at: ago(260) },
-  { id: 'r5', assetId: demoId(8), issue: 'dirty', note: 'Brown water the day before it ran dry.', at: ago(1500) },
-  { id: 'r6', assetId: demoId(10), issue: 'empty', note: 'Dry for two days.', at: ago(2900) },
-  { id: 'r7', assetId: demoId(7), issue: 'low', note: 'Very slow, takes 10 minutes to fill a pail.', at: ago(60) },
-  { id: 'r8', assetId: demoId(1), issue: 'dirty', note: 'Cloudy water.', at: ago(420) },
-]
-
-const KEY = 'wellpoint.demo.v3' // v3: sources moved to Supabase, only role + reports are kept here
+const KEY = 'wellpoint.demo.v4' // v4: sources and reports are in Supabase, only the role is kept here
 
 const isRole = (v: unknown): v is Role => ROLES.some((r) => r.id === v)
 const isKind = (v: unknown): v is AssetKind => v === 'pump' || v === 'well' || v === 'reservoir' || v === 'station'
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
 
-function loadLocal(): Pick<State, 'role' | 'reports'> {
+function loadRole(): Role {
   try {
     const raw = typeof localStorage === 'undefined' ? null : localStorage.getItem(KEY)
-    const d = raw ? (JSON.parse(raw) as Partial<State> | null) : null
-    if (d && Array.isArray(d.reports)) {
-      const reports = d.reports.filter(
-        (r): r is Report => !!r && typeof r.id === 'string' && typeof r.assetId === 'string' && r.issue in ISSUES && isNum(r.at),
-      )
-      return { role: isRole(d.role) ? d.role : 'citizen', reports }
-    }
+    const d = raw ? (JSON.parse(raw) as { role?: unknown } | null) : null
+    if (d && isRole(d.role)) return d.role
   } catch {
-    /* fall through to the seed */
+    /* fall through */
   }
-  return { role: 'citizen', reports: seedReports }
+  return 'citizen'
 }
 
 // crypto.randomUUID only exists on https or localhost, so fall back when it is missing.
@@ -102,13 +92,13 @@ const uid = () =>
     ? crypto.randomUUID()
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 
-let state: State = { ...loadLocal(), assets: [], loading: true, error: null }
+let state: State = { role: loadRole(), reports: [], assets: [], loading: true, error: null }
 const listeners = new Set<() => void>()
 
 function set(next: State) {
   state = next
   try {
-    localStorage.setItem(KEY, JSON.stringify({ role: next.role, reports: next.reports }))
+    localStorage.setItem(KEY, JSON.stringify({ role: next.role }))
   } catch {
     /* storage full or blocked: keep working in memory */
   }
@@ -162,19 +152,70 @@ export async function loadAssets() {
   }
 }
 
+type ReportRow = {
+  id: string
+  source_id: string
+  issue: string
+  note: string | null
+  reporter_name: string | null
+  reporter_barangay: string | null
+  created_at: string
+}
+
+// Only the LGU can read reports (the database enforces it); everyone else just gets an empty list.
+export async function loadReports() {
+  if (state.role !== 'lgu') {
+    if (state.reports.length) set({ ...state, reports: [] })
+    return
+  }
+  try {
+    const { data, error } = await supabase()
+      .from('reports')
+      .select('id, source_id, issue, note, reporter_name, reporter_barangay, created_at')
+      .order('created_at', { ascending: false })
+    if (error) throw new Error(error.message)
+    const reports = (data as ReportRow[])
+      .filter((r) => r.issue in ISSUES)
+      .map((r) => ({
+        id: r.id,
+        assetId: r.source_id,
+        issue: r.issue as Issue,
+        note: r.note ?? '',
+        at: new Date(r.created_at).getTime(),
+        reporterName: r.reporter_name ?? '',
+        reporterBarangay: r.reporter_barangay ?? '',
+      }))
+    if (state.role === 'lgu') set({ ...state, reports })
+  } catch (e) {
+    const msg = (e as Error).message
+    set({
+      ...state,
+      error: /relation .*reports.* does not exist|could not find the table/i.test(msg)
+        ? 'The reports table is missing. Run supabase-reports.sql in Supabase.'
+        : friendly(msg),
+    })
+  }
+}
+
 // Called by the dashboard once the user is logged in: first load + live updates from other users.
 let started = false
 export function initWaterStore() {
   if (started) return
   started = true
   void loadAssets()
+  void loadReports()
   try {
-    let timer: ReturnType<typeof setTimeout> | undefined
+    let assetTimer: ReturnType<typeof setTimeout> | undefined
+    let reportTimer: ReturnType<typeof setTimeout> | undefined
     supabase()
-      .channel('water_sources')
+      .channel('wellpoint')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'water_sources' }, () => {
-        clearTimeout(timer)
-        timer = setTimeout(() => void loadAssets(), 300) // several changes at once -> one reload
+        clearTimeout(assetTimer)
+        assetTimer = setTimeout(() => void loadAssets(), 300) // several changes at once -> one reload
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reports' }, () => {
+        clearTimeout(reportTimer)
+        reportTimer = setTimeout(() => void loadReports(), 300)
       })
       .subscribe()
   } catch {
@@ -186,7 +227,11 @@ export const dismissError = () => set({ ...state, error: null })
 
 // ---------- actions (same names as before, so the components don't change) ----------
 
-export const setRole = (role: Role) => set({ ...state, role })
+export function setRole(role: Role) {
+  if (role === state.role) return
+  set({ ...state, role, reports: [] })
+  if (started) void loadReports()
+}
 
 export function addAsset(kind: AssetKind, lng: number, lat: number) {
   if (!CAN_PLACE[state.role].includes(kind)) return
@@ -248,8 +293,18 @@ export function removeAsset(id: string) {
   void save((t) => t.delete().eq('id', id).select('id'))
 }
 
-export const fileReport = (assetId: string, issue: Issue, note: string) =>
-  set({ ...state, reports: [...state.reports, { id: uid(), assetId, issue, note, at: Date.now() }] })
+// Saves a citizen report. Returns an error message, or null when it was sent.
+export async function fileReport(assetId: string, issue: Issue, note: string): Promise<string | null> {
+  if (assetId.startsWith('temp-')) return 'This water source is still being saved. Try again in a moment.'
+  try {
+    const { error } = await supabase().from('reports').insert({ source_id: assetId, issue, note: note.slice(0, 500) })
+    if (error) return friendly(error.message)
+    if (state.role === 'lgu') void loadReports()
+    return null
+  } catch (e) {
+    return friendly((e as Error).message)
+  }
+}
 
 // Marking a source working also clears its open reports.
 export function setStatus(assetId: string, status: Status) {

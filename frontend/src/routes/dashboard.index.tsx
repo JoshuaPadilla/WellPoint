@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { SupplyOutlook } from '@/components/SupplyOutlook'
 import { useBarangays } from '@/lib/barangays'
-import { ISSUES, hasStatus, setStatus, useWaterStore } from '@/lib/WaterStore'
-import type { Asset, Role } from '@/lib/WaterStore'
+import { CAN_SET_STATUS, ISSUES, STATUSES, hasStatus, isShort, setStatus, useWaterStore } from '@/lib/WaterStore'
+import type { Asset, Role, Status } from '@/lib/WaterStore'
 
 export const Route = createFileRoute('/dashboard/')({ component: Page })
 
@@ -59,6 +59,33 @@ function Page() {
   )
 }
 
+function StatusBadge({ status }: { status: Status }) {
+  return (
+    <p className={cn('mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold', STATUSES[status].badge)}>
+      {STATUSES[status].label}
+    </p>
+  )
+}
+
+function StatusPicker({ asset }: { asset: Asset }) {
+  const { role } = useWaterStore()
+  if (!CAN_SET_STATUS[role].includes(asset.kind)) return <StatusBadge status={asset.status} />
+  return (
+    <label className="flex items-center gap-2 text-sm font-semibold">
+      Status
+      <select
+        value={asset.status}
+        onChange={(e) => setStatus(asset.id, e.target.value as Status)}
+        className="rounded-md border border-line bg-white px-2 py-1.5 font-normal"
+      >
+        {Object.entries(STATUSES).map(([v, s]) => (
+          <option key={v} value={v}>{s.label}</option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
 type ViewProps = { barangayOf: (a: { lng: number; lat: number }) => string | null }
 
 function MapLink() {
@@ -69,11 +96,12 @@ function MapLink() {
   )
 }
 
-// LGU: pumps the barangay officials have marked empty.
+// LGU: every source that isn't working, worst first.
 function LguView({ barangayOf }: ViewProps) {
   const { assets, reports } = useWaterStore()
-  const rows = assets.filter((a) => hasStatus(a.kind) && a.status === 'empty')
-  if (rows.length === 0) return empty('No pumps or wells are marked empty right now.')
+  const order: Status[] = ['empty', 'unsafe', 'low', 'repair']
+  const rows = assets.filter((a) => a.status !== 'ok').sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status))
+  if (rows.length === 0) return empty('Every water source is working right now.')
   return (
     <ul className="space-y-3">
       {rows.map((a) => (
@@ -83,6 +111,7 @@ function LguView({ barangayOf }: ViewProps) {
             <p className="text-sm text-ink/70">
               {barangayOf(a) ?? 'Barangay unknown'} · {reports.filter((r) => r.assetId === a.id).length} report(s)
             </p>
+            <StatusBadge status={a.status} />
           </div>
           <MapLink />
         </li>
@@ -111,11 +140,7 @@ function OfficialView({ barangayOf }: ViewProps) {
             <p className="text-sm text-ink/70">{barangayOf(a) ?? 'Barangay unknown'}</p>
             <p className="font-semibold">{ISSUES[r.issue]}</p>
             {r.note && <p className="text-sm">{r.note}</p>}
-            {a.status === 'ok' ? (
-              <Button size="sm" variant="destructive" onClick={() => setStatus(a.id, 'empty')}>Mark as empty</Button>
-            ) : (
-              <Button size="sm" onClick={() => setStatus(a.id, 'ok')}>Mark as working</Button>
-            )}
+            <StatusPicker asset={a} />
           </li>
         )
       })}
@@ -133,7 +158,7 @@ function DrrmView({ barangayOf }: ViewProps) {
       const name = barangayOf(a) ?? 'Barangay unknown'
       const row = m.get(name) ?? { name, pumps: 0, emptyPumps: 0, reports: 0 }
       row.pumps++
-      if (a.status === 'empty') row.emptyPumps++
+      if (isShort(a.status)) row.emptyPumps++
       row.reports += reports.filter((r) => r.assetId === a.id).length
       m.set(name, row)
     }
@@ -150,7 +175,7 @@ function DrrmView({ barangayOf }: ViewProps) {
           <div>
             <p className="font-extrabold">{i + 1}. {r.name}</p>
             <p className="text-sm text-ink/70">
-              {r.emptyPumps} of {r.pumps} pump(s)/well(s) empty · {r.reports} report(s)
+              {r.emptyPumps} of {r.pumps} pump(s)/well(s) empty or low · {r.reports} report(s)
             </p>
           </div>
           <MapLink />
@@ -179,8 +204,8 @@ function HouseholdView({ barangayOf }: ViewProps) {
   const pumps = assets.filter((a) => hasStatus(a.kind)) // pumps and wells
   const dist = (a: Asset) => km(origin, a)
   const problems = pumps
-    .filter((a) => a.status === 'empty' || reports.some((r) => r.assetId === a.id))
-    .sort((a, b) => Number(b.status === 'empty') - Number(a.status === 'empty') || dist(a) - dist(b))
+    .filter((a) => a.status !== 'ok' || reports.some((r) => r.assetId === a.id))
+    .sort((a, b) => Number(isShort(b.status)) - Number(isShort(a.status)) || dist(a) - dist(b))
   const nearestWorking = pumps.filter((a) => a.status === 'ok').sort((a, b) => dist(a) - dist(b))[0]
 
   return (
@@ -211,9 +236,11 @@ function HouseholdView({ barangayOf }: ViewProps) {
                 <p className="text-sm text-ink/70">
                   {barangayOf(a) ?? 'Barangay unknown'} · {dist(a).toFixed(1)} km away
                 </p>
-                <p className={cn('mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold', a.status === 'empty' ? 'bg-red-100 text-red-700' : 'bg-sky text-well')}>
-                  {a.status === 'empty' ? 'Empty' : 'Problem reported'}
-                </p>
+                {a.status === 'ok' ? (
+                  <p className="mt-1 inline-block rounded-full bg-sky px-2 py-0.5 text-xs font-bold text-well">Problem reported</p>
+                ) : (
+                  <StatusBadge status={a.status} />
+                )}
               </div>
               <MapLink />
             </li>

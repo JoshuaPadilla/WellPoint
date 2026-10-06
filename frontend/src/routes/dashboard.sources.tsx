@@ -5,8 +5,8 @@ import type { LucideIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useBarangays } from '@/lib/barangays'
-import { KINDS, hasStatus, useWaterStore } from '@/lib/WaterStore'
-import type { Asset, AssetKind } from '@/lib/WaterStore'
+import { KINDS, STATUSES, useWaterStore } from '#/lib/WaterStore'
+import type { Asset, AssetKind } from '#/lib/WaterStore'
 
 export const Route = createFileRoute('/dashboard/sources')({ component: Page })
 
@@ -15,7 +15,6 @@ const OUTSIDE = 'Outside the barangay boundaries'
 
 function Source({ a }: { a: Asset }) {
   const Icon = ICONS[a.kind]
-  const isEmpty = hasStatus(a.kind) && a.status === 'empty'
   return (
     <li className="flex items-center justify-between gap-3 rounded-lg bg-mist px-3 py-2 text-sm">
       <span className="flex items-center gap-2 font-semibold">
@@ -23,11 +22,9 @@ function Source({ a }: { a: Asset }) {
         {a.name}
         <span className="font-normal text-ink/60">{KINDS[a.kind]}</span>
       </span>
-      {hasStatus(a.kind) && (
-        <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', isEmpty ? 'bg-red-100 text-red-700' : 'bg-sky text-well')}>
-          {isEmpty ? 'Empty' : 'Working'}
-        </span>
-      )}
+      <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', STATUSES[a.status].badge)}>
+        {STATUSES[a.status].label}
+      </span>
     </li>
   )
 }

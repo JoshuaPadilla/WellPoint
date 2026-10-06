@@ -2,7 +2,7 @@
 // Name and barangay go along with the signup; a database trigger copies them into
 // the public.profiles table (see supabase-profiles.sql), which also holds the role.
 import type { User as SupaUser } from '@supabase/supabase-js'
-import type { Role } from '@/lib/WaterStore'
+import type { Role } from '@/lib/water-store'
 import { supabase } from './supabase'
 
 export type User = { id: string; name: string; email: string; barangay: string; role: Role }

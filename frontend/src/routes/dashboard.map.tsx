@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { AssetMarkers, MapBridge, RolePanel } from '@/components/WaterAssets'
-import { addAsset } from '@/lib/WaterStore'
-import type { AssetKind } from '@/lib/WaterStore'
+import { addAsset } from '#/lib/WaterStore'
+import type { AssetKind } from '#/lib/WaterStore'
 
 export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap })
 
