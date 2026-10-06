@@ -25,7 +25,6 @@ function inGeom(g: Geom, x: number, y: number) {
   return polys.some((p) => inRing(x, y, p[0]) && !p.slice(1).some((hole) => inRing(x, y, hole)))
 }
 
-<<<<<<< HEAD
 // Polygon / multi-polygon centroid (area-weighted), for distance-from-center.
 function ringCentroid(ring: number[][]): { cx: number; cy: number; area: number } {
   let area = 0
@@ -65,10 +64,8 @@ function centroid(g: Geom): { lat: number; lng: number } {
   return { lat: wy / totalArea, lng: wx / totalArea }
 }
 
-// Loads the barangay boundaries once and exposes names, the full records (with
-// PSGC code, area, and centroid), and point-in-polygon lookup.
-=======
 // The boundary file is downloaded once and shared by every component that uses this hook.
+// Each record carries the PSGC code, area and centroid alongside its geometry.
 let cache: Promise<Feat[]> | null = null
 function loadFeatures(): Promise<Feat[]> {
   cache ??= fetch(DATA_URL)
@@ -76,7 +73,17 @@ function loadFeatures(): Promise<Feat[]> {
     .then((raw) =>
       raw.features
         .filter((f) => f.properties.ADM3_PCODE === CITY_PCODE)
-        .map((f) => ({ name: f.properties.ADM4_EN, geometry: f.geometry })),
+        .map((f) => {
+          const c = centroid(f.geometry)
+          return {
+            name: f.properties.ADM4_EN,
+            psgcCode: f.properties.psgc_code,
+            areaSqKm: f.properties.AREA_SQKM,
+            lat: c.lat,
+            lng: c.lng,
+            geometry: f.geometry,
+          }
+        }),
     )
     .catch((e) => {
       cache = null // allow a retry on the next mount
@@ -85,40 +92,18 @@ function loadFeatures(): Promise<Feat[]> {
   return cache
 }
 
-// `names` is every barangay A-Z; `barangayOf` names the one a point falls inside.
->>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
+// `names` is every barangay A-Z; `barangays` are the full records (PSGC code, area, centroid);
+// `barangayAt` / `barangayOf` find the one a point falls inside.
 export function useBarangays() {
   const [feats, setFeats] = useState<Feat[]>([])
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-<<<<<<< HEAD
-    const ctrl = new AbortController()
-    fetch(DATA_URL, { signal: ctrl.signal })
-      .then((r) => (r.ok ? (r.json() as Promise<Raw>) : Promise.reject(new Error(String(r.status)))))
-      .then((raw) => {
-        setFeats(
-          raw.features
-            .filter((f) => f.properties.ADM3_PCODE === CITY_PCODE)
-            .map((f) => {
-              const c = centroid(f.geometry)
-              return {
-                name: f.properties.ADM4_EN,
-                psgcCode: f.properties.psgc_code,
-                areaSqKm: f.properties.AREA_SQKM,
-                lat: c.lat,
-                lng: c.lng,
-                geometry: f.geometry,
-              }
-            }),
-        )
-=======
     let alive = true
     loadFeatures()
       .then((f) => {
         if (!alive) return
         setFeats(f)
->>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
         setLoaded(true)
       })
       .catch(() => {
@@ -133,7 +118,6 @@ export function useBarangays() {
     () => feats.map(({ geometry: _geometry, ...rest }) => rest),
     [feats],
   )
-<<<<<<< HEAD
 
   const names = useMemo(() => barangays.map((f) => f.name).sort((a, b) => a.localeCompare(b, 'en', { numeric: true })), [barangays])
 
@@ -150,7 +134,4 @@ export function useBarangays() {
   const barangayOf = useCallback((a: { lng: number; lat: number }) => barangayAt(a)?.name ?? null, [barangayAt])
 
   return { names, barangays, barangayAt, barangayOf, loaded }
-=======
-  return { names, barangayOf, loaded }
->>>>>>> d57b73fa1274ad1dd4a0c1679f937505514d5ad7
 }
