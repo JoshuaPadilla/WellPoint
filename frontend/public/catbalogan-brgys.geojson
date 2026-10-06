@@ -1,0 +1,2549 @@
+{
+	"type": "FeatureCollection",
+	"metadata": {
+		"psgc_type": "barangay",
+		"psgc_version": "2023-10-24",
+		"namria_version": "2023-11-06",
+		"feature_count": 42026,
+		"match_summary": {
+			"exact": 38771,
+			"huc_map": 0,
+			"fuzzy": 3255,
+			"non_administrative": 0,
+			"unresolved": 0
+		}
+	},
+	"name": "barangays",
+	"features": [
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Albalate",
+				"ADM4_PCODE": "PH0806005001",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.10608879850900001,
+				"Shape_Area": 0.000693743582056,
+				"AREA_SQKM": 8.3616577247299997,
+				"psgc_id": "PH0806005001",
+				"psgc_code": "0806005001",
+				"psgc_name": "Albalate",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.913592253000047, 11.878467493000073],
+						[124.912967851000076, 11.850637013000039],
+						[124.89057858700005, 11.84858540700003],
+						[124.886103568000067, 11.876425891000054],
+						[124.913592253000047, 11.878467493000073]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Bagongon",
+				"ADM4_PCODE": "PH0806005002",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.108157090964,
+				"Shape_Area": 6.6138779271000006e-5,
+				"AREA_SQKM": 0.79734845341299998,
+				"psgc_id": "PH0806005002",
+				"psgc_code": "0806005002",
+				"psgc_name": "Bagongon",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.733846602000085, 11.783925038000064],
+							[124.735594266000021, 11.784459374000051],
+							[124.734805971000014, 11.78295924400004],
+							[124.733846602000085, 11.783925038000064]
+						]
+					],
+					[
+						[
+							[124.722843276000049, 11.790078651000044],
+							[124.724161734000063, 11.789217282000038],
+							[124.721608493000076, 11.789508029000046],
+							[124.722843276000049, 11.790078651000044]
+						]
+					],
+					[
+						[
+							[124.733411912000065, 11.790977191000025],
+							[124.735315961000083, 11.791237663000061],
+							[124.734196083000029, 11.79034671900007],
+							[124.733411912000065, 11.790977191000025]
+						]
+					],
+					[
+						[
+							[124.719253473000094, 11.793140833000052],
+							[124.719787144000065, 11.79263019900003],
+							[124.71893727500003, 11.792439748000049],
+							[124.719253473000094, 11.793140833000052]
+						]
+					],
+					[
+						[
+							[124.715219792000084, 11.801483044000065],
+							[124.716296400000033, 11.796786349000058],
+							[124.71407092600009, 11.795087526000032],
+							[124.715219792000084, 11.801483044000065]
+						]
+					],
+					[
+						[
+							[124.701566040000102, 11.809139935000076],
+							[124.707385536000061, 11.801435010000034],
+							[124.706727151000109, 11.794082757000069],
+							[124.699302941000042, 11.801146221000067],
+							[124.701566040000102, 11.809139935000076]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Bangon",
+				"ADM4_PCODE": "PH0806005003",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.068181130783900007,
+				"Shape_Area": 0.00029715400450399998,
+				"AREA_SQKM": 3.5813519239799998,
+				"psgc_id": "PH0806005003",
+				"psgc_code": "0806005003",
+				"psgc_name": "Bangon",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.881364777000044, 11.892619211000067],
+						[124.886282345000041, 11.875237182000035],
+						[124.866721046000066, 11.873496934000059],
+						[124.86637665100011, 11.887117837000062],
+						[124.881364777000044, 11.892619211000067]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Basiao",
+				"ADM4_PCODE": "PH0806005004",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.13475586549,
+				"Shape_Area": 0.000107449539148,
+				"AREA_SQKM": 1.29582300549,
+				"psgc_id": "PH0806005004",
+				"psgc_code": "0806005004",
+				"psgc_name": "Basiao",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.896587593000049, 11.685329468000077],
+							[124.899381071000107, 11.686544319000063],
+							[124.898088444000109, 11.685551882000027],
+							[124.896587593000049, 11.685329468000077]
+						]
+					],
+					[
+						[
+							[124.904843695000068, 11.692885829000033],
+							[124.904954559000089, 11.692788894000046],
+							[124.904794200000083, 11.692800528000021],
+							[124.904843695000068, 11.692885829000033]
+						]
+					],
+					[
+						[
+							[124.907207382000024, 11.698928355000021],
+							[124.906219735000036, 11.693680963000077],
+							[124.903860323000117, 11.692639266000072],
+							[124.902537750000079, 11.688800236000077],
+							[124.899569521000103, 11.686352330000034],
+							[124.907207382000024, 11.698928355000021]
+						]
+					],
+					[
+						[
+							[124.869882176000033, 11.715103336000027],
+							[124.882633811000119, 11.705037533000052],
+							[124.888097427000048, 11.69489162900004],
+							[124.87474261300008, 11.704236249000076],
+							[124.869882176000033, 11.715103336000027]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Buluan",
+				"ADM4_PCODE": "PH0806005005",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.032451921486399998,
+				"Shape_Area": 3.37330241423e-5,
+				"AREA_SQKM": 0.4066548949,
+				"psgc_id": "PH0806005005",
+				"psgc_code": "0806005005",
+				"psgc_name": "Buluan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.737145262000013, 11.820722140000044],
+						[124.742993100000035, 11.814453796000066],
+						[124.740291515000081, 11.808761245000028],
+						[124.737710514000014, 11.811698335000074],
+						[124.737145262000013, 11.820722140000044]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Bunuanan",
+				"ADM4_PCODE": "PH0806005006",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.049533126524799999,
+				"Shape_Area": 9.0654913879200007e-5,
+				"AREA_SQKM": 1.0930775424900001,
+				"psgc_id": "PH0806005006",
+				"psgc_code": "0806005006",
+				"psgc_name": "Bunuanan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.898178941000083, 11.762072948000025],
+						[124.892501731000038, 11.750614965000068],
+						[124.884506308000027, 11.757115896000073],
+						[124.898178941000083, 11.762072948000025]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cabugawan",
+				"ADM4_PCODE": "PH0806005007",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.098161663170700006,
+				"Shape_Area": 7.9469882722200003e-5,
+				"AREA_SQKM": 0.95803396920299999,
+				"psgc_id": "PH0806005007",
+				"psgc_code": "0806005007",
+				"psgc_name": "Cabugawan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.799039081000046, 11.79487468800005],
+							[124.798227737000047, 11.793904265000037],
+							[124.797321866000061, 11.794369053000025],
+							[124.799039081000046, 11.79487468800005]
+						]
+					],
+					[
+						[
+							[124.802088723000111, 11.796732907000035],
+							[124.803871481000101, 11.795172797000077],
+							[124.801307988000076, 11.795976651000046],
+							[124.802088723000111, 11.796732907000035]
+						]
+					],
+					[
+						[
+							[124.820731933000047, 11.809344986000042],
+							[124.83736658600003, 11.814404842000044],
+							[124.826956304000078, 11.801245703000063],
+							[124.820731933000047, 11.809344986000042]
+						]
+					],
+					[
+						[
+							[124.817376417000105, 11.818123188000072],
+							[124.81928576700011, 11.816813527000022],
+							[124.817256826000062, 11.817045767000025],
+							[124.817376417000105, 11.818123188000072]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cagudalo",
+				"ADM4_PCODE": "PH0806005008",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.092779333515099996,
+				"Shape_Area": 0.00052443573682000005,
+				"AREA_SQKM": 6.3210611512100003,
+				"psgc_id": "PH0806005008",
+				"psgc_code": "0806005008",
+				"psgc_name": "Cagudalo",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.886282345000041, 11.875237182000035],
+						[124.89057858700005, 11.84858540700003],
+						[124.871048782000116, 11.847280842000032],
+						[124.866721046000066, 11.873496934000059],
+						[124.886282345000041, 11.875237182000035]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cagusipan",
+				"ADM4_PCODE": "PH0806005009",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.15327488170199999,
+				"Shape_Area": 0.0014560925736500001,
+				"AREA_SQKM": 17.548114850099999,
+				"psgc_id": "PH0806005009",
+				"psgc_code": "0806005009",
+				"psgc_name": "Cagusipan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.96920763300011, 11.914251400000069],
+						[124.955765420000034, 11.879512575000035],
+						[124.922407030000045, 11.87843747200003],
+						[124.920324855000104, 11.90926238000003],
+						[124.96920763300011, 11.914251400000069]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cagutian",
+				"ADM4_PCODE": "PH0806005011",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.12867100782499999,
+				"Shape_Area": 0.00086490705831,
+				"AREA_SQKM": 10.4237309342,
+				"psgc_id": "PH0806005011",
+				"psgc_code": "0806005011",
+				"psgc_name": "Cagutian",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.920324855000104, 11.90926238000003],
+						[124.922407030000045, 11.87843747200003],
+						[124.886103568000067, 11.876425891000054],
+						[124.881364777000044, 11.892619211000067],
+						[124.920324855000104, 11.90926238000003]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cagutsan",
+				"ADM4_PCODE": "PH0806005012",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.098202840937000005,
+				"Shape_Area": 9.1421474890299994e-5,
+				"AREA_SQKM": 1.1020602210399999,
+				"psgc_id": "PH0806005012",
+				"psgc_code": "0806005012",
+				"psgc_name": "Cagutsan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.673067736, 11.821616648000031],
+						[124.690074850000087, 11.828185681000036],
+						[124.682284371000037, 11.822961711000062],
+						[124.68804478200002, 11.817138874000022],
+						[124.677137883000114, 11.815538208000021],
+						[124.673067736, 11.821616648000031]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Canhawan Gote",
+				"ADM4_PCODE": "PH0806005013",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.029508107114700002,
+				"Shape_Area": 2.89352489894e-5,
+				"AREA_SQKM": 0.348804010951,
+				"psgc_id": "PH0806005013",
+				"psgc_code": "0806005013",
+				"psgc_name": "Canhawan Gote",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.724117164000063, 11.823532267000076],
+						[124.730583718000048, 11.825755780000065],
+						[124.72564297100007, 11.819810593000057],
+						[124.724117164000063, 11.823532267000076]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Canlapwas (Pob.)",
+				"ADM4_PCODE": "PH0806005014",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.032309748471600001,
+				"Shape_Area": 5.7663903363499998e-5,
+				"AREA_SQKM": 0.69522004133000004,
+				"psgc_id": "PH0806005014",
+				"psgc_code": "0806005014",
+				"psgc_name": "Canlapwas",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.883760607000113, 11.785689370000057],
+						[124.89232934600011, 11.779481901000054],
+						[124.884911674000023, 11.779246897000064],
+						[124.883760607000113, 11.785689370000057]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cawayan",
+				"ADM4_PCODE": "PH0806005015",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.086007818814800005,
+				"Shape_Area": 0.00042918141582500003,
+				"AREA_SQKM": 5.17425558477,
+				"psgc_id": "PH0806005015",
+				"psgc_code": "0806005015",
+				"psgc_name": "Cawayan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.926064093000036, 11.803313968000055],
+						[124.917976011000064, 11.773101715000053],
+						[124.905617083000038, 11.800212918000057],
+						[124.926064093000036, 11.803313968000055]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Cinco",
+				"ADM4_PCODE": "PH0806005016",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.098346759051299998,
+				"Shape_Area": 0.000110008492071,
+				"AREA_SQKM": 1.3260935120099999,
+				"psgc_id": "PH0806005016",
+				"psgc_code": "0806005016",
+				"psgc_name": "Cinco",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.702249040000083, 11.835698637000064],
+							[124.708504946000062, 11.824828161000028],
+							[124.700637909000079, 11.830436327000029],
+							[124.692352056000118, 11.81858687600004],
+							[124.702249040000083, 11.835698637000064]
+						]
+					],
+					[
+						[
+							[124.716139327000064, 11.843300146000047],
+							[124.719636617000106, 11.842074066000066],
+							[124.719050472000049, 11.841343041000073],
+							[124.716139327000064, 11.843300146000047]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Darahuway Daco",
+				"ADM4_PCODE": "PH0806005017",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.034382078580699998,
+				"Shape_Area": 2.96601957943e-5,
+				"AREA_SQKM": 0.35764825717799997,
+				"psgc_id": "PH0806005017",
+				"psgc_code": "0806005017",
+				"psgc_name": "Darahuway Daco",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.877294994000067, 11.736370553000029],
+						[124.876835048000089, 11.745386858000074],
+						[124.877953149000064, 11.741246469000032],
+						[124.877294994000067, 11.736370553000029]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Darahuway Gote",
+				"ADM4_PCODE": "PH0806005018",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.019298820249299999,
+				"Shape_Area": 9.0737524649099995e-6,
+				"AREA_SQKM": 0.109410199475,
+				"psgc_id": "PH0806005018",
+				"psgc_code": "0806005018",
+				"psgc_name": "Darahuway Gote",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.870630685000037, 11.747239122000053],
+						[124.872059231000094, 11.750470080000071],
+						[124.872464994000097, 11.746769273000041],
+						[124.870630685000037, 11.747239122000053]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Estaka",
+				"ADM4_PCODE": "PH0806005019",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.036062367162600001,
+				"Shape_Area": 4.2226689229000002e-5,
+				"AREA_SQKM": 0.50907362718000004,
+				"psgc_id": "PH0806005019",
+				"psgc_code": "0806005019",
+				"psgc_name": "Estaka",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.839983135000011, 11.802625177000039],
+						[124.834563907000074, 11.794864200000063],
+						[124.828704642000048, 11.795833864000031],
+						[124.829753853000057, 11.801610790000041],
+						[124.839983135000011, 11.802625177000039]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Guinsorongan",
+				"ADM4_PCODE": "PH0806005020",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.042273097679199997,
+				"Shape_Area": 7.1437577609099995e-5,
+				"AREA_SQKM": 0.86134545992599998,
+				"psgc_id": "PH0806005020",
+				"psgc_code": "0806005020",
+				"psgc_name": "Guinsorongan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.88383968200003, 11.764742228000046],
+						[124.898178941000083, 11.762072948000025],
+						[124.884534837000047, 11.757221841000046],
+						[124.88383968200003, 11.764742228000046]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Iguid",
+				"ADM4_PCODE": "PH0806005021",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.123022336229,
+				"Shape_Area": 0.00062611415088700004,
+				"AREA_SQKM": 7.5472904266800001,
+				"psgc_id": "PH0806005021",
+				"psgc_code": "0806005021",
+				"psgc_name": "Iguid",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.87429458400004, 11.829803448000064],
+						[124.835853466000117, 11.822677850000048],
+						[124.827846891000036, 11.833682080000074],
+						[124.871048782000116, 11.847280842000032],
+						[124.87429458400004, 11.829803448000064]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Lagundi",
+				"ADM4_PCODE": "PH0806005022",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.059368810500900003,
+				"Shape_Area": 0.00020777232442800001,
+				"AREA_SQKM": 2.5051479881500001,
+				"psgc_id": "PH0806005022",
+				"psgc_code": "0806005022",
+				"psgc_name": "Lagundi",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.91671313400002, 11.769438779000041],
+						[124.912713967000059, 11.759822478000046],
+						[124.898178941000083, 11.762072948000025],
+						[124.896980979000091, 11.769025475000035],
+						[124.91671313400002, 11.769438779000041]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Libas",
+				"ADM4_PCODE": "PH0806005023",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.119120016169,
+				"Shape_Area": 0.00075078336602400005,
+				"AREA_SQKM": 9.0499382517400004,
+				"psgc_id": "PH0806005023",
+				"psgc_code": "0806005023",
+				"psgc_name": "Libas",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.913160234000088, 11.830299072000059],
+						[124.87429458400004, 11.829803448000064],
+						[124.871048782000116, 11.847280842000032],
+						[124.912967851000076, 11.850637013000039],
+						[124.913160234000088, 11.830299072000059]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Lobo",
+				"ADM4_PCODE": "PH0806005024",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.094361775479100005,
+				"Shape_Area": 0.00053509030220900001,
+				"AREA_SQKM": 6.4499463112199997,
+				"psgc_id": "PH0806005024",
+				"psgc_code": "0806005024",
+				"psgc_name": "Lobo",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.936097217000111, 11.831887951000056],
+						[124.913160234000088, 11.830250195000076],
+						[124.912967851000076, 11.850637013000039],
+						[124.943238298000097, 11.85065962300007],
+						[124.936097217000111, 11.831887951000056]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Manguehay",
+				"ADM4_PCODE": "PH0806005025",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.13230041071900001,
+				"Shape_Area": 0.00100082089379,
+				"AREA_SQKM": 12.064872361500001,
+				"psgc_id": "PH0806005025",
+				"psgc_code": "0806005025",
+				"psgc_name": "Manguehay",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.891491138000106, 11.830410013000062],
+						[124.934556213000064, 11.83028506900007],
+						[124.926064093000036, 11.803313968000055],
+						[124.898347581000053, 11.799014722000038],
+						[124.891491138000106, 11.830410013000062]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Maulong",
+				"ADM4_PCODE": "PH0806005026",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.12187525155700001,
+				"Shape_Area": 0.00039578269517899999,
+				"AREA_SQKM": 4.77149945715,
+				"psgc_id": "PH0806005026",
+				"psgc_code": "0806005026",
+				"psgc_name": "Maulong",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.898347581000053, 11.799014722000038],
+						[124.866917994000119, 11.784372222000059],
+						[124.857855283000049, 11.790692637000063],
+						[124.865002077000099, 11.789967592000039],
+						[124.863846290000083, 11.799139578000052],
+						[124.887055860000032, 11.804742131000069],
+						[124.896667868, 11.806313684000031],
+						[124.898347581000053, 11.799014722000038]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Mercedes",
+				"ADM4_PCODE": "PH0806005027",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.089091032525900005,
+				"Shape_Area": 0.000138355962082,
+				"AREA_SQKM": 1.6680553465000001,
+				"psgc_id": "PH0806005027",
+				"psgc_code": "0806005027",
+				"psgc_name": "Mercedes",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.889332592000073, 11.794261173000052],
+						[124.879609345000063, 11.778641953000033],
+						[124.866917994000119, 11.784372222000059],
+						[124.889332592000073, 11.794261173000052]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Mombon",
+				"ADM4_PCODE": "PH0806005028",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.102238787338,
+				"Shape_Area": 0.000112210229916,
+				"AREA_SQKM": 1.3527454867499999,
+				"psgc_id": "PH0806005028",
+				"psgc_code": "0806005028",
+				"psgc_name": "Mombon",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.694235027000104, 11.811619234000034],
+							[124.695039251000026, 11.812577119000025],
+							[124.694815588000097, 11.811163673000067],
+							[124.694235027000104, 11.811619234000034]
+						]
+					],
+					[
+						[
+							[124.690947098000038, 11.815374585000029],
+							[124.691432414000019, 11.814784819000067],
+							[124.691281737000054, 11.814584130000071],
+							[124.690947098000038, 11.815374585000029]
+						]
+					],
+					[
+						[
+							[124.686340647000065, 11.81609678500007],
+							[124.698131697, 11.800518274000069],
+							[124.697818401000063, 11.796322402000044],
+							[124.685014123000087, 11.804717780000033],
+							[124.686340647000065, 11.81609678500007]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "New Mahayag",
+				"ADM4_PCODE": "PH0806005029",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.10775517973900001,
+				"Shape_Area": 0.00064231141835100001,
+				"AREA_SQKM": 7.7421324608299997,
+				"psgc_id": "PH0806005029",
+				"psgc_code": "0806005029",
+				"psgc_name": "New Mahayag",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.859254465000049, 11.849178142000028],
+						[124.827846891000036, 11.833682080000074],
+						[124.824299525000015, 11.854959706000045],
+						[124.855202554000016, 11.864978074000021],
+						[124.859254465000049, 11.849178142000028]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Old Mahayag",
+				"ADM4_PCODE": "PH0806005030",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.10095295767199999,
+				"Shape_Area": 0.00020510476268,
+				"AREA_SQKM": 2.4722556759500001,
+				"psgc_id": "PH0806005030",
+				"psgc_code": "0806005030",
+				"psgc_name": "Old Mahayag",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.822431509000012, 11.863009157000022],
+						[124.827381964000097, 11.844729878000066],
+						[124.827857426000037, 11.833580933000064],
+						[124.821360345000016, 11.84489989900004],
+						[124.809891737000044, 11.844653770000036],
+						[124.822431509000012, 11.863009157000022]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Palanyogon",
+				"ADM4_PCODE": "PH0806005031",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.095722353365799998,
+				"Shape_Area": 0.00042057317505700002,
+				"AREA_SQKM": 5.0691462741300004,
+				"psgc_id": "PH0806005031",
+				"psgc_code": "0806005031",
+				"psgc_name": "Palanyogon",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.86472402600009, 11.885179572000027],
+						[124.871048782000116, 11.847280842000032],
+						[124.859589713000105, 11.846169329000077],
+						[124.853575196000065, 11.877614573000074],
+						[124.86472402600009, 11.885179572000027]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Pangdan",
+				"ADM4_PCODE": "PH0806005032",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.078089160578399999,
+				"Shape_Area": 0.00029239389034300001,
+				"AREA_SQKM": 3.5256245313600001,
+				"psgc_id": "PH0806005032",
+				"psgc_code": "0806005032",
+				"psgc_name": "Pangdan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.916261128000087, 11.760001716000033],
+						[124.925397348000047, 11.747479500000054],
+						[124.908627890000048, 11.740833310000028],
+						[124.903196929000046, 11.749102346000029],
+						[124.916261128000087, 11.760001716000033]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Payao",
+				"ADM4_PCODE": "PH0806005033",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.10368482594,
+				"Shape_Area": 0.000279606140384,
+				"AREA_SQKM": 3.3707703046400002,
+				"psgc_id": "PH0806005033",
+				"psgc_code": "0806005033",
+				"psgc_name": "Payao",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.896667868, 11.806313684000031],
+						[124.863846290000083, 11.799139578000052],
+						[124.854027050000013, 11.806362887000034],
+						[124.895171965000031, 11.812655434000021],
+						[124.896667868, 11.806313684000031]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 1 (Barangay 1)",
+				"ADM4_PCODE": "PH0806005034",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0099950452517000004,
+				"Shape_Area": 3.8265066966199996e-6,
+				"AREA_SQKM": 0.046134706948800001,
+				"psgc_id": "PH0806005034",
+				"psgc_code": "0806005034",
+				"psgc_name": "Poblacion 1",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.880193296000016, 11.77709623100003],
+						[124.881576371000051, 11.77968865400004],
+						[124.881448810000052, 11.777208352000059],
+						[124.880193296000016, 11.77709623100003]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 2 (Barangay 2)",
+				"ADM4_PCODE": "PH0806005035",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0073573943422599996,
+				"Shape_Area": 2.66483787414e-6,
+				"AREA_SQKM": 0.032128958638599998,
+				"psgc_id": "PH0806005035",
+				"psgc_code": "0806005035",
+				"psgc_name": "Poblacion 2",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.881565096000031, 11.779502315000059],
+						[124.883033225000077, 11.777582081000048],
+						[124.881448810000052, 11.777208352000059],
+						[124.881565096000031, 11.779502315000059]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 3 (Barangay 3)",
+				"ADM4_PCODE": "PH0806005036",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.014290449673500001,
+				"Shape_Area": 5.91654074668e-6,
+				"AREA_SQKM": 0.071333986119000006,
+				"psgc_id": "PH0806005036",
+				"psgc_code": "0806005036",
+				"psgc_name": "Poblacion 3",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.878724716000079, 11.775236966000023],
+						[124.883493862000023, 11.77652766600005],
+						[124.879378974000019, 11.775306131000036],
+						[124.878724716000079, 11.775236966000023]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 4 (Barangay 4)",
+				"ADM4_PCODE": "PH0806005037",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0151246602035,
+				"Shape_Area": 5.6793347882799998e-6,
+				"AREA_SQKM": 0.068474332926200004,
+				"psgc_id": "PH0806005037",
+				"psgc_code": "0806005037",
+				"psgc_name": "Poblacion 4",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.883493862000023, 11.77652766600005],
+						[124.879117418000078, 11.774159578000024],
+						[124.877497008000091, 11.774932070000034],
+						[124.883493862000023, 11.77652766600005]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 5 (Barangay 5)",
+				"ADM4_PCODE": "PH0806005038",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0188208173352,
+				"Shape_Area": 4.5096764066900002e-6,
+				"AREA_SQKM": 0.054372196692400003,
+				"psgc_id": "PH0806005038",
+				"psgc_code": "0806005038",
+				"psgc_name": "Poblacion 5",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.885923631000082, 11.77578279100004],
+						[124.879451603, 11.77312375300005],
+						[124.877880239000092, 11.773172794000061],
+						[124.879126903000042, 11.774204905000033],
+						[124.885923631000082, 11.77578279100004]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 6 (Barangay 6)",
+				"ADM4_PCODE": "PH0806005039",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.015974432901000001,
+				"Shape_Area": 6.5500474974100002e-6,
+				"AREA_SQKM": 0.078972948124099995,
+				"psgc_id": "PH0806005039",
+				"psgc_code": "0806005039",
+				"psgc_name": "Poblacion 6",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.882966058000079, 11.774623089000045],
+						[124.88187653600005, 11.771504289000063],
+						[124.880392610000058, 11.773599493000063],
+						[124.882966058000079, 11.774623089000045]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 7 (Barangay 7)",
+				"ADM4_PCODE": "PH0806005040",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0146505849913,
+				"Shape_Area": 9.5371411213600001e-6,
+				"AREA_SQKM": 0.114987482958,
+				"psgc_id": "PH0806005040",
+				"psgc_code": "0806005040",
+				"psgc_name": "Poblacion 7",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.882966058000079, 11.774623089000045],
+						[124.887238044000014, 11.773946797000065],
+						[124.88374504300009, 11.771774693000054],
+						[124.882966058000079, 11.774623089000045]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 8 (Barangay 8)",
+				"ADM4_PCODE": "PH0806005041",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0093577652834199998,
+				"Shape_Area": 3.6280419527699999e-6,
+				"AREA_SQKM": 0.043743117055800002,
+				"psgc_id": "PH0806005041",
+				"psgc_code": "0806005041",
+				"psgc_name": "Poblacion 8",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.88239068200005, 11.769759402000034],
+						[124.884137562000092, 11.769990317000065],
+						[124.882553147000067, 11.769768260000035],
+						[124.88239068200005, 11.769759402000034]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 9 (Barangay 9)",
+				"ADM4_PCODE": "PH0806005042",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.031310075431199999,
+				"Shape_Area": 2.4870439155600001e-5,
+				"AREA_SQKM": 0.29986544314300001,
+				"psgc_id": "PH0806005042",
+				"psgc_code": "0806005042",
+				"psgc_name": "Poblacion 9",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.883905583000114, 11.764674102000072],
+						[124.889774810000063, 11.767438477000042],
+						[124.890122788000099, 11.765489799000022],
+						[124.883905583000114, 11.764674102000072]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 10 (Barangay 10)",
+				"ADM4_PCODE": "PH0806005043",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0084926800444699996,
+				"Shape_Area": 3.77152405692e-6,
+				"AREA_SQKM": 0.0454718262315,
+				"psgc_id": "PH0806005043",
+				"psgc_code": "0806005043",
+				"psgc_name": "Poblacion 10",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.882608058000073, 11.778810362000058],
+						[124.885878541000011, 11.778178593000064],
+						[124.883033225000077, 11.777582081000048],
+						[124.882608058000073, 11.778810362000058]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 11 (Barangay 11)",
+				"ADM4_PCODE": "PH0806005044",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.00777535449124,
+				"Shape_Area": 3.0460949157899999e-6,
+				"AREA_SQKM": 0.036725750986399998,
+				"psgc_id": "PH0806005044",
+				"psgc_code": "0806005044",
+				"psgc_name": "Poblacion 11",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.885878541000011, 11.778178593000064],
+						[124.883493862000023, 11.77652766600005],
+						[124.883033225000077, 11.777582081000048],
+						[124.885878541000011, 11.778178593000064]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 12 (Barangay 12)",
+				"ADM4_PCODE": "PH0806005045",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0072801211600099997,
+				"Shape_Area": 2.7992089461000002e-6,
+				"AREA_SQKM": 0.0337492537255,
+				"psgc_id": "PH0806005045",
+				"psgc_code": "0806005045",
+				"psgc_name": "Poblacion 12",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.886088677000089, 11.777154518000032],
+						[124.883933905000049, 11.775468402000058],
+						[124.883493862000023, 11.77652766600005],
+						[124.886088677000089, 11.777154518000032]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Poblacion 13 (Barangay 13)",
+				"ADM4_PCODE": "PH0806005046",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.023580281412000002,
+				"Shape_Area": 3.2527302439e-5,
+				"AREA_SQKM": 0.392171654807,
+				"psgc_id": "PH0806005046",
+				"psgc_code": "0806005046",
+				"psgc_name": "Poblacion 13",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.885690206000049, 11.77914521200006],
+						[124.892614073000118, 11.77436298300006],
+						[124.886769078000043, 11.774220289000027],
+						[124.885690206000049, 11.77914521200006]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Muñoz (Poblacion 14)",
+				"ADM4_PCODE": "PH0806005047",
+				"ADM4_REF": "Munoz (Poblacion 14)",
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0169209064838,
+				"Shape_Area": 1.1346497333700001e-5,
+				"AREA_SQKM": 0.13679837395200001,
+				"psgc_id": "PH0806005047",
+				"psgc_code": "0806005047",
+				"psgc_name": "Muñoz",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.881470856000078, 11.785096564000071],
+						[124.884911674000023, 11.779246897000064],
+						[124.883555795, 11.779003105000072],
+						[124.881470856000078, 11.785096564000071]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Pupua",
+				"ADM4_PCODE": "PH0806005048",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.13803981207800001,
+				"Shape_Area": 0.00079187360545800005,
+				"AREA_SQKM": 9.5459153825299996,
+				"psgc_id": "PH0806005048",
+				"psgc_code": "0806005048",
+				"psgc_name": "Pupua",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.891491138000106, 11.830410013000062],
+						[124.895171965000031, 11.812655434000021],
+						[124.858298941000044, 11.80733629100007],
+						[124.850455972000077, 11.812741088000053],
+						[124.853356371000018, 11.828393601000073],
+						[124.891491138000106, 11.830410013000062]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Guindaponan",
+				"ADM4_PCODE": "PH0806005049",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.074736405751099994,
+				"Shape_Area": 0.00015640266161800001,
+				"AREA_SQKM": 1.8857282252500001,
+				"psgc_id": "PH0806005049",
+				"psgc_code": "0806005049",
+				"psgc_name": "Guindaponan",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.917132492000064, 11.776202803000047],
+						[124.88689613300005, 11.768158997000057],
+						[124.88374504300009, 11.771774693000054],
+						[124.917132492000064, 11.776202803000047]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Rama",
+				"ADM4_PCODE": "PH0806005050",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.079119627304900006,
+				"Shape_Area": 9.1739943511800004e-5,
+				"AREA_SQKM": 1.10587145345,
+				"psgc_id": "PH0806005050",
+				"psgc_code": "0806005050",
+				"psgc_name": "Rama",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.690883879000012, 11.816823505000059],
+							[124.691160847000106, 11.816771316000029],
+							[124.691295346000061, 11.816219376000049],
+							[124.690883879000012, 11.816823505000059]
+						]
+					],
+					[
+						[
+							[124.687381308000113, 11.836310419000029],
+							[124.699076648000073, 11.833862172000067],
+							[124.691616976000091, 11.818427412000062],
+							[124.687381308000113, 11.836310419000029]
+						]
+					],
+					[
+						[
+							[124.67761307100011, 11.838056081000047],
+							[124.679785867000078, 11.839438597000026],
+							[124.680281442000023, 11.838550989000055],
+							[124.67761307100011, 11.838056081000047]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "San Andres",
+				"ADM4_PCODE": "PH0806005051",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.093395576300099994,
+				"Shape_Area": 0.00047982483138800001,
+				"AREA_SQKM": 5.7849092032999998,
+				"psgc_id": "PH0806005051",
+				"psgc_code": "0806005051",
+				"psgc_name": "San Andres",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.905521941000075, 11.797075075000066],
+						[124.917132492000064, 11.776202803000047],
+						[124.892614073000118, 11.77436298300006],
+						[124.888609560000077, 11.79720222800006],
+						[124.905521941000075, 11.797075075000066]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "San Pablo",
+				"ADM4_PCODE": "PH0806005052",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.0087361467574800008,
+				"Shape_Area": 3.6876147422299999e-6,
+				"AREA_SQKM": 0.044459882183400003,
+				"psgc_id": "PH0806005052",
+				"psgc_code": "0806005052",
+				"psgc_name": "San Pablo",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.881517664000057, 11.779738092000059],
+						[124.883555795, 11.779003105000072],
+						[124.882608058000073, 11.778810362000058],
+						[124.881517664000057, 11.779738092000059]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "San Roque",
+				"ADM4_PCODE": "PH0806005053",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.052047558763199997,
+				"Shape_Area": 7.8862561166599996e-5,
+				"AREA_SQKM": 0.95072156572699995,
+				"psgc_id": "PH0806005053",
+				"psgc_code": "0806005053",
+				"psgc_name": "San Roque",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.837748582000017, 11.814679909000063],
+						[124.839983130000064, 11.80263928200003],
+						[124.828869904000044, 11.802110415000072],
+						[124.830799253, 11.810192992000054],
+						[124.837748582000017, 11.814679909000063]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "San Vicente",
+				"ADM4_PCODE": "PH0806005054",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.088824026357799998,
+				"Shape_Area": 0.00041115728376499999,
+				"AREA_SQKM": 4.9556148147899997,
+				"psgc_id": "PH0806005054",
+				"psgc_code": "0806005054",
+				"psgc_name": "San Vicente",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.855133629000079, 11.865592886000059],
+						[124.824299525000015, 11.854959706000045],
+						[124.822431509000012, 11.863009157000022],
+						[124.846434012000032, 11.877339115000041],
+						[124.853575196000065, 11.877614573000074],
+						[124.855133629000079, 11.865592886000059]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Silanga",
+				"ADM4_PCODE": "PH0806005055",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.065837454656899996,
+				"Shape_Area": 0.0001397129837,
+				"AREA_SQKM": 1.6842154125,
+				"psgc_id": "PH0806005055",
+				"psgc_code": "0806005055",
+				"psgc_name": "Silanga",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.850715210000089, 11.814577241000052],
+						[124.837748582000017, 11.814679909000063],
+						[124.83927225900004, 11.818902678000029],
+						[124.837562615000024, 11.821531759000038],
+						[124.835948091000091, 11.822169689000077],
+						[124.835773801000073, 11.822433110000077],
+						[124.835822266000037, 11.822930771000074],
+						[124.851692026000023, 11.826667464000025],
+						[124.850715210000089, 11.814577241000052]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Totoringon",
+				"ADM4_PCODE": "PH0806005056",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.13178717825,
+				"Shape_Area": 0.00100625829827,
+				"AREA_SQKM": 12.1283196751,
+				"psgc_id": "PH0806005056",
+				"psgc_code": "0806005056",
+				"psgc_name": "Totoringon",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.9543872160001, 11.876467467000055],
+						[124.943238298000097, 11.85065962300007],
+						[124.912967851000076, 11.850637013000039],
+						[124.913592253000047, 11.878467493000073],
+						[124.9543872160001, 11.876467467000055]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Ibol",
+				"ADM4_PCODE": "PH0806005057",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.059814161794400002,
+				"Shape_Area": 5.2886432762100001e-5,
+				"AREA_SQKM": 0.63768463294900002,
+				"psgc_id": "PH0806005057",
+				"psgc_code": "0806005057",
+				"psgc_name": "Ibol",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "MultiPolygon",
+				"coordinates": [
+					[
+						[
+							[124.895963240000015, 11.747675248000064],
+							[124.897080192000089, 11.745696126000041],
+							[124.897495752000054, 11.742292490000068],
+							[124.895963240000015, 11.747675248000064]
+						]
+					],
+					[
+						[
+							[124.903682379000088, 11.757784220000076],
+							[124.903196929000046, 11.749102346000029],
+							[124.898178941000083, 11.762072948000025],
+							[124.903682379000088, 11.757784220000076]
+						]
+					]
+				]
+			}
+		},
+		{
+			"type": "Feature",
+			"properties": {
+				"ADM4_EN": "Socorro",
+				"ADM4_PCODE": "PH0806005059",
+				"ADM4_REF": null,
+				"ADM3_EN": "City of Catbalogan (Capital)",
+				"ADM3_PCODE": "PH0806005",
+				"ADM2_EN": "Samar (Western Samar)",
+				"ADM2_PCODE": "PH08060",
+				"ADM1_EN": "Region VIII (Eastern Visayas)",
+				"ADM1_PCODE": "PH08",
+				"ADM0_EN": "Philippines (the)",
+				"ADM0_PCODE": "PH",
+				"date": "2022-11-09",
+				"validOn": "2023-11-06",
+				"validTo": null,
+				"Shape_Leng": 0.026876279046700001,
+				"Shape_Area": 3.0809800375399999e-5,
+				"AREA_SQKM": 0.37147714374000002,
+				"psgc_id": "PH0806005059",
+				"psgc_code": "0806005059",
+				"psgc_name": "Socorro",
+				"psgc_status": "matched",
+				"match_confidence": 1.0,
+				"psgc_type": "barangay",
+				"match_method": "exact",
+				"sga_member": false
+			},
+			"geometry": {
+				"type": "Polygon",
+				"coordinates": [
+					[
+						[124.896980979000091, 11.769025475000035],
+						[124.890122788000099, 11.765489799000022],
+						[124.886898189000021, 11.768157632000054],
+						[124.896980979000091, 11.769025475000035]
+					]
+				]
+			}
+		}
+	]
+}
