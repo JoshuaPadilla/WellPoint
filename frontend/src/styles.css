@@ -1,5 +1,14 @@
-
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #0b2530;
+  --color-well: #1f7a8c;
+  --color-deep: #134b58;
+  --color-mist: #eef3f4;
+  --color-line: #cddadd;
+  --color-signal: #e0a100;
+}
 
 * {
   box-sizing: border-box;
@@ -13,5 +22,27 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-mist);
 }
 
+:focus-visible {
+  outline: 3px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+.flow-line {
+  stroke-dasharray: 6 10;
+  animation: flow 2.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flow-line {
+    animation: none;
+  }
+}
