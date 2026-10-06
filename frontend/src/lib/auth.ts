@@ -75,6 +75,12 @@ export function refreshProfile(): Promise<User | null> {
   return refreshed
 }
 
+// Forces a fresh read of the profile (after the user edits it on the Profile page).
+export function reloadProfile(): Promise<User | null> {
+  refreshed = null
+  return refreshProfile()
+}
+
 function client() {
   try {
     return supabase()

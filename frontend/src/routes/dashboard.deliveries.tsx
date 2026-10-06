@@ -32,6 +32,7 @@ function Page() {
 
       {role === 'citizen' && (
         <>
+          <NearbyStations />
           <RequestDelivery />
           <MyDeliveries deliveries={deliveries} loading={loading} error={error} />
         </>
@@ -56,7 +57,7 @@ function Page() {
         />
       )}
 
-      <NearbyStations />
+      {role !== 'citizen' && <NearbyStations />}
     </div>
   )
 }

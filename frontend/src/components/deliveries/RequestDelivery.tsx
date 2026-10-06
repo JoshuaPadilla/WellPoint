@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { MapPin, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { getUser } from '@/lib/auth'
 import { useBarangays } from '@/lib/barangays'
 import { useMyLocation } from '@/lib/geo'
+import { useProfile, useProfileLoaded } from '@/lib/profile'
 import { DELIVERY_FEE, MAX_CONTAINERS, peso, startDeliveryCheckout } from '@/lib/deliveries'
 
 const PHONE = /^(09\d{9}|\+639\d{9})$/
@@ -31,6 +32,18 @@ export function RequestDelivery() {
   const [busy, setBusy] = useState(false)
 
   const pin = usePin ? here : null
+
+  // Fill in what the resident saved on their Profile page (once, without overwriting typing).
+  const profile = useProfile()
+  const profileLoaded = useProfileLoaded()
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (!profileLoaded || prefilled.current) return
+    prefilled.current = true
+    if (profile.barangay) setBarangay((b) => b || profile.barangay)
+    if (profile.purok) setAddress((a) => a || profile.purok)
+    if (profile.phone) setContactNumber((c) => c || profile.phone)
+  }, [profileLoaded, profile])
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()

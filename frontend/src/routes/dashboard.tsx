@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import {
   BarChart3, BellRing, ClipboardList, Droplets, LayoutGrid, LogOut, MapIcon,
-  PanelLeftClose, PanelLeftOpen, Settings, Truck,
+  PanelLeftClose, PanelLeftOpen, Settings, Truck, UserRound,
 } from 'lucide-react'
 import { Logo } from '../components/Logo'
+import { ProfileButton } from '../components/ProfileButton'
+import { useProfile } from '@/lib/profile'
 import { cn } from '@/lib/utils'
 import { getUser, isLoggedIn, logout, refreshProfile } from '@/lib/auth'
 import type { User } from '@/lib/auth'
@@ -38,6 +40,7 @@ const nav = [
 const myReports = { to: '/dashboard/my-reports', label: 'My reports', icon: ClipboardList } as const
 
 const bottom = [
+  { to: '/dashboard/profile', label: 'Profile', icon: UserRound },
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
   { to: '/login', label: 'Log out', icon: LogOut, logout: true },
 ] as const
@@ -78,7 +81,10 @@ function NavItem({ item, open }: { item: Item; open: boolean }) {
 
 // Who is signed in: full card when the sidebar is open, an initial bubble when closed.
 function UserBadge({ user, open }: { user: User; open: boolean }) {
-  const label = `${user.name} · Brgy. ${user.barangay} · ${ROLE_LABELS[user.role]}`
+  const profile = useProfile() // updates right after the Profile page saves
+  const name = profile.fullName || user.name
+  const barangay = profile.barangay || user.barangay
+  const label = `${name}, Brgy. ${barangay}, ${ROLE_LABELS[user.role]}`
   if (!open) {
     return (
       <span
@@ -86,14 +92,14 @@ function UserBadge({ user, open }: { user: User; open: boolean }) {
         aria-label={label}
         className="grid size-11 place-items-center rounded-full bg-sky text-sm font-extrabold uppercase text-well"
       >
-        {user.name.trim().charAt(0) || '?'}
+        {name.trim().charAt(0) || '?'}
       </span>
     )
   }
   return (
     <div className="mb-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm">
-      <p className="truncate font-semibold">{user.name}</p>
-      <p className="truncate text-xs text-white/60">Brgy. {user.barangay}</p>
+      <p className="truncate font-semibold">{name}</p>
+      <p className="truncate text-xs text-white/60">Brgy. {barangay}</p>
       <span className="mt-1 inline-block rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold">
         {ROLE_LABELS[user.role]}
       </span>
@@ -155,6 +161,9 @@ function DashboardLayout() {
       </nav>
 
       <main className="min-w-0 flex-1 p-4 lg:p-6">
+        <div className="mb-4 flex justify-end">
+          <ProfileButton />
+        </div>
         <StoreStatus />
         <Outlet />
       </main>

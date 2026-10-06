@@ -18,6 +18,7 @@ import { Route as DashboardAlertsRouteImport } from './routes/dashboard.alerts'
 import { Route as DashboardDeliveriesRouteImport } from './routes/dashboard.deliveries'
 import { Route as DashboardMapRouteImport } from './routes/dashboard.map'
 import { Route as DashboardMyReportsRouteImport } from './routes/dashboard.my-reports'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSourcesRouteImport } from './routes/dashboard.sources'
@@ -67,6 +68,11 @@ const DashboardMyReportsRoute = DashboardMyReportsRouteImport.update({
   path: '/my-reports',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardReportsRoute = DashboardReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/my-reports': typeof DashboardMyReportsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/my-reports': typeof DashboardMyReportsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
@@ -120,6 +128,7 @@ export interface FileRoutesById {
   '/dashboard/deliveries': typeof DashboardDeliveriesRoute
   '/dashboard/map': typeof DashboardMapRoute
   '/dashboard/my-reports': typeof DashboardMyReportsRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/dashboard/deliveries'
     | '/dashboard/map'
     | '/dashboard/my-reports'
+    | '/dashboard/profile'
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/dashboard/deliveries'
     | '/dashboard/map'
     | '/dashboard/my-reports'
+    | '/dashboard/profile'
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/dashboard/deliveries'
     | '/dashboard/map'
     | '/dashboard/my-reports'
+    | '/dashboard/profile'
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
@@ -241,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMyReportsRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/reports': {
       id: '/dashboard/reports'
       path: '/reports'
@@ -270,6 +289,7 @@ interface DashboardRouteChildren {
   DashboardDeliveriesRoute: typeof DashboardDeliveriesRoute
   DashboardMapRoute: typeof DashboardMapRoute
   DashboardMyReportsRoute: typeof DashboardMyReportsRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardSourcesRoute: typeof DashboardSourcesRoute
@@ -281,6 +301,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDeliveriesRoute: DashboardDeliveriesRoute,
   DashboardMapRoute: DashboardMapRoute,
   DashboardMyReportsRoute: DashboardMyReportsRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
   DashboardReportsRoute: DashboardReportsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardSourcesRoute: DashboardSourcesRoute,
