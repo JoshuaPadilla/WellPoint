@@ -4,6 +4,7 @@ import { AuthShell, Field, primaryBtn } from '../components/AuthShell'
 import { validateRegister } from '../lib/validate'
 import type { Errors } from '../lib/validate'
 import { ApiError, register } from '../lib/auth'
+import { useBarangays } from '../lib/barangays'
 
 export const Route = createFileRoute('/register')({ component: Register })
 
@@ -57,7 +58,7 @@ function Register() {
           </p>
         )}
         <Field label="Full name" name="name" autoComplete="name" error={errors.name} />
-        <Field label="Barangay" name="barangay" error={errors.barangay} />
+        <BarangayField error={errors.barangay} />
         <Field label="Email" name="email" type="email" autoComplete="email" error={errors.email} />
         <Field label="Password" name="password" type="password" autoComplete="new-password" error={errors.password} />
 
@@ -81,5 +82,43 @@ function Register() {
         </Link>
       </p>
     </AuthShell>
+  )
+}
+
+// A dropdown of Catbalogan's barangays, so the name matches the map exactly
+// (barangay officials only see reports from the barangay in their profile).
+// Falls back to a text box if the boundary file can't be loaded.
+function BarangayField({ error }: { error?: string }) {
+  const { names, loaded } = useBarangays()
+  if (loaded && names.length === 0) return <Field label="Barangay" name="barangay" error={error} />
+  return (
+    <div className="mb-4">
+      <label htmlFor="barangay" className="mb-1 block text-sm font-medium">
+        Barangay
+      </label>
+      <select
+        id="barangay"
+        name="barangay"
+        defaultValue=""
+        disabled={!loaded}
+        aria-invalid={!!error}
+        aria-describedby={error ? 'barangay-error' : undefined}
+        className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-base ${error ? 'border-orange-700' : 'border-line'}`}
+      >
+        <option value="" disabled>
+          {loaded ? 'Select your barangay' : 'Loading barangays…'}
+        </option>
+        {names.map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+      {error && (
+        <p id="barangay-error" role="alert" className="mt-1 text-sm text-orange-700">
+          {error}
+        </p>
+      )}
+    </div>
   )
 }

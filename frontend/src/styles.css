@@ -98,6 +98,18 @@ body {
   --foreground: var(--color-ink);
   --muted-foreground: color-mix(in srgb, var(--color-ink) 70%, white);
   --border: var(--color-line);
+  /* Colours the shared UI components (Button, Sheet, ...) expect, taken from the WellPoint palette. */
+  --primary: var(--color-well);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-sky);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-mist);
+  --accent: var(--color-sky);
+  --destructive: #dc2626;
+  --input: var(--color-line);
+  --ring: var(--color-aqua);
+  --popover: #ffffff;
+  --popover-foreground: var(--color-ink);
 }
 
 @theme inline {
@@ -105,4 +117,15 @@ body {
   --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
 }

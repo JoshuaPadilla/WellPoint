@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import {
-  BarChart3, BellRing, Droplets, LayoutGrid, LogOut, MapIcon,
+  BarChart3, BellRing, ClipboardList, Droplets, LayoutGrid, LogOut, MapIcon,
   PanelLeftClose, PanelLeftOpen, Settings, Truck,
 } from 'lucide-react'
 import { Logo } from '../components/Logo'
@@ -34,12 +34,24 @@ const nav = [
   { to: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
 ] as const
 
+// Residents get this instead of Reports.
+const myReports = { to: '/dashboard/my-reports', label: 'My reports', icon: ClipboardList } as const
+
 const bottom = [
   { to: '/dashboard/settings', label: 'Settings', icon: Settings },
   { to: '/login', label: 'Log out', icon: LogOut, logout: true },
 ] as const
 
-type Item = (typeof nav)[number] | (typeof bottom)[number]
+type Item = (typeof nav)[number] | (typeof bottom)[number] | typeof myReports
+
+// Sidebar links per role: LGU and barangay officials work the Reports page, residents only
+// follow their own reports (My reports), DRRM can't read reports so gets neither.
+function navFor(role: User['role'] | undefined): readonly Item[] {
+  if (role === 'lgu' || role === 'official') return nav
+  const withoutReports = nav.filter((n) => n.to !== '/dashboard/reports')
+  if (role === 'citizen') return [...withoutReports.slice(0, 4), myReports, ...withoutReports.slice(4)]
+  return withoutReports
+}
 
 function NavItem({ item, open }: { item: Item; open: boolean }) {
   const Icon = item.icon
@@ -93,6 +105,7 @@ function DashboardLayout() {
   const [open, setOpen] = useState(false)
   const Toggle = open ? PanelLeftClose : PanelLeftOpen
   const user = typeof window === 'undefined' ? null : getUser()
+  const items = navFor(user?.role)
 
   return (
     <div className="min-h-screen bg-mist md:flex md:gap-4 md:p-4">
@@ -127,7 +140,7 @@ function DashboardLayout() {
           aria-label="Main"
           className={cn('flex flex-col gap-1', open ? 'mt-6' : 'items-center rounded-full bg-white p-2 shadow-sm')}
         >
-          {nav.map((n) => <NavItem key={n.to} item={n} open={open} />)}
+          {items.map((n) => <NavItem key={n.to} item={n} open={open} />)}
         </nav>
 
         <div className={cn('mt-auto flex flex-col gap-1', !open && 'items-center rounded-full bg-white p-2 shadow-sm')}>
@@ -138,7 +151,7 @@ function DashboardLayout() {
 
       {/* Phones: icon bar across the top */}
       <nav aria-label="Main" className="flex gap-1 overflow-x-auto bg-deep p-2 md:hidden">
-        {[...nav, ...bottom].map((n) => <NavItem key={n.to} item={n} open={false} />)}
+        {[...items, ...bottom].map((n) => <NavItem key={n.to} item={n} open={false} />)}
       </nav>
 
       <main className="min-w-0 flex-1 p-4 lg:p-6">

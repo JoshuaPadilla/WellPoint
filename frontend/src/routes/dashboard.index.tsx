@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { SupplyOutlook } from '@/components/SupplyOutlook'
 import { useBarangays } from '@/lib/barangays'
+import { getUser } from '@/lib/auth'
 import { CAN_SET_STATUS, ISSUES, STATUSES, hasStatus, isShort, setStatus, useWaterStore } from '@/lib/water-store'
 import type { Asset, Role, Status } from '@/lib/water-store'
 
@@ -11,10 +12,10 @@ export const Route = createFileRoute('/dashboard/')({ component: Page })
 
 // The four roles. The user's role comes from their profile in Supabase (set in dashboard.tsx).
 const PERSONAS: { role: Role; label: string; blurb: string }[] = [
-  { role: 'lgu', label: 'LGU', blurb: 'Water pumps and wells that barangay officials have marked as empty.' },
-  { role: 'official', label: 'Barangay official', blurb: 'Problems reported by households, newest first.' },
-  { role: 'drrm', label: 'DRRM', blurb: 'Barangays with the most empty or reported pumps and wells.' },
-  { role: 'citizen', label: 'Household', blurb: 'Pumps near you that are empty or have problems.' },
+  { role: 'lgu', label: 'LGU', blurb: 'Citizen reports, newest first, and every water source that is not working.' },
+  { role: 'official', label: 'Barangay official', blurb: 'Reports and pumps and wells in your barangay. Update their status as it changes.' },
+  { role: 'drrm', label: 'DRRM', blurb: 'Barangays with the most empty or low pumps and wells.' },
+  { role: 'citizen', label: 'Household', blurb: 'Pumps and wells near you that are empty or have problems.' },
 ]
 
 const CITY_CENTER = { lat: 11.78, lng: 124.89 }
@@ -96,76 +97,178 @@ function MapLink() {
   )
 }
 
-// LGU: every source that isn't working, worst first.
+const WORST_FIRST: Status[] = ['empty', 'unsafe', 'low', 'repair', 'ok']
+const byWorst = (a: Asset, b: Asset) => WORST_FIRST.indexOf(a.status) - WORST_FIRST.indexOf(b.status)
+
+// LGU: citizen reports (only the LGU can read these), then every source that isn't working.
 function LguView({ barangayOf }: ViewProps) {
   const { assets, reports } = useWaterStore()
-  const order: Status[] = ['empty', 'unsafe', 'low', 'repair']
-  const rows = assets.filter((a) => a.status !== 'ok').sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status))
-  if (rows.length === 0) return empty('Every water source is working right now.')
+  const byId = useMemo(() => new Map(assets.map((a) => [a.id, a])), [assets])
+  const reportRows = reports.filter((r) => byId.has(r.assetId)) // already newest first
+  const down = assets.filter((a) => a.status !== 'ok').sort(byWorst)
+
   return (
-    <ul className="space-y-3">
-      {rows.map((a) => (
-        <li key={a.id} className={cn(card, 'flex flex-wrap items-center justify-between gap-3')}>
-          <div>
-            <p className="font-extrabold">{a.name}</p>
-            <p className="text-sm text-ink/70">
-              {barangayOf(a) ?? 'Barangay unknown'} · {reports.filter((r) => r.assetId === a.id).length} report(s)
-            </p>
-            <StatusBadge status={a.status} />
-          </div>
-          <MapLink />
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-8">
+      <section>
+        <h2 className="mb-3 text-lg font-extrabold">Citizen reports ({reportRows.length})</h2>
+        {reportRows.length === 0 ? (
+          empty('No reports right now. New reports from citizens show up here as they come in.')
+        ) : (
+          <ul className="space-y-3">
+            {reportRows.map((r) => {
+              const a = byId.get(r.assetId)!
+              return (
+                <li key={r.id} className={cn(card, 'space-y-2')}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-extrabold">{a.name}</p>
+                    <p className="text-xs text-ink/60">{when(r.at)}</p>
+                  </div>
+                  <p className="text-sm text-ink/70">{barangayOf(a) ?? 'Barangay unknown'}</p>
+                  <p className="font-semibold">{ISSUES[r.issue]}</p>
+                  {r.note && <p className="text-sm">{r.note}</p>}
+                  {r.reporterName && (
+                    <p className="text-xs text-ink/60">
+                      Reported by {r.reporterName}
+                      {r.reporterBarangay && ` · Brgy. ${r.reporterBarangay}`}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <StatusPicker asset={a} />
+                    <MapLink />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg font-extrabold">Not working ({down.length})</h2>
+        {down.length === 0 ? (
+          empty('Every water source is working right now.')
+        ) : (
+          <ul className="space-y-3">
+            {down.map((a) => (
+              <li key={a.id} className={cn(card, 'flex flex-wrap items-center justify-between gap-3')}>
+                <div>
+                  <p className="font-extrabold">{a.name}</p>
+                  <p className="text-sm text-ink/70">
+                    {barangayOf(a) ?? 'Barangay unknown'} · {reports.filter((r) => r.assetId === a.id).length} report(s)
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <StatusPicker asset={a} />
+                  <MapLink />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
   )
 }
 
-// Barangay official: the report list, with the same mark empty / working action as the map popup.
+const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()
+
+// Barangay official: open reports from their barangay (the database only returns those),
+// then the pumps and wells inside their barangay, problems first, each with a status dropdown.
 function OfficialView({ barangayOf }: ViewProps) {
   const { assets, reports } = useWaterStore()
+  const { names, loaded } = useBarangays()
+  const myBarangay = typeof window === 'undefined' ? '' : (getUser()?.barangay ?? '')
+  const known = names.some((n) => same(n, myBarangay))
   const byId = useMemo(() => new Map(assets.map((a) => [a.id, a])), [assets])
-  const rows = [...reports].sort((a, b) => b.at - a.at)
-  if (rows.length === 0) return empty('No reports yet. Reports from households will show up here.')
+  const reportRows = reports.filter((r) => byId.has(r.assetId))
+  const mine = assets
+    .filter((a) => hasStatus(a.kind) && (!known || same(barangayOf(a) ?? '', myBarangay)))
+    .sort((a, b) => byWorst(a, b) || a.name.localeCompare(b.name))
+
   return (
-    <ul className="space-y-3">
-      {rows.map((r) => {
-        const a = byId.get(r.assetId)
-        if (!a) return null
-        return (
-          <li key={r.id} className={cn(card, 'space-y-2')}>
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="font-extrabold">{a.name}</p>
-              <p className="text-xs text-ink/60">{when(r.at)}</p>
-            </div>
-            <p className="text-sm text-ink/70">{barangayOf(a) ?? 'Barangay unknown'}</p>
-            <p className="font-semibold">{ISSUES[r.issue]}</p>
-            {r.note && <p className="text-sm">{r.note}</p>}
-            <StatusPicker asset={a} />
-          </li>
-        )
-      })}
-    </ul>
+    <div className="space-y-8">
+      {loaded && !known && (
+        <p role="alert" className="rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+          Your profile's barangay ("{myBarangay || 'not set'}") doesn't match a barangay on the map, so you won't receive
+          reports. Ask the LGU to correct it in Supabase (Table Editor → profiles → barangay).
+        </p>
+      )}
+
+      <section>
+        <h2 className="mb-3 text-lg font-extrabold">
+          Reports in Brgy. {myBarangay || '—'} ({reportRows.length})
+        </h2>
+        {reportRows.length === 0 ? (
+          empty('No open reports in your barangay right now.')
+        ) : (
+          <ul className="space-y-3">
+            {reportRows.map((r) => {
+              const a = byId.get(r.assetId)!
+              return (
+                <li key={r.id} className={cn(card, 'space-y-2')}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="font-extrabold">{a.name}</p>
+                    <p className="text-xs text-ink/60">{when(r.at)}</p>
+                  </div>
+                  <p className="font-semibold">{ISSUES[r.issue]}</p>
+                  {r.note && <p className="text-sm">{r.note}</p>}
+                  {r.reporterName && <p className="text-xs text-ink/60">Reported by {r.reporterName}</p>}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <StatusPicker asset={a} />
+                    <MapLink />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg font-extrabold">
+          {known ? `Pumps and wells in Brgy. ${myBarangay}` : 'All pumps and wells'} ({mine.length})
+        </h2>
+        {mine.length === 0 ? (
+          empty('No pumps or wells on the map in your barangay yet.')
+        ) : (
+          <ul className="space-y-3">
+            {mine.map((a) => (
+              <li key={a.id} className={cn(card, 'flex flex-wrap items-center justify-between gap-3')}>
+                <div>
+                  <p className="font-extrabold">{a.name}</p>
+                  <p className="text-sm text-ink/70">{barangayOf(a) ?? 'Barangay unknown'}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <StatusPicker asset={a} />
+                  <MapLink />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
   )
 }
 
-// DRRM: barangays ranked by how many of their pumps are empty or have reports.
+// DRRM: barangays ranked by how many of their pumps and wells are empty or low.
 function DrrmView({ barangayOf }: ViewProps) {
-  const { assets, reports } = useWaterStore()
+  const { assets } = useWaterStore()
   const rows = useMemo(() => {
-    const m = new Map<string, { name: string; pumps: number; emptyPumps: number; reports: number }>()
+    const m = new Map<string, { name: string; total: number; short: number; empty: number }>()
     for (const a of assets) {
       if (!hasStatus(a.kind)) continue
       const name = barangayOf(a) ?? 'Barangay unknown'
-      const row = m.get(name) ?? { name, pumps: 0, emptyPumps: 0, reports: 0 }
-      row.pumps++
-      if (isShort(a.status)) row.emptyPumps++
-      row.reports += reports.filter((r) => r.assetId === a.id).length
+      const row = m.get(name) ?? { name, total: 0, short: 0, empty: 0 }
+      row.total++
+      if (isShort(a.status)) row.short++
+      if (a.status === 'empty') row.empty++
       m.set(name, row)
     }
     return [...m.values()]
-      .filter((r) => r.emptyPumps > 0 || r.reports > 0)
-      .sort((a, b) => b.emptyPumps - a.emptyPumps || b.reports - a.reports || a.name.localeCompare(b.name))
-  }, [assets, reports, barangayOf])
+      .filter((r) => r.short > 0)
+      .sort((a, b) => b.empty - a.empty || b.short - a.short || a.name.localeCompare(b.name))
+  }, [assets, barangayOf])
 
   if (rows.length === 0) return empty('No barangay is short on water right now.')
   return (
@@ -175,10 +278,12 @@ function DrrmView({ barangayOf }: ViewProps) {
           <div>
             <p className="font-extrabold">{i + 1}. {r.name}</p>
             <p className="text-sm text-ink/70">
-              {r.emptyPumps} of {r.pumps} pump(s)/well(s) empty or low · {r.reports} report(s)
+              {r.empty} empty · {r.short - r.empty} low · out of {r.total} pump(s)/well(s)
             </p>
           </div>
-          <MapLink />
+          <Link to="/dashboard/deliveries" className="text-sm font-semibold text-well underline">
+            Filling stations
+          </Link>
         </li>
       ))}
     </ol>
@@ -187,7 +292,7 @@ function DrrmView({ barangayOf }: ViewProps) {
 
 // Household: empty or problem pumps, nearest first. Uses the device location if allowed.
 function HouseholdView({ barangayOf }: ViewProps) {
-  const { assets, reports } = useWaterStore()
+  const { assets } = useWaterStore()
   const [here, setHere] = useState<{ lat: number; lng: number } | null>(null)
   const [denied, setDenied] = useState(false)
   const origin = here ?? CITY_CENTER
@@ -204,7 +309,7 @@ function HouseholdView({ barangayOf }: ViewProps) {
   const pumps = assets.filter((a) => hasStatus(a.kind)) // pumps and wells
   const dist = (a: Asset) => km(origin, a)
   const problems = pumps
-    .filter((a) => a.status !== 'ok' || reports.some((r) => r.assetId === a.id))
+    .filter((a) => a.status !== 'ok')
     .sort((a, b) => Number(isShort(b.status)) - Number(isShort(a.status)) || dist(a) - dist(b))
   const nearestWorking = pumps.filter((a) => a.status === 'ok').sort((a, b) => dist(a) - dist(b))[0]
 
@@ -236,11 +341,7 @@ function HouseholdView({ barangayOf }: ViewProps) {
                 <p className="text-sm text-ink/70">
                   {barangayOf(a) ?? 'Barangay unknown'} · {dist(a).toFixed(1)} km away
                 </p>
-                {a.status === 'ok' ? (
-                  <p className="mt-1 inline-block rounded-full bg-sky px-2 py-0.5 text-xs font-bold text-well">Problem reported</p>
-                ) : (
-                  <StatusBadge status={a.status} />
-                )}
+                <StatusBadge status={a.status} />
               </div>
               <MapLink />
             </li>

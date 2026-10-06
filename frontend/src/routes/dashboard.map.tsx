@@ -8,8 +8,11 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 import { AssetMarkers, MapBridge, RolePanel } from '@/components/WaterAssets'
-import { addAsset } from '@/lib/water-store'
-import type { AssetKind } from '@/lib/water-store'
+import { BarangayStats } from '@/components/BarangayStats'
+import { getUser } from '@/lib/auth'
+import { useBarangays } from '@/lib/barangays'
+import { addAsset, useWaterStore } from '@/lib/water-store'
+import type { Asset, AssetKind } from '@/lib/water-store'
 
 export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap })
 
@@ -61,6 +64,31 @@ function BarangayMap() {
   const [focus, setFocus] = useState<Focus | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const mapRef = useRef<MapLibreMap | null>(null)
+  const { role, assets, reports } = useWaterStore()
+  const { barangayOf } = useBarangays()
+  const myBarangay = typeof window === 'undefined' ? '' : (getUser()?.barangay ?? '')
+
+  // Water sources grouped by the barangay their marker sits in.
+  const sourcesBy = useMemo(() => {
+    const m = new globalThis.Map<string, Asset[]>() // `Map` here is the map component
+    for (const a of assets) {
+      const name = barangayOf(a)
+      if (name) m.set(name, [...(m.get(name) ?? []), a])
+    }
+    return m
+  }, [assets, barangayOf])
+
+  // Open-report count for a barangay, or null when this viewer may not see that barangay's reports.
+  const openReportsIn = (name: string, list: Asset[]) => {
+    const visible = role === 'lgu' || (role === 'official' && name.trim().toLowerCase() === myBarangay.trim().toLowerCase())
+    if (!visible) return null
+    const ids = new Set(list.map((a) => a.id))
+    return reports.filter((r) => ids.has(r.assetId)).length
+  }
+  const statsFor = (name: string) => {
+    const list = sourcesBy.get(name) ?? []
+    return { name, sources: list, openReports: openReportsIn(name, list) }
+  }
 
   // A palette item dropped on the map becomes an asset at the drop point (the store checks the role).
   const onDrop = (e: DragEvent<HTMLElement>) => {
@@ -235,9 +263,9 @@ function BarangayMap() {
 
             <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col items-start gap-2">
               {hovered && (
-                <p aria-live="polite" className="rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold shadow-sm">
-                  {hovered.name}
-                </p>
+                <div aria-live="polite" className="w-72 max-w-[calc(100vw-3rem)] rounded-xl bg-white/95 p-3 shadow-md">
+                  <BarangayStats {...statsFor(hovered.name)} />
+                </div>
               )}
               <Button
                 type="button"
@@ -265,6 +293,7 @@ function BarangayMap() {
           <div className="flex min-h-0 flex-1 flex-col gap-5 px-4">
             {selected && (
               <div>
+                <BarangayStats {...statsFor(selected.name)} className="mb-4 rounded-xl border border-line bg-white p-3" />
                 <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                   <dt className="text-ink/70">City</dt>
                   <dd className="font-semibold">Catbalogan</dd>
