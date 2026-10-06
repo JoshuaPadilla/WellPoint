@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { SupplyOutlook } from '@/components/SupplyOutlook'
 import { useBarangays } from '@/lib/barangays'
-import { CAN_SET_STATUS, ISSUES, STATUSES, hasStatus, isShort, setStatus, useWaterStore } from '@/lib/WaterStore'
-import type { Asset, Role, Status } from '@/lib/WaterStore'
+import { CAN_SET_STATUS, ISSUES, STATUSES, hasStatus, isShort, setStatus, useWaterStore } from '@/lib/water-store'
+import type { Asset, Role, Status } from '@/lib/water-store'
 
 export const Route = createFileRoute('/dashboard/')({ component: Page })
 

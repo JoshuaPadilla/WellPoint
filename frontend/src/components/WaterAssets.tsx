@@ -85,7 +85,7 @@ export function AssetMarkers() {
             <MarkerContent>
               <div className={cn('relative grid size-9 place-items-center rounded-full border-2 border-white text-white shadow-md', tone)}>
                 <Icon className="size-4" aria-hidden="true" />
-                {role === 'lgu' && count > 0 && (
+                {role === 'official' && count > 0 && (
                   <span className="absolute -right-1 -top-1 grid size-4 place-items-center rounded-full bg-signal text-[10px] font-bold text-ink">
                     {count}
                   </span>
@@ -109,8 +109,6 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
   const [issue, setIssue] = useState<Issue>('empty')
   const [note, setNote] = useState('')
   const [sent, setSent] = useState(false)
-  const [sending, setSending] = useState(false)
-  const [sendError, setSendError] = useState('')
   const isPump = hasStatus(asset.kind) // pumps and wells
 
   return (
@@ -143,18 +141,14 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
 
       {role === 'citizen' && isPump &&
         (sent ? (
-          <p className="font-semibold">Report sent. The LGU will see it.</p>
+          <p className="font-semibold">Report sent. Your barangay official can see it.</p>
         ) : (
           <form
             className="space-y-2"
-            onSubmit={async (e) => {
+            onSubmit={(e) => {
               e.preventDefault()
-              setSending(true)
-              setSendError('')
-              const err = await fileReport(asset.id, issue, note.trim())
-              setSending(false)
-              if (err) setSendError(err)
-              else setSent(true)
+              fileReport(asset.id, issue, note.trim())
+              setSent(true)
             }}
           >
             <label htmlFor={`issue-${asset.id}`} className="block font-semibold">
@@ -166,12 +160,11 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
               ))}
             </select>
             <textarea aria-label="Note (optional)" placeholder="Add a note (optional)" rows={2} value={note} onChange={(e) => setNote(e.target.value)} className={field} />
-            {sendError && <p role="alert" className="text-orange-700">{sendError}</p>}
-            <Button type="submit" size="sm" disabled={sending}>{sending ? 'Sending…' : 'Send report'}</Button>
+            <Button type="submit" size="sm">Send report</Button>
           </form>
         ))}
 
-      {role === 'lgu' && isPump && (
+      {role === 'official' && isPump && (
         <div className="space-y-2">
           <p className="font-semibold">Reports ({mine.length})</p>
           {mine.length === 0 && <p className="text-ink/70">No reports yet.</p>}
@@ -180,11 +173,6 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
               <li key={r.id} className="rounded-md bg-mist px-2 py-1.5">
                 <p className="font-semibold">{ISSUES[r.issue]}</p>
                 {r.note && <p>{r.note}</p>}
-                {r.reporterName && (
-                  <p className="text-xs text-ink/70">
-                    {r.reporterName}{r.reporterBarangay && ` · Brgy. ${r.reporterBarangay}`}
-                  </p>
-                )}
                 <p className="text-xs text-ink/60">{new Date(r.at).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</p>
               </li>
             ))}

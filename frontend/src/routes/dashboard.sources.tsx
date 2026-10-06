@@ -5,8 +5,8 @@ import type { LucideIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useBarangays } from '@/lib/barangays'
-import { KINDS, STATUSES, useWaterStore } from '#/lib/WaterStore'
-import type { Asset, AssetKind } from '#/lib/WaterStore'
+import { KINDS, STATUSES, useWaterStore } from '@/lib/water-store'
+import type { Asset, AssetKind } from '@/lib/water-store'
 
 export const Route = createFileRoute('/dashboard/sources')({ component: Page })
 
