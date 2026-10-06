@@ -27,8 +27,11 @@
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^12.0.2",
+<<<<<<< HEAD
     "@supabase/supabase-js": "^2.117.2",
     "bcryptjs": "^3.0.3",
+=======
+>>>>>>> 749e17a457eab9060077de9a39c47247cde4094b
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.23.1",
