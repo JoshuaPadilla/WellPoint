@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
-/** Place your photo at public/images/catbalogan.jpg — it appears automatically. */
-const HERO_IMAGE = "/images/catbalogan.jpg";
+/** Place your photo at public/bggg.webp — it appears automatically. */
+const HERO_IMAGE = "/bggg.webp";
 
 const pins = [
   { left: "30%", top: "28%", c: "#e5484d" },
@@ -34,8 +34,8 @@ export function Hero() {
             Know when the water stops <span>before it does.</span>
           </h1>
           <p className="lead">
-            WellPoint tracks Catbalogan's three water sources and sends tankers to the barangays that need them first
-            when pipes fail.
+            WellPoint maps water access across Catbalogan's 57 barangays and alerts the LGU before a shortage becomes a
+            crisis.
           </p>
           <div className="cta">
             <Link className="btn p" to="/register">
@@ -61,10 +61,10 @@ export function Hero() {
               <div className="side">
                 <b>WellPoint</b>
                 <div className="on">Dashboard</div>
-                <div>Water sources</div>
-                <div>Barangays</div>
-                <div>Tankers</div>
-                <div>Updates</div>
+                <div>Barangay map</div>
+                <div>Outage alerts</div>
+                <div>Reports</div>
+                <div>Deliveries</div>
               </div>
               <div className="main">
                 <div className="map">
@@ -77,14 +77,14 @@ export function Hero() {
                     <b>Water supply status</b>
                     <div className="ring" style={{ marginTop: 6 }}>
                       <i />
-                      <span><b style={{ color: "#1aa86b", fontSize: 11 }}>Normal</b></span>
+                      <span><b style={{ color: "#e29a0b", fontSize: 11 }}>Watch</b></span>
                     </div>
                   </div>
                   <div className="box">
                     <b>Recent reports</b>
                     <div className="row"><u style={{ background: "#e5484d" }} />No water supply</div>
                     <div className="row"><u style={{ background: "#f5a524" }} />Low pressure</div>
-                    <div className="row"><u style={{ background: "#1565c8" }} />Tanker en route</div>
+                    <div className="row"><u style={{ background: "#7c4dcf" }} />Contamination</div>
                   </div>
                 </div>
               </div>
@@ -93,8 +93,8 @@ export function Hero() {
           <div className="ph">
             <div className="in">
               <b style={{ color: "#0a1f6b", fontSize: 10 }}>WellPoint</b>
-              <div className="alert"><b>Water alert</b><br />A barangay is first in line for tanker delivery.</div>
-              <div className="tiles"><div>Sources</div><div>Map</div><div>Updates</div><div>Requests</div></div>
+              <div className="alert"><b>Water alert</b><br />A barangay is at risk — respond first.</div>
+              <div className="tiles"><div>Map</div><div>Alerts</div><div>Reports</div><div>Deliveries</div></div>
             </div>
           </div>
         </div>

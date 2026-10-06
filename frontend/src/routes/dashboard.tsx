@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { Link, Outlet, createFileRoute, redirect } from '@tanstack/react-router'
+import type { LucideIcon } from 'lucide-react'
 import {
-  BarChart3, BellRing, Droplets, LayoutGrid, LogOut, MapIcon,
-  PanelLeftClose, PanelLeftOpen, Settings, Truck,
+  BarChart3, BellRing, LogOut, MapIcon,
+  Megaphone, PanelLeftClose, PanelLeftOpen, Plus, SlidersHorizontal, Truck, Users as UsersIcon,
 } from 'lucide-react'
 import { Logo } from '../components/Logo'
 import { cn } from '@/lib/utils'
 import { getUser, isLoggedIn, logout, refreshProfile } from '@/lib/auth'
 import type { User } from '@/lib/auth'
+import type { Role } from '@/lib/water-store'
 import { dismissError, initWaterStore, setRole, useWaterStore } from '@/lib/water-store'
 
 export const Route = createFileRoute('/dashboard')({
@@ -18,38 +20,39 @@ export const Route = createFileRoute('/dashboard')({
     // The role comes from the profiles table, not from a button the user can click.
     const user = (await refreshProfile()) ?? getUser()
     if (user) setRole(user.role)
-    initWaterStore() // load water sources from Supabase + listen for changes
+    initWaterStore() // load water sources + reports + warnings from Supabase + listen for changes
   },
   component: DashboardLayout,
 })
 
-const ROLE_LABELS = { citizen: 'Citizen', official: 'Barangay official', lgu: 'LGU', drrm: 'DRRM' } as const
+const ROLE_LABELS: Record<Role, string> = { citizen: 'Resident', official: 'Barangay leader', lgu: 'LGU', drrm: 'DRRM' }
 
-const nav = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutGrid, exact: true },
-  { to: '/dashboard/sources', label: 'Water sources', icon: Droplets },
-  { to: '/dashboard/map', label: 'Barangay map', icon: MapIcon },
-  { to: '/dashboard/alerts', label: 'Outage alerts', icon: BellRing },
-  { to: '/dashboard/deliveries', label: 'Deliveries', icon: Truck },
-  { to: '/dashboard/reports', label: 'Reports', icon: BarChart3 },
-] as const
+type NavItem = { to: string; label: string; icon: LucideIcon; exact?: boolean; roles?: Role[]; logout?: boolean }
 
-const bottom = [
-  { to: '/dashboard/settings', label: 'Settings', icon: Settings },
+const nav: NavItem[] = [
+  { to: '/dashboard/map', label: 'Map', icon: MapIcon },
+  { to: '/dashboard/alerts', label: 'Alerts', icon: BellRing },
+  { to: '/dashboard/reports', label: 'Reports', icon: BarChart3, roles: ['citizen', 'official'] },
+  { to: '/dashboard/add-source', label: 'Add source', icon: Plus, roles: ['official'] },
+  { to: '/dashboard/warnings', label: 'Warnings', icon: Megaphone, roles: ['lgu', 'drrm'] },
+  { to: '/dashboard/deliveries', label: 'Deliveries', icon: Truck, roles: ['drrm'] },
+  { to: '/dashboard/users', label: 'Users', icon: UsersIcon, roles: ['lgu'] },
+]
+
+const bottom: NavItem[] = [
+  { to: '/dashboard/settings', label: 'Demo controls', icon: SlidersHorizontal, roles: ['lgu', 'drrm'] },
   { to: '/login', label: 'Log out', icon: LogOut, logout: true },
-] as const
+]
 
-type Item = (typeof nav)[number] | (typeof bottom)[number]
-
-function NavItem({ item, open }: { item: Item; open: boolean }) {
+function NavItem({ item, open }: { item: NavItem; open: boolean }) {
   const Icon = item.icon
   return (
     <Link
       to={item.to}
       title={item.label}
       aria-label={item.label}
-      activeOptions={{ exact: 'exact' in item }}
-      onClick={'logout' in item ? () => void logout() : undefined}
+      activeOptions={item.exact ? { exact: true } : undefined}
+      onClick={item.logout ? () => void logout() : undefined}
       className={cn(
         'flex items-center gap-3 whitespace-nowrap transition',
         open
@@ -66,7 +69,7 @@ function NavItem({ item, open }: { item: Item; open: boolean }) {
 
 // Who is signed in: full card when the sidebar is open, an initial bubble when closed.
 function UserBadge({ user, open }: { user: User; open: boolean }) {
-  const label = `${user.name} · Brgy. ${user.barangay} · ${ROLE_LABELS[user.role]}`
+  const label = `${user.name} · ${user.barangay ? `Brgy. ${user.barangay}` : 'No barangay'} · ${ROLE_LABELS[user.role]}`
   if (!open) {
     return (
       <span
@@ -81,7 +84,7 @@ function UserBadge({ user, open }: { user: User; open: boolean }) {
   return (
     <div className="mb-2 rounded-xl bg-white/10 px-3 py-2.5 text-sm">
       <p className="truncate font-semibold">{user.name}</p>
-      <p className="truncate text-xs text-white/60">Brgy. {user.barangay}</p>
+      <p className="truncate text-xs text-white/60">{user.barangay ? `Brgy. ${user.barangay}` : 'No barangay'}</p>
       <span className="mt-1 inline-block rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold">
         {ROLE_LABELS[user.role]}
       </span>
@@ -93,6 +96,9 @@ function DashboardLayout() {
   const [open, setOpen] = useState(false)
   const Toggle = open ? PanelLeftClose : PanelLeftOpen
   const user = typeof window === 'undefined' ? null : getUser()
+  const role = user?.role ?? 'citizen'
+  const mainNav = nav.filter((n) => !n.roles || n.roles.includes(role))
+  const bottomNav = bottom.filter((n) => !n.roles || n.roles.includes(role))
 
   return (
     <div className="min-h-screen bg-mist md:flex md:gap-4 md:p-4">
@@ -127,18 +133,18 @@ function DashboardLayout() {
           aria-label="Main"
           className={cn('flex flex-col gap-1', open ? 'mt-6' : 'items-center rounded-full bg-white p-2 shadow-sm')}
         >
-          {nav.map((n) => <NavItem key={n.to} item={n} open={open} />)}
+          {mainNav.map((n) => <NavItem key={n.to} item={n} open={open} />)}
         </nav>
 
         <div className={cn('mt-auto flex flex-col gap-1', !open && 'items-center rounded-full bg-white p-2 shadow-sm')}>
           {user && <UserBadge user={user} open={open} />}
-          {bottom.map((n) => <NavItem key={n.to} item={n} open={open} />)}
+          {bottomNav.map((n) => <NavItem key={n.to} item={n} open={open} />)}
         </div>
       </aside>
 
       {/* Phones: icon bar across the top */}
       <nav aria-label="Main" className="flex gap-1 overflow-x-auto bg-deep p-2 md:hidden">
-        {[...nav, ...bottom].map((n) => <NavItem key={n.to} item={n} open={false} />)}
+        {[...mainNav, ...bottomNav].map((n) => <NavItem key={n.to} item={n} open={false} />)}
       </nav>
 
       <main className="min-w-0 flex-1 p-4 lg:p-6">
@@ -162,6 +168,6 @@ function StoreStatus() {
       </div>
     )
   }
-  if (loading) return <p className="mb-4 text-sm text-ink/60">Loading water sources…</p>
+  if (loading) return <p className="mb-4 text-sm text-ink/60">Loading water data…</p>
   return null
 }

@@ -1,8 +1,8 @@
 const steps = [
-  { title: "Report", text: "Submit a water issue with details and location." },
-  { title: "Verify", text: "Our team reviews and validates the report." },
-  { title: "Take Action", text: "The issue is marked on the map and tankers are sent." },
-  { title: "Stay Informed", text: "Residents receive updates and delivery schedules." },
+  { title: "Report", text: "A barangay official submits an outage or contamination report." },
+  { title: "Derive", text: "WellPoint derives alerts and the coverage map from live signals." },
+  { title: "Prioritize", text: "The LGU sees at-risk barangays and responds to the most vulnerable first." },
+  { title: "Recover", text: "Status and deliveries are tracked until service is restored." },
 ];
 
 export function HowItWorks() {

@@ -30,11 +30,11 @@ function Home() {
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 lg:grid-cols-2">
             <div>
               <h2 className="text-3xl font-extrabold text-ink sm:text-4xl">
-                Three sources, <span className="text-well">one city</span>
+                From source, <span className="text-well">to barangay</span>
               </h2>
               <p className="mt-4 max-w-md text-ink/75">
-                Each source is monitored, so a failure at one is spotted quickly and the affected barangays are reached
-                first.
+                Catbalogan's sources are monitored and access is mapped across all 57 barangays, so a failure is
+                spotted quickly and the affected communities are reached first.
               </p>
             </div>
             <svg viewBox="0 0 480 270" role="img" aria-label="Three water sources flowing into Catbalogan" className="w-full">

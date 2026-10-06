@@ -4,6 +4,7 @@ import { AuthShell, Field, primaryBtn } from '../components/AuthShell'
 import { validateRegister } from '../lib/validate'
 import type { Errors } from '../lib/validate'
 import { ApiError, register } from '../lib/auth'
+import { useBarangays } from '../lib/barangays'
 
 export const Route = createFileRoute('/register')({ component: Register })
 
@@ -13,6 +14,9 @@ function Register() {
   const [formError, setFormError] = useState('')
   const [busy, setBusy] = useState(false)
   const [sentTo, setSentTo] = useState('')
+  const [brgy, setBrgy] = useState('')
+  const { barangays } = useBarangays()
+  const brgyName = barangays.find((b) => b.psgcCode === brgy)?.name ?? ''
 
   if (sentTo) {
     return (
@@ -57,7 +61,30 @@ function Register() {
           </p>
         )}
         <Field label="Full name" name="name" autoComplete="name" error={errors.name} />
-        <Field label="Barangay" name="barangay" error={errors.barangay} />
+        <div className="mb-4">
+          <label htmlFor="barangay" className="mb-1 block text-sm font-medium">
+            Barangay
+          </label>
+          <select
+            id="barangay"
+            name="barangay_psgc"
+            value={brgy}
+            onChange={(e) => setBrgy(e.target.value)}
+            aria-invalid={!!errors.barangay}
+            className={`block w-full rounded-lg border bg-white px-3 py-2.5 text-base ${errors.barangay ? 'border-orange-700' : 'border-line'}`}
+          >
+            <option value="">Choose your barangay…</option>
+            {barangays.map((b) => (
+              <option key={b.psgcCode} value={b.psgcCode}>{b.name}</option>
+            ))}
+          </select>
+          <input type="hidden" name="barangay" value={brgyName} />
+          {errors.barangay && (
+            <p id="barangay-error" role="alert" className="mt-1 text-sm text-orange-700">
+              {errors.barangay}
+            </p>
+          )}
+        </div>
         <Field label="Email" name="email" type="email" autoComplete="email" error={errors.email} />
         <Field label="Password" name="password" type="password" autoComplete="new-password" error={errors.password} />
 

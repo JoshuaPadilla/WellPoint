@@ -5,7 +5,7 @@ Companion to `docs/plan.md` and `docs/architecture.md`. This document has two pa
 1. **Persona Matrix & Access Control** — who uses the system, what they can do, and what is enforced.
 2. **System Logic & Data Flow Architecture** — how information moves end-to-end and which business rules govern each transition.
 
-All names, endpoints, and rules below are consistent with `docs/architecture.md` (§4 entities, §5 derived logic, §6 API contract). Nothing here changes the current scope: the prototype is single-tenant with **no login**; roles below are the design target, demonstrated in the prototype through a role-mode switcher and enforced in the documented production path.
+All names, tables, and rules below are consistent with `docs/architecture.md` (§4 data model, §5 derived logic, §6 data access). Authentication is real (Supabase email/password) and the role comes from the `profiles` table; the permission matrix below is enforced today at the presentation layer and in Supabase row-level security, and fully in the documented production path.
 
 ---
 
@@ -17,24 +17,24 @@ Four personas (from `docs/plan.md` §2) map to four **roles**. Each role has a d
 
 | # | Persona | Role | Primary goal |
 | :-: | :--- | :--- | :--- |
-| 1 | LGU Water / Engineering Office Staff | `water-officer` | Know at a glance which barangays are secure, at risk, or down; prioritize response |
-| 2 | Barangay Official / Community Leader | `barangay-official` | Report issues and see their area's status |
-| 3 | Household / Community Member | `resident` | Get a simple answer: is my water available, safe, affordable today? |
-| 4 | DRRM / Disaster Officer | `drrm-officer` | Early warning of water disruption; plan emergency water distribution |
+| 1 | LGU Water / Engineering Office Staff | `lgu` | Know at a glance which barangays are secure, at risk, or down; prioritize response |
+| 2 | Barangay Official / Community Leader | `official` | Report issues and see their area's status |
+| 3 | Household / Community Member | `citizen` | Get a simple answer: is my water available, safe, affordable today? |
+| 4 | DRRM / Disaster Officer | `drrm` | Early warning of water disruption; plan emergency water distribution |
 
 ### Enforcement model
 
 | Layer | Prototype (now) | Production path (documented) |
 | :--- | :--- | :--- |
-| UI | Role-mode switcher (demo only): any viewer can switch role to see that persona's view; no credentials | Route guards + per-route role menus |
-| API | No authentication; every endpoint is callable; Zod validates shape, not identity | NestJS guards (`RolesGuard` + JWT) on controllers; `@Roles()` decorators |
-| Data | One shared Postgres instance | Row-level tenant/role scoping on entities |
+| UI | Role comes from the Supabase `profiles` table; the dashboard renders that persona's view | Per-route role menus + guard components |
+| Data | Supabase row-level security on `water_sources` and `reports` (see `supabase/schema.sql`) | RLS extended for multi-LGU tenancy |
+| Derivation | Alerts/metrics/vulnerability are pure client functions; a role cannot mutate them | Same functions moved server-side |
 
-The matrix below is therefore the **contract the production path enforces**; in the prototype, permissions are demonstrated at the presentation layer.
+The matrix below is the **contract the production path enforces**; in the prototype, write permissions are enforced by Supabase RLS and read scoping is demonstrated at the presentation layer.
 
 ## 1.2 Persona detail
 
-### Persona 1 — LGU Water / Engineering Office Staff (`water-officer`)
+### Persona 1 — LGU Water / Engineering Office Staff (`lgu`)
 
 **Typical actions**
 - Read the dashboard banner and KPI cards (coverage, reliability, active alerts, affordability).
@@ -47,27 +47,27 @@ The matrix below is therefore the **contract the production path enforces**; in 
 - `read:*` — all entities (status, sources, barangays, alerts, metrics, reports).
 - `report:ack` / `report:resolve` — transition report lifecycle states.
 - `demo:simulate` / `demo:reset` — mutate demo state.
-- `alert:*` — derived server-side; read-only here (staff cannot hand-craft alerts).
+- `alert:*` — derived; read-only here (staff cannot hand-craft alerts).
 
 **Features available**
 Dashboard, coverage map + drill-down, alerts list, report triage, demo controls.
 
-### Persona 2 — Barangay Official / Community Leader (`barangay-official`)
+### Persona 2 — Barangay Official / Community Leader (`official`)
 
 **Typical actions**
-- Submit a report (area auto-set to their barangay, type, description).
+- Submit a report (area, type, description).
 - View their own barangay's status and open alerts.
 - See whether their report was acknowledged/resolved (feedback loop).
 
 **Permissions (own barangay only)**
 - `read:barangay:own` — status, alerts, sources for their own barangay.
 - `report:create` — create reports; `type` limited to `no_water / low_pressure / contamination / infrastructure_damage / other`.
-- No access to other barangays' data; no demo controls; cannot acknowledge/resolve.
+- No demo controls; cannot acknowledge/resolve (that is `lgu`).
 
 **Features available**
 Report submission form, barangay status card, report history with status badges.
 
-### Persona 3 — Household / Community Member (`resident`)
+### Persona 3 — Household / Community Member (`citizen`)
 
 **Typical actions**
 - Look up their barangay: is water available, safe, and affordable today?
@@ -80,7 +80,7 @@ Report submission form, barangay status card, report history with status badges.
 **Features available**
 Barangay lookup / 5-second status answer, contact/action guidance.
 
-### Persona 4 — DRRM / Disaster Officer (`drrm-officer`)
+### Persona 4 — DRRM / Disaster Officer (`drrm`)
 
 **Typical actions**
 - Read the alerts list with severity and **response priority** (underserved-first ordering).
@@ -88,7 +88,7 @@ Barangay lookup / 5-second status answer, contact/action guidance.
 - Read vulnerability tiers to plan emergency water distribution routes.
 
 **Permissions (read + demo, city-wide)**
-- `read:*` — all entities, same read scope as `water-officer`.
+- `read:*` — all entities, same read scope as `lgu`.
 - `demo:simulate` / `demo:reset` — scenario rehearsal.
 - No report mutation, no acknowledge/resolve.
 
@@ -99,26 +99,29 @@ Alerts list (priority-sorted), coverage map with vulnerability overlay, demo con
 
 Legend: ✓ = granted, — = denied. All access is scoped to Catbalogan City data; `own` = only the actor's barangay.
 
-| Capability | `water-officer` | `barangay-official` | `resident` | `drrm-officer` |
+| Capability | `lgu` | `official` | `citizen` | `drrm` |
 | :--- | :-: | :-: | :-: | :-: |
-| View dashboard KPIs | ✓ | — | — | ✓ |
-| View coverage map (57 brgys) | ✓ | own only | own only | ✓ |
-| View vulnerability tiers | ✓ | own only | — | ✓ |
-| View alerts (city-wide) | ✓ | own only | own only | ✓ |
-| View source health | ✓ | own only | — | ✓ |
-| View metrics read-model | ✓ | — | — | ✓ |
-| Submit report | — | ✓ (own) | — | — |
-| Acknowledge / resolve report | ✓ | — | — | — |
-| View report history | ✓ (all) | ✓ (own) | — | — |
-| Run `simulate disruption` | ✓ | — | — | ✓ |
-| Run `reset demo` | ✓ | — | — | ✓ |
-| Drill-down: trend + vulnerability breakdown | ✓ | own only | — | ✓ |
+| Main screen | full-screen map | map + inbox | map | map + warnings |
+| View coverage map | city-wide | own brgy | own brgy | city-wide |
+| View vulnerability tiers | ✓ | own brgy | — | ✓ |
+| View alerts (notifications) | city-wide | own brgy | own brgy | city-wide |
+| View source health | ✓ | own brgy | ✓ (available only) | ✓ |
+| Register a water source | — | ✓ (own) | — | station only |
+| Set source status | — | ✓ (own) | — | station only |
+| Submit report | — | — | ✓ (own) | — |
+| Acknowledge / resolve report (inbox) | — | ✓ (own) | — | — |
+| Author warning | ✓ | — | — | ✓ |
+| Resolve / cancel warning | ✓ | — | — | ✓ (own) |
+| Assign roles / barangays | ✓ | — | — | — |
+| Run `simulate` / `reset demo` | ✓ | — | — | ✓ |
+| Drill-down: trend + vulnerability breakdown | ✓ | own brgy | — | ✓ |
 
 **Production enforcement notes**
-- `barangay-official` identity is tied to a `Community.psgcCode` so "own barangay" is an entity-level filter, not a string match.
-- `water-officer` and `drrm-officer` are city-wide roles issued by the LGU admin.
-- `resident` read-only access is served by a public lookup endpoint (`GET /api/barangays/:id/public`) that returns only the plain-language status DTO — no metrics, no internal alerts payloads.
-- Every role transition (e.g., report ack) re-derives alerts server-side; a role cannot influence derivation by mutating status.
+- `official` identity is tied to a `profiles.barangay_psgc` so "own barangay" is an entity-level filter, not a string match.
+- `lgu` and `drrm` are city-wide roles issued by the LGU admin (stored in `profiles.role`).
+- `citizen` submits reports for their own barangay; `official` triages that inbox. `lgu` has no report screen — it sees report-derived alerts city-wide.
+- Water-source registration/status is `official` (own barangay) + `drrm` (stations); `lgu` is read-only on sources (oversight via the map and alerts).
+- Every role transition (e.g., report ack) re-derives alerts client-side; a role cannot influence derivation by mutating status.
 
 ---
 
@@ -129,67 +132,63 @@ Legend: ✓ = granted, — = denied. All access is scoped to Catbalogan City dat
 ```mermaid
 flowchart LR
   subgraph UI[frontend/ React 19 + TanStack Router + shadcn/ui]
-    C[Components] --> Q[TanStack Query]
-    R[Routes / role views]
+    C[Components] --> STORE[lib/water-store.ts useSyncExternalStore]
+    STORE --> DER[lib/alerts · metrics · vulnerability]
+    DER --> RM[lib/store.ts read model]
+    R[Routes / role views] --> RM
   end
-  Q -->|HTTPS /api| API[NestJS API]
-  API --> V[Zod pipe validation]
-  V --> SVC[Services: status · alerts · metrics · vulnerability · reports · demo]
-  SVC --> ORM[TypeORM Repositories]
-  ORM --> DB[(PostgreSQL)]
-  DB --> SEED[idempotent seeder]
-  SEED --> GEO[seed-data/catbalogan-brgys.geojson]
+  STORE -->|Supabase JS SDK| SB[(Supabase: Postgres + Auth + Realtime)]
+  RM --> SEED[lib/seed.ts deterministic seed]
+  SEED --> GEO[public/catbalogan-brgys.geojson]
 ```
 
-**One sentence:** the browser renders read-model DTOs fetched through TanStack Query from a NestJS API that derives alerts, metrics, and vulnerability from persisted entities in Postgres; the only write paths are `report:create`, `demo:simulate`, `demo:reset`, and `report:ack`/`resolve`, and every write triggers a server-side re-derivation that invalidates the relevant queries.
+**One sentence:** the browser renders a read model computed from a deterministic client-side seed and the Supabase-backed store (`water_sources`, `reports`, `profiles`); the only write paths are `report:create`, `report:ack/resolve`, `demo:simulate`, and `demo:reset`, and every write triggers a re-derivation that updates the read model in place via Realtime.
 
 ## 2.2 Data flow: boot & seed
 
 | Step | Actor | What happens | Business logic |
 | :--- | :--- | :--- | :--- |
-| 1 | `docker compose up` | Postgres, API, UI start | — |
-| 2 | seeder (on API boot) | Reads `seed-data/catbalogan-brgys.geojson` (57 features) | PSGC codes are the join key; features without `ADM4_EN`/`psgc_code` are skipped |
-| 3 | seeder | Inserts/updates `Community` (incl. `areaSqKm`, centroid, `distanceToCenterKm`) | Idempotent upsert by `psgcCode`; re-run never duplicates |
-| 4 | seeder | Inserts `WaterSource`, `WaterSystem`, and the initial `ServiceStatus` sample series for 5 pilot systems | Deterministic sequence via `baseSeed = 20261006` |
-| 5 | seeder | Inserts one active critical alert and one resolved alert | Alerts are still derived (§5.1); the seed only fixes the initial status inputs that produce them |
-| 6 | API ready | `GET /api/barangays` etc. begin serving derived read-models | — |
+| 1 | `npm run dev` | Vite serves the SPA on port 3000 | — |
+| 2 | `useBarangays()` | Fetches `public/catbalogan-brgys.geojson` (57 features) | PSGC codes are the join key; features outside `ADM3_PCODE = PH0806005` are skipped |
+| 3 | `lib/seed.ts` | Builds the 57 `Community` records (area, centroid, distance-to-center, population, affordability) | Deterministic via `mulberry32(BASE_SEED)`; pilot barangays get their system's values |
+| 4 | `lib/seed.ts` | Defines the 5 pilot `WaterSystem`s and their 6-tick status history | Deterministic sequence via `baseSeed = 20261006` |
+| 5 | `lib/water-store.ts` | Loads `water_sources` + `reports` from Supabase and subscribes to `postgres_changes` | Debounced (300 ms) reload on any change |
+| 6 | `lib/store.ts` | Composes seed + store into the read model; derives alerts, metrics, vulnerability | Pure functions; recomputed on any input change |
 
 ## 2.3 Data flow: read path (dashboard)
 
-1. Route loads → TanStack Query hooks mount (`useStatus()`, `useMetrics()`, `useAlerts()`, `useBarangays()`).
-2. Each hook fetches its endpoint; response bodies pass through the shared **Zod schemas** on both sides.
-3. `metrics.service` computes: access coverage (derived access state per barangay), reliability (mean `flow`, unavailable = 0), affordability index, active-alert count, composite score, status band.
-4. `alerts.service` runs the §5.1 rules against latest `ServiceStatus`, source health, open reports, and each barangay's vulnerability tier.
-5. `vulnerability.service` returns the per-barangay tier used for weighting and the impact note.
-6. UI renders: banner (status band) → KPI cards (components of the score) → map (polygons + derived color) → alerts (priority-sorted, underserved-first).
+1. Route loads → `useDomain()` mounts (`lib/store.ts`), which composes `useWaterStore()` + `useBarangays()`.
+2. `lib/alerts.ts` runs the §5.1 rules against each system's derived status, source statuses, and open reports.
+3. `lib/metrics.ts` computes: access coverage (derived access state per barangay), reliability (population-weighted mean flow), affordability index, active-alert count, composite score, status band.
+4. `lib/vulnerability.ts` returns the per-barangay tier used for weighting and the impact note.
+5. UI renders: banner (status band) → KPI cards (components of the score) → map (polygons + derived color) → alerts (priority-sorted, underserved-first).
 
-**Caching contract:** queries are cached by TanStack Query keyed on endpoint; `staleTime` is short for status/alerts, longer for static barangay polygons. The browser never re-implements scoring — it renders DTOs only.
+**Reactivity contract:** `useWaterStore` is a `useSyncExternalStore`; Supabase Realtime triggers a reload, the store notifies listeners, and the read model recomputes. The browser is the only place scoring runs in the prototype — it renders derived values, never invents state.
 
 ## 2.4 Data flow: report submission (write path)
 
-1. `barangay-official` submits `POST /api/reports` with `{ area, type, description }`; `area` is pinned to their PSGC barangay (production: from the JWT; prototype: from the role-mode picker).
-2. Zod pipe validates shape + `type` enum; 400 on failure with the schema error message.
-3. TypeORM inserts `CommunityReport` (`status: 'new'`).
-4. The write **triggers re-derivation**: `alerts.service` re-evaluates rules — `new` contamination report → contamination warning; `new` no_water / infrastructure_damage → outage warning.
-5. TanStack Query invalidation: `useReports`, `useAlerts`, `useMetrics` re-fetch; the new alert appears without a full reload.
-6. `water-officer` acknowledges (`status: acknowledged`) or resolves (`status: resolved`); resolution re-derives alerts and may resolve the linked alert (see §2.6).
+1. `official` submits a report `{ area, type, description }` (the form pins `area` to the selected barangay; production: from the `profiles.barangay`).
+2. `lib/water-store.ts` `submitReport` inserts into Supabase `reports` (`status: 'new'`).
+3. The insert fires a `postgres_changes` event → the store reloads `reports`.
+4. Re-derivation runs: `lib/alerts.ts` re-evaluates — `new` contamination report → contamination warning; `new` no_water / infrastructure_damage → outage warning.
+5. The read model updates in place; the new alert appears without a full reload.
+6. `lgu` acknowledges (`status: acknowledged`) or resolves (`status: resolved`); resolution re-derives alerts and may resolve the linked alert (see §2.6).
 
 ## 2.5 Data flow: demo simulation & reset
 
-1. `POST /api/demo/simulate { type: 'typhoon' | 'drought' | 'contamination' | 'maintenance', targetSystemId }`.
-2. A deterministic disruption function appends a short series of `ServiceStatus` samples to the target system (e.g., typhoon → `available:false`, `quality:'advisory'` → outage).
-3. Re-derivation runs: alert rules now fire against the disrupted samples; metrics fall (reliability drops, access coverage may drop); vulnerability weighting elevates isolated barangays to `critical` priority.
-4. Invalidation re-fetches status/alerts/metrics → the dashboard reacts live.
-5. `POST /api/demo/reset` re-runs the idempotent seeder → all tables return to the known-good state → queries invalidate → clean demo.
+1. `simulateDisruption(type, systemId)` sets a client-side `disruption` override on the target system (typhoon → `available:false`; drought → `flow` drop; contamination → `quality:'unsafe'`; maintenance → `available:false`).
+2. Re-derivation runs: alert rules now fire against the disrupted status; metrics fall (reliability drops, coverage may drop); vulnerability weighting elevates isolated barangays to `critical` priority.
+3. The read model updates in place → the dashboard reacts live.
+4. `resetDemo()` clears the disruption, deletes Supabase `reports`, and restores `water_sources.status = 'ok'` → the known-good state returns.
 
 ## 2.6 State machines governed by business logic
 
-### ServiceStatus (system health) — appended samples, never edited in place
+### ServiceStatus (system health) — derived, never edited in place
 
 ```mermaid
 stateDiagram-v2
   [*] --> ok: seed / reset
-  ok --> low: flow 40–60 (drought/maintenance)
+  ok --> low: flow 40-60 (drought/maintenance)
   ok --> contaminated: quality unsafe (report/source)
   low --> ok: recovery (reset/tick)
   low --> offline: available=false (typhoon)
@@ -215,32 +214,31 @@ Governing rules: an alert resolves only when the triggering condition clears (re
 
 ```mermaid
 stateDiagram-v2
-  [*] --> new: POST /api/reports
-  new --> acknowledged: water-officer ack
-  acknowledged --> resolved: water-officer resolve (field verified)
+  [*] --> new: submit report
+  new --> acknowledged: lgu ack
+  acknowledged --> resolved: lgu resolve (field verified)
   resolved --> [*]
 ```
 
-Governing rules: `barangay-official`/`resident` cannot transition states; only `water-officer` can; every transition re-derives alerts.
+Governing rules: `official`/`citizen` cannot transition states; only `lgu` can; every transition re-derives alerts.
 
 ### Demo state
 
-`known-good` → (simulate) → `disrupted` → (reset) → `known-good`. The seeder is the only writer of `known-good`; `simulate` appends samples; `reset` truncates and re-seeds.
+`known-good` → (simulate) → `disrupted` → (reset) → `known-good`. The client seed is the only writer of `known-good`; `simulate` sets a disruption override; `reset` clears it and re-seeds Supabase state.
 
 ## 2.7 Validation & error boundaries
 
-- **Request validation:** NestJS Zod pipe (`ValidationPipe` using `zod` schemas) rejects malformed bodies with field-level messages.
-- **Response validation:** shared schemas parse every DTO the API returns; a schema drift fails loudly in development, never silently at the venue.
-- **Query layer:** TanStack Query surfaces loading → error → success states; on API failure the UI shows a retry card rather than stale/blank data.
-- **Derivation is total:** every read-model is computed from persisted inputs; there is no path where the browser invents state.
+- **Type safety:** a single typed domain (`data/types.ts`); `tsc --noEmit` fails on shape drift.
+- **Store:** `useWaterStore` surfaces loading → error → success states; on Supabase failure the UI shows a retry/error card rather than stale/blank data.
+- **Derivation is total:** every read-model value is computed from the seed + store; there is no path where the browser invents state.
 
 ## 2.8 Rule-to-flow traceability
 
 | Business rule | Lives in | Governs | Verified in flow |
 | :--- | :--- | :--- | :--- |
-| Access state derived (covered ≠ accessed) | `metrics.service` (§5.2) | Map color, access-coverage KPI | §2.3 |
-| Alert rules + severity | `alerts.service` (§5.1) | Alert lifecycle, priority | §2.3, §2.4, §2.5 |
-| Vulnerability tier (isolation + level + capacity) | `vulnerability.service` (§5.3) | Alert weighting, impact note, response order | §2.3, §2.5 |
-| Report lifecycle transitions | `reports.service` | `new → acknowledged → resolved` | §2.4, §2.6 |
-| Deterministic demo transitions | `demo.service` + seeder | simulate/reset | §2.5, §2.6 |
-| Role-based capability | production `RolesGuard` | Access matrix (Part 1) | production only |
+| Access state derived (covered ≠ accessed) | `frontend/src/lib/metrics.ts` (§5.2) | Map color, access-coverage KPI | §2.3 |
+| Alert rules + severity | `frontend/src/lib/alerts.ts` (§5.1) | Alert lifecycle, priority | §2.3, §2.4, §2.5 |
+| Vulnerability tier (isolation + level + capacity) | `frontend/src/lib/vulnerability.ts` (§5.3) | Alert weighting, impact note, response order | §2.3, §2.5 |
+| Report lifecycle transitions | `frontend/src/lib/water-store.ts` | `new → acknowledged → resolved` | §2.4, §2.6 |
+| Deterministic demo transitions | `frontend/src/lib/seed.ts` + `water-store.ts` | simulate/reset | §2.5, §2.6 |
+| Role-based capability | Supabase RLS (`supabase/schema.sql`) + UI | Access matrix (Part 1) | Part 1 |

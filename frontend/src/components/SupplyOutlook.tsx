@@ -3,8 +3,8 @@ import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSun, Sun
 import type { LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { RESERVOIR, STAGES, project } from '@/lib/Supply'
-import type { DayForecast } from '@/lib/Supply'
+import { RESERVOIR, STAGES, project } from '@/lib/supply'
+import type { DayForecast } from '@/lib/supply'
 
 type Raw = {
   daily: {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import type { RefObject } from 'react'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { Droplet, Droplets, GlassWater, Waves } from 'lucide-react'
@@ -6,11 +6,12 @@ import type { LucideIcon } from 'lucide-react'
 import { MapMarker, MarkerContent, MarkerPopup, MarkerTooltip, useMap } from '@/components/ui/map'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useBarangays } from '@/lib/barangays'
 import {
-  CAN_PLACE, CAN_SET_STATUS, ISSUES, KINDS, ROLES, STATUSES,
-  fileReport, hasStatus, moveAsset, removeAsset, setStatus, useWaterStore,
+  CAN_PLACE, CAN_SET_STATUS, KINDS, REPORT_TYPES, STATUSES,
+  moveAsset, removeAsset, setStatus, useWaterStore,
 } from '@/lib/water-store'
-import type { Asset, AssetKind, Issue, Role, Status } from '@/lib/water-store'
+import type { Asset, AssetKind, Role, Status } from '@/lib/water-store'
 
 const ICONS: Record<AssetKind, LucideIcon> = { pump: Droplet, well: Droplets, reservoir: Waves, station: GlassWater }
 const field = 'w-full rounded-md border border-line bg-white px-2 py-1.5 text-sm'
@@ -29,34 +30,15 @@ export function MapBridge({ mapRef }: { mapRef: RefObject<MapLibreMap | null> })
 
 export function RolePanel() {
   const { role } = useWaterStore()
-  const current = ROLES.find((r) => r.id === role)!
+  const hint = {
+    citizen: 'Find which water sources are available near you.',
+    official: 'Register water sources and manage reports for your barangay.',
+    lgu: 'City-wide view. Open the summary, alerts, warnings, and users from the map.',
+    drrm: 'City-wide view. Issue early warnings to affected barangays.',
+  }[role]
   return (
     <div className="mt-6 rounded-2xl border border-line bg-white p-4">
-      <p className="text-sm">
-        Signed in as <span className="rounded-lg bg-ink px-3 py-1 font-bold text-white">{current.label}</span>
-      </p>
-      <p className="mt-3 text-sm text-ink/70">{current.hint}</p>
-      {CAN_PLACE[role].length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-2">
-          {CAN_PLACE[role].map((k) => {
-            const Icon = ICONS[k]
-            return (
-              <li
-                key={k}
-                draggable
-                onDragStart={(e) => {
-                  e.dataTransfer.setData('text/kind', k)
-                  e.dataTransfer.effectAllowed = 'copy'
-                }}
-                className="flex cursor-grab items-center gap-2 rounded-lg border border-dashed border-well px-3 py-2 text-sm font-semibold text-well active:cursor-grabbing"
-              >
-                <Icon className="size-4" aria-hidden="true" />
-                {KINDS[k]}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      <p className="text-sm text-ink/70">{hint}</p>
     </div>
   )
 }
@@ -68,7 +50,7 @@ export function AssetMarkers() {
       {assets.map((a) => {
         const canEdit = CAN_PLACE[role].includes(a.kind)
         const Icon = ICONS[a.kind]
-        const count = reports.filter((r) => r.assetId === a.id).length
+        const count = reports.filter((r) => r.barangayPsgc === a.barangayPsgc && r.status !== 'resolved').length
         // Any status other than "Working" colours the pin; otherwise each kind has its own colour.
         const tone =
           STATUSES[a.status].marker ||
@@ -105,11 +87,9 @@ export function AssetMarkers() {
 
 function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdit: boolean }) {
   const { reports } = useWaterStore()
-  const mine = reports.filter((r) => r.assetId === asset.id)
-  const [issue, setIssue] = useState<Issue>('empty')
-  const [note, setNote] = useState('')
-  const [sent, setSent] = useState(false)
-  const isPump = hasStatus(asset.kind) // pumps and wells
+  const { barangayOf } = useBarangays()
+  const area = barangayOf(asset) ?? asset.name
+  const mine = reports.filter((r) => r.barangayPsgc === asset.barangayPsgc && r.status !== 'resolved')
 
   return (
     <div className="space-y-3 text-sm">
@@ -139,41 +119,16 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
         </div>
       )}
 
-      {role === 'citizen' && isPump &&
-        (sent ? (
-          <p className="font-semibold">Report sent. Your barangay official can see it.</p>
-        ) : (
-          <form
-            className="space-y-2"
-            onSubmit={(e) => {
-              e.preventDefault()
-              fileReport(asset.id, issue, note.trim())
-              setSent(true)
-            }}
-          >
-            <label htmlFor={`issue-${asset.id}`} className="block font-semibold">
-              What's wrong?
-            </label>
-            <select id={`issue-${asset.id}`} value={issue} onChange={(e) => setIssue(e.target.value as Issue)} className={field}>
-              {Object.entries(ISSUES).map(([v, l]) => (
-                <option key={v} value={v}>{l}</option>
-              ))}
-            </select>
-            <textarea aria-label="Note (optional)" placeholder="Add a note (optional)" rows={2} value={note} onChange={(e) => setNote(e.target.value)} className={field} />
-            <Button type="submit" size="sm">Send report</Button>
-          </form>
-        ))}
-
-      {role === 'official' && isPump && (
+      {role === 'official' && (
         <div className="space-y-2">
-          <p className="font-semibold">Reports ({mine.length})</p>
-          {mine.length === 0 && <p className="text-ink/70">No reports yet.</p>}
+          <p className="font-semibold">Reports in {area} ({mine.length})</p>
+          {mine.length === 0 && <p className="text-ink/70">No open reports yet.</p>}
           <ul className="max-h-32 space-y-1.5 overflow-y-auto">
             {mine.map((r) => (
               <li key={r.id} className="rounded-md bg-mist px-2 py-1.5">
-                <p className="font-semibold">{ISSUES[r.issue]}</p>
-                {r.note && <p>{r.note}</p>}
-                <p className="text-xs text-ink/60">{new Date(r.at).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                <p className="font-semibold">{REPORT_TYPES[r.type]}</p>
+                {r.description && <p>{r.description}</p>}
+                <p className="text-xs text-ink/60">{new Date(r.createdAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</p>
               </li>
             ))}
           </ul>

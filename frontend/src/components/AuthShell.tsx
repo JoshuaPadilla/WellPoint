@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import { Logo } from './Logo'
 
-const perks = ['Water status for your barangay', 'Alerts when service changes', 'Tanker deliveries tracked']
+const perks = ['Water access status for your barangay', 'Early-warning alerts before shortages hit', 'Priority response when service fails']
 
 export function AuthShell({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
   return (

@@ -1,194 +1,81 @@
-Welcome to your new TanStack Start app!
+# WellPoint — Frontend
 
-# Getting Started
+A React 19 + TanStack Router + Vite SPA that talks directly to Supabase. It is the
+water-security access & early-warning dashboard for Catbalogan City LGUs: a live
+coverage map of the 57 barangays, derived alerts and metrics, community reports,
+and demo controls (`Simulate disruption` / `Reset demo`).
 
-To run this application:
+There is no separate backend. All persistence lives in Supabase (Postgres); all
+derived logic (access state, vulnerability tier, alerts, metrics) runs client-side
+as pure functions in `src/lib/`.
+
+## Prerequisites
+
+- Node 20+ (uses `npm`; the repo also has a `pnpm` allowlist in `package.json`).
+- A Supabase project with the SQL in `../supabase/` applied (creates `water_sources`,
+  `profiles`, and `reports` tables plus row-level security).
+
+## Environment
+
+Copy `.env` from the values below (`.env` is gitignored):
+
+```bash
+VITE_SUPABASE_URL=https://<project>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon public key>
+```
+
+The app refuses to run without these and prints a clear error. Never put the
+service-role key or JWT secret in the frontend environment.
+
+## Run
 
 ```bash
 npm install
-npm run dev
+npm run dev       # http://localhost:3000
 ```
 
-# Building For Production
-
-To build this application for production:
+## Build & quality
 
 ```bash
-npm run build
+npm run build       # Vite production build (dist/)
+npm run typecheck   # tsc --noEmit (build alone does not type-check)
+npm run lint        # eslint
+npm run format      # prettier --write + eslint --fix
+npm run check       # prettier --check
 ```
 
-## Styling
+## Routes
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+| Path | What it is |
+| :--- | :--- |
+| `/` | Landing page |
+| `/register`, `/login` | Supabase Auth (email/password) |
+| `/dashboard` | Status banner + KPI cards + role-aware views |
+| `/dashboard/map` | 57-barangay coverage map (colored by derived access state) |
+| `/dashboard/sources` | Water sources grouped per barangay |
+| `/dashboard/alerts` | Derived early-warning alerts |
+| `/dashboard/warnings` | DRRM/LGU early warnings (issue + target barangays) |
+| `/dashboard/deliveries` | DRRM filling stations |
+| `/dashboard/reports` | Community reports (submit + acknowledge/resolve) |
+| `/dashboard/users` | LGU role & barangay management |
+| `/dashboard/settings` | Demo controls (simulate disruption / reset demo) |
 
-### Removing Tailwind CSS
+## Data model (at a glance)
 
-If you prefer not to use Tailwind CSS:
+- **Static reference data** is seeded in Supabase by `../supabase/schema.sql` (the 57
+  barangays' metadata and the 5 pilot water systems), with a deterministic client-side
+  fallback in `src/lib/seed.ts` (`baseSeed = 20261006`).
+- **User-authored data** lives in Supabase: `water_sources` (physical asset markers),
+  `reports` (community reports), `warnings` (DRRM early warnings), and `profiles`
+  (user + role + barangay). These sync via `src/lib/water-store.ts` with realtime subscriptions.
+- **Derived data** (access state, vulnerability, alerts, metrics) is never stored —
+  it is recomputed from the above in `src/lib/{vulnerability,alerts,metrics,store}.ts`.
 
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+## Demo flow
 
-## Linting & Formatting
-
-
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+1. Log in (any Supabase account; role comes from `profiles.role`).
+2. Read the dashboard banner and KPI cards.
+3. Open the coverage map — green = served, amber = partial, red = underserved.
+4. Submit a report, then watch it appear in the alerts view without a reload.
+5. `Simulate disruption` (typhoon / drought / contamination / maintenance) and watch
+   the banner and alerts react, then `Reset demo` back to a known-good state.

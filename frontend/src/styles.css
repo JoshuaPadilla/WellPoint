@@ -11,6 +11,21 @@
   --color-aqua: #00b4d8;
   --color-foam: #90e0ef;
   --color-sky: #caf0f8;
+
+  /* shadcn/ui theme tokens mapped onto the WellPoint palette */
+  --color-primary: #0077b6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #caf0f8;
+  --color-secondary-foreground: #03045e;
+  --color-muted: #f8fbfd;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #03045e;
+  --color-input: #e2e8f0;
+  --color-ring: #00b4d8;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
 }
 
 * {

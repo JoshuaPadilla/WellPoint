@@ -5,7 +5,7 @@ import type { User as SupaUser } from '@supabase/supabase-js'
 import type { Role } from '@/lib/water-store'
 import { supabase } from './supabase'
 
-export type User = { id: string; name: string; email: string; barangay: string; role: Role }
+export type User = { id: string; name: string; email: string; barangay: string; barangayPsgc: string; role: Role }
 
 const ROLES: Role[] = ['citizen', 'official', 'lgu', 'drrm']
 const asRole = (v: unknown): Role => (ROLES.includes(v as Role) ? (v as Role) : 'citizen')
@@ -26,8 +26,9 @@ function fromMetadata(u: SupaUser): User {
   return {
     id: u.id,
     email: u.email ?? '',
-    name: String(u.user_metadata?.name ?? ''),
-    barangay: String(u.user_metadata?.barangay ?? ''),
+    name: String(u.user_metadata.name ?? ''),
+    barangay: String(u.user_metadata.barangay ?? ''),
+    barangayPsgc: String(u.user_metadata.barangay_psgc ?? ''),
     role: 'citizen',
   }
 }
@@ -39,17 +40,20 @@ async function loadProfile(u: SupaUser, touchLogin: boolean): Promise<User> {
     const { error } = await db.from('profiles').update({ last_login_at: new Date().toISOString() }).eq('id', u.id)
     if (error) console.warn('Could not save login time:', error.message)
   }
-  const { data, error } = await db.from('profiles').select('id, name, barangay, email, role').eq('id', u.id).maybeSingle()
+  const { data, error } = await db.from('profiles').select('id, name, barangay_psgc, email, role, barangays(name)').eq('id', u.id).maybeSingle()
   if (error || !data) {
     console.warn('Could not load profile, using signup data instead:', error?.message ?? 'no profile row')
     return fromMetadata(u)
   }
+  const row = data as { id: string; name: string | null; email: string | null; role: string | null; barangay_psgc: string | null; barangays: { name: string | null } | { name: string | null }[] | null }
+  const bgy = Array.isArray(row.barangays) ? row.barangays[0] : row.barangays
   return {
-    id: data.id,
-    email: data.email || u.email || '',
-    name: data.name,
-    barangay: data.barangay,
-    role: asRole(data.role),
+    id: row.id,
+    email: row.email || u.email || '',
+    name: row.name ?? '',
+    barangay: bgy?.name ?? '',
+    barangayPsgc: row.barangay_psgc ?? '',
+    role: asRole(row.role),
   }
 }
 
@@ -89,7 +93,7 @@ export async function register(form: FormData): Promise<User | null> {
   const { data, error } = await client().auth.signUp({
     email: text(form, 'email').toLowerCase(),
     password: String(form.get('password') ?? ''),
-    options: { data: { name: text(form, 'name'), barangay: text(form, 'barangay') } },
+    options: { data: { name: text(form, 'name'), barangay: text(form, 'barangay'), barangay_psgc: text(form, 'barangay_psgc') } },
   })
 
   if (error) {

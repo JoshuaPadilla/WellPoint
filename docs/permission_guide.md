@@ -1,120 +1,45 @@
-# RBAC Permission System
+# Roles & Permissions (water domain)
 
-> **Hackathon note.** This guide was originally written around a loan-domain
-> permission set. For the WellPoint water-app hackathon build the tokens were
-> **re-scoped** to the water domain (sources, alerts, deliveries, reports).
-> Everything below matches the code actually running in `backend/`.
+This is the runtime permission model for the WellPoint prototype. It replaces the earlier loan-domain RBAC draft; everything below matches the code actually running in `frontend/src/lib/water-store.ts` and the Supabase policies in `supabase/schema.sql`.
 
-## What kind of system is this?
+## Roles
 
-**Static Role-Based Access Control (RBAC) with string permission tokens.** It is **not CASL** and not attribute-based (ABAC). There is no CASL library, no wildcards (`*`), and no conditions or attributes — it is a fixed `role → permission[]` matrix enforced by a global guard.
+`citizen | official | lgu | drrm` (see `docs/system-design.md` Part 1 for the full matrix). The role is stored in the Supabase `profiles` table and loaded by `lib/auth.ts`; the dashboard renders the matching persona view.
 
-- A single union type `Permission` defines every capability as an atomic string in `resource:action` format, e.g. `'source:update'`, `'user:manage'`. There is no wildcard support.
-- A `Record<UserRoles, readonly Permission[]>` map statically grants each role its permission set. Permissions resolve to an empty list for `pending` users.
-- Authorization is checked per endpoint: handlers declare required permissions via a `@Permissions('source:update', ...)` decorator (metadata via `SetMetadata`), and a global `PermissionGuard` reads the caller's role from `req.user`, builds a `Set` of granted permissions, and allows the request if the handler's required list intersects it — `required.some((p) => granted.has(p))`, any-match semantics, not all-match.
-- Handlers with **no** `@Permissions(...)` decorator are allowed through (authenticated-only baseline).
-- Permission checks are **role-derived, not user-specific**: there is no per-user override and no ownership rules.
+## What each role can do with water sources
 
-Authentication is email/password: `POST /api/auth/register` and `POST /api/auth/login` return a signed JWT; `JwtAuthGuard` verifies the HS256 signature against `APP_JWT_SECRET` (falls back to `SUPABASE_JWT_SECRET`), loads the app `User` row by `sub`, and attaches `req.user = { id, email, name, role }`.
-
-## `Permission` type
-
-Source: `backend/src/common/rbac/permissions.ts`
+Two static maps in `frontend/src/lib/water-store.ts` define the capabilities:
 
 ```ts
-/** Every atomic capability in the system. Add here first, then grant. */
-export const PERMISSIONS = [
-  "dashboard:read",
+// Who may place (create/delete/move) each asset kind on the map.
+export const CAN_PLACE: Record<Role, AssetKind[]> = {
+  lgu: ['pump', 'well', 'reservoir'],
+  drrm: ['station'],
+  official: [],
+  citizen: [],
+}
 
-  "source:read",
-  "source:create",
-  "source:update",
-  "source:delete",
-
-  "alert:read",
-  "report:read",
-  "delivery:read",
-
-  "user:manage", // create users, change roles
-  "auditlog:read",
-] as const;
-
-export type Permission = (typeof PERMISSIONS)[number];
-```
-
-## Role type
-
-Source: `backend/src/common/enum/user_roles.enum.ts`
-
-```ts
-export enum UserRoles {
-  ADMIN = "admin",
-  MANAGER = "manager", // ops lead: edits sources, manages users
-  STAFF = "staff", // field editor: reads + updates sources
-  VIEWER = "viewer", // read-only citizen/barangay member
-  PENDING = "pending", // self-onboarded, no access until a role is granted
+// Who may change the status of each asset kind.
+export const CAN_SET_STATUS: Record<Role, AssetKind[]> = {
+  lgu: ['pump', 'well', 'reservoir', 'station'],
+  drrm: ['station'],
+  official: ['pump', 'well'],
+  citizen: [],
 }
 ```
 
-## Role → permission grants
+Asset kinds: `pump | well | reservoir | station`. Source statuses: `ok | low | empty | repair | unsafe`.
 
-Source: `backend/src/common/rbac/role_permissions.ts`
+## Enforcement
 
-```ts
-export const ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]> = {
-  admin: [...PERMISSIONS], // all
+- **Frontend:** the maps above gate the UI — drag/drop palette, marker edit rights, and the status select. This is presentation-only convenience.
+- **Database (authoritative):** Supabase row-level security mirrors the same rules via `public.can_place(kind)` and `public.can_set_status(kind)` (defined in `supabase/schema.sql`), which read the caller's role from `profiles`.
 
-  manager: [
-    "dashboard:read",
-    "source:read",
-    "source:create",
-    "source:update",
-    "alert:read",
-    "report:read",
-    "delivery:read",
-    "user:manage",
-    "auditlog:read",
-  ],
+## Reports
 
-  staff: [
-    "dashboard:read",
-    "source:read",
-    "source:create",
-    "source:update",
-    "alert:read",
-    "delivery:read",
-  ],
+- Any signed-in user may **insert** a report.
+- Only `lgu` (and, for their own barangay, `official` in the full matrix) may **acknowledge / resolve** a report. The `reports` RLS policies enforce `user_role() in ('lgu', 'official')` for update/delete.
 
-  viewer: ["dashboard:read", "source:read", "alert:read", "delivery:read"],
+## Rule of thumb
 
-  pending: [], // zero grants until an admin/manager assigns a real role
-};
-```
-
-## Guard semantics
-
-Source: `backend/src/guards/permission.guard.ts`
-
-- Global guards run in registration order: `JwtAuthGuard` first (attaches `req.user` from a verified Bearer token), then `PermissionGuard`.
-- `PermissionGuard` reads `@Permissions(...)` metadata from the handler and class (controller-level fallback).
-- No declared permissions → allow (authenticated-only baseline).
-- Builds a `Set` from `ROLE_PERMISSIONS[user.role] ?? []`; the request passes if any required permission is present (`required.some(...)`).
-- Fails with `UnauthorizedException` if there is no `req.user`, `ForbiddenException('Insufficient permissions')` otherwise.
-
-## Email/password login flow
-
-1. `POST /api/auth/register` `{ name, email, password }` → hashes the password (Node `scrypt`, `salt:hash`), creates the `User` row, and returns `{ token, user }`.
-2. `POST /api/auth/login` `{ email, password }` → verifies the scrypt hash and returns `{ token, user }`.
-3. The client sends the token as `Authorization: Bearer <token>`; `JwtAuthGuard` verifies it (HS256, signed with `APP_JWT_SECRET`), loads the user by `sub`, and `PermissionGuard` enforces the handler's `@Permissions(...)`.
-4. `GET /api/auth/me` returns the profile + granted permissions.
-
-Other endpoints: `POST /api/auth/logout` (stateless — client discards the token), `PATCH /api/users/:id/role` (`user:manage`).
-
-**Hackathon-only rules** (change before a real launch):
-- The **first** registered account becomes `ADMIN`; every later registration becomes `STAFF`. Assign roles afterwards via `PATCH /api/users/:id/role` (requires `user:manage`).
-- JWT expiry is 7 days.
-- `synchronize: true` auto-creates/updates the `users` table from the entity.
-
-## Porting to another project
-
-Copy the three blocks above verbatim (`Permission` union, role enum, grants map). Guard route handlers with a `RequirePermission`/`@Permissions` decorator and gate UI elements with `roleHasPermission(role, 'source:update')`. Keep the convention "add the token to `PERMISSIONS` first, then grant it in `ROLE_PERMISSIONS`" so the union and the grants stay in sync.
+Keep the "add the capability to `CAN_PLACE`/`CAN_SET_STATUS` first, then mirror it in the SQL helper" convention so the UI maps and the database policies stay in sync.
