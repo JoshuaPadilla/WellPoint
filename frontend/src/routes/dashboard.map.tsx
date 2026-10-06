@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import type { ExpressionSpecification } from 'maplibre-gl'
 import { Map, MapControls, MapGeoJSON, useMap } from '@/components/ui/map'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap })
@@ -9,6 +12,7 @@ export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap 
 // Copy the seed file to frontend/public/catbalogan-brgys.geojson so Vite serves it as-is.
 const DATA_URL = '/catbalogan-brgys.geojson'
 const CITY_PCODE = 'PH0806005' // City of Catbalogan; guards against a file that holds more than one city
+const MAX_SUGGESTIONS = 8
 
 type Props = { ADM4_EN: string; ADM4_PCODE: string; ADM3_PCODE: string; AREA_SQKM: number }
 type Geom = GeoJSON.Polygon | GeoJSON.MultiPolygon
@@ -51,6 +55,7 @@ function BarangayMap() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [focus, setFocus] = useState<Focus | null>(null)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -92,10 +97,10 @@ function BarangayMap() {
 
   const selected = items.find((b) => b.id === selectedId) ?? null
   const hovered = items.find((b) => b.id === hoverId) ?? null
-  const cityBounds = focus && data ? boundsOf(data.features.map((f) => f.geometry)) : null
+  const cityBounds = data ? boundsOf(data.features.map((f) => f.geometry)) : null
 
   const colors = useMemo(
-    () => ({ well: themeColor('--color-well', '#0e7490'), foam: themeColor('--color-foam', '#a5f3fc') }),
+    () => ({ well: themeColor('--color-well', '#0077b6'), foam: themeColor('--color-foam', '#90e0ef') }),
     [],
   )
 
@@ -106,11 +111,14 @@ function BarangayMap() {
     filtering ? ['case', isSelected, 0.6, inMatches, 0.3, 0.04] : ['case', isSelected, 0.6, 0.2]
   ) as ExpressionSpecification
 
-  const zoomTo = (id: string) => {
+  // Select a barangay, fly to it and open the sheet.
+  const pick = (id: string) => {
     const b = items.find((i) => i.id === id)
     if (!b) return
     setSelectedId(id)
     setFocus((f) => ({ bounds: b.bounds, n: (f?.n ?? 0) + 1 }))
+    setQuery('')
+    setSheetOpen(true)
   }
 
   return (
@@ -118,69 +126,124 @@ function BarangayMap() {
       <h1 className="text-3xl font-extrabold">Barangay map</h1>
       <p className="mt-2 max-w-xl text-ink/70">
         {data ? `The ${items.length} barangays of Catbalogan. ` : ''}
-        Select a barangay on the map or from the list to see its details.
+        Search for a barangay or select one on the map to see its details.
       </p>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
-        <section
-          aria-label="Map of Catbalogan barangays"
-          className="relative h-[520px] overflow-hidden rounded-2xl border border-line bg-sky/40 lg:h-[640px]"
-        >
-          {error && (
-            <p role="alert" className="p-8 text-ink">
-              Couldn't load the barangay map. Check that <code>catbalogan-brgys.geojson</code> is in the frontend{' '}
-              <code>public</code> folder, then refresh.
-            </p>
-          )}
-          {!error && !data && <p className="p-8 text-ink/70">Loading map…</p>}
+      <section
+        aria-label="Map of Catbalogan barangays"
+        className="relative mt-6 h-[70vh] min-h-[480px] overflow-hidden rounded-2xl border border-line bg-sky/40"
+      >
+        {error && (
+          <p role="alert" className="p-8 text-ink">
+            Couldn't load the barangay map. Check that <code>catbalogan-brgys.geojson</code> is in the frontend{' '}
+            <code>public</code> folder, then refresh.
+          </p>
+        )}
+        {!error && !data && <p className="p-8 text-ink/70">Loading map…</p>}
 
-          {data && focus && (
-            <>
-              <Map theme="light" center={[124.89, 11.78]} zoom={11} className="h-full w-full">
-                <FitTo focus={focus} />
-                <MapControls position="top-right" />
-                <MapGeoJSON<Props>
-                  data={data}
-                  promoteId="ADM4_PCODE"
-                  interactive
-                  fillPaint={{ 'fill-color': colors.well, 'fill-opacity': fillOpacity }}
-                  fillHoverPaint={{ 'fill-color': colors.foam, 'fill-opacity': 0.55 }}
-                  linePaint={{
-                    'line-color': colors.well,
-                    'line-width': ['case', isSelected, 3, 1] as ExpressionSpecification,
-                  }}
-                  onHover={(e) => setHoverId(e?.feature.properties.ADM4_PCODE ?? null)}
-                  onClick={(e) => {
-                    const id = e.feature.properties.ADM4_PCODE
-                    setSelectedId((cur) => (cur === id ? null : id))
-                  }}
-                />
-              </Map>
+        {data && focus && (
+          <>
+            <Map theme="light" center={[124.89, 11.78]} zoom={11} className="h-full w-full">
+              <FitTo focus={focus} />
+              <MapControls position="bottom-right" />
+              <MapGeoJSON<Props>
+                data={data}
+                promoteId="ADM4_PCODE"
+                interactive
+                fillPaint={{ 'fill-color': colors.well, 'fill-opacity': fillOpacity }}
+                fillHoverPaint={{ 'fill-color': colors.foam, 'fill-opacity': 0.55 }}
+                linePaint={{
+                  'line-color': colors.well,
+                  'line-width': ['case', isSelected, 3, 1] as ExpressionSpecification,
+                }}
+                onHover={(e) => setHoverId(e?.feature.properties.ADM4_PCODE ?? null)}
+                onClick={(e) => {
+                  setSelectedId(e.feature.properties.ADM4_PCODE)
+                  setSheetOpen(true)
+                }}
+              />
+            </Map>
 
-              <p
-                aria-live="polite"
-                className="pointer-events-none absolute left-3 top-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold shadow-sm"
-              >
-                {hovered?.name ?? selected?.name ?? 'Hover over a barangay'}
-              </p>
+            {/* Search sits on top of the map */}
+            <div className="absolute left-3 top-3 w-[min(22rem,calc(100%-9rem))]">
+              <Input
+                type="search"
+                aria-label="Find a barangay"
+                placeholder="Find a barangay"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setQuery('')
+                  if (e.key === 'Enter' && matches[0]) pick(matches[0].id)
+                }}
+                className="bg-white shadow-sm"
+              />
+              {filtering && (
+                <ul className="mt-1 max-h-72 overflow-y-auto rounded-lg border border-line bg-white p-1 shadow-md">
+                  {matches.slice(0, MAX_SUGGESTIONS).map((b) => (
+                    <li key={b.id}>
+                      <button
+                        type="button"
+                        onClick={() => pick(b.id)}
+                        className="w-full rounded-md px-3 py-1.5 text-left text-sm hover:bg-sky"
+                      >
+                        {b.name}
+                      </button>
+                    </li>
+                  ))}
+                  {matches.length === 0 && <li className="px-3 py-2 text-sm text-ink/70">No barangay matches "{query}".</li>}
+                  {matches.length > MAX_SUGGESTIONS && (
+                    <li className="px-3 py-1.5 text-xs text-ink/60">
+                      {matches.length - MAX_SUGGESTIONS} more. Keep typing to narrow the list.
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
 
-              <button
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSheetOpen(true)}
+              className="absolute right-3 top-3 bg-white shadow-sm"
+            >
+              {selected ? 'Details' : 'All barangays'}
+            </Button>
+
+            <div className="pointer-events-none absolute bottom-3 left-3 flex flex-col items-start gap-2">
+              {hovered && (
+                <p aria-live="polite" className="rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold shadow-sm">
+                  {hovered.name}
+                </p>
+              )}
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => cityBounds && setFocus({ bounds: cityBounds, n: focus.n + 1 })}
-                className="absolute bottom-3 left-3 rounded-lg border border-line bg-white px-3 py-1.5 text-sm font-bold text-ink shadow-sm hover:bg-sky focus-visible:outline-2 focus-visible:outline-well"
+                className="pointer-events-auto bg-white shadow-sm"
               >
                 Show whole city
-              </button>
-            </>
-          )}
-        </section>
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
 
-        <aside className="flex flex-col gap-5">
-          <div className="rounded-2xl border border-line bg-white p-5">
-            {selected ? (
-              <>
-                <h2 className="text-xl font-extrabold">{selected.name}</h2>
-                <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent className="bg-white/70 backdrop-blur-sm">
+          <SheetHeader>
+            <SheetTitle>{selected ? selected.name : 'Barangays'}</SheetTitle>
+            <SheetDescription>
+              {selected ? 'Barangay details' : 'Pick a barangay to zoom to it on the map.'}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex min-h-0 flex-1 flex-col gap-5 px-4">
+            {selected && (
+              <div>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                   <dt className="text-ink/70">City</dt>
                   <dd className="font-semibold">Catbalogan</dd>
                   <dt className="text-ink/70">PSGC code</dt>
@@ -194,48 +257,40 @@ function BarangayMap() {
                     </>
                   )}
                 </dl>
-                <button type="button" className="mt-4 text-sm font-bold text-well underline" onClick={() => zoomTo(selected.id)}>
-                  Zoom to barangay
-                </button>
-              </>
-            ) : (
-              <p className="text-sm text-ink/70">Select a barangay on the map or from the list to see its details.</p>
+                <div className="mt-4 flex gap-2">
+                  <Button type="button" size="sm" onClick={() => pick(selected.id)}>
+                    Zoom to barangay
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => setSelectedId(null)}>
+                    Clear selection
+                  </Button>
+                </div>
+              </div>
             )}
-          </div>
 
-          <div className="rounded-2xl border border-line bg-white p-5">
-            <label htmlFor="brgy-search" className="text-sm font-bold">
-              Find a barangay
-            </label>
-            <input
-              id="brgy-search"
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type a name"
-              className="mt-2 w-full rounded-lg border border-line px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-well"
-            />
-            <ul className="mt-3 max-h-80 overflow-y-auto">
-              {matches.map((b) => (
-                <li key={b.id}>
-                  <button
-                    type="button"
-                    aria-pressed={b.id === selectedId}
-                    onClick={() => zoomTo(b.id)}
-                    className={cn(
-                      'w-full rounded-md px-3 py-1.5 text-left text-sm',
-                      b.id === selectedId ? 'bg-well font-semibold text-white' : 'hover:bg-sky',
-                    )}
-                  >
-                    {b.name}
-                  </button>
-                </li>
-              ))}
-              {data && matches.length === 0 && <li className="px-3 py-2 text-sm text-ink/70">No barangay matches "{query}".</li>}
-            </ul>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <h3 className="text-sm font-bold">All barangays ({items.length})</h3>
+              <ul className="mt-2 min-h-0 flex-1 overflow-y-auto">
+                {items.map((b) => (
+                  <li key={b.id}>
+                    <button
+                      type="button"
+                      aria-pressed={b.id === selectedId}
+                      onClick={() => pick(b.id)}
+                      className={cn(
+                        'w-full rounded-md px-3 py-1.5 text-left text-sm',
+                        b.id === selectedId ? 'bg-well font-semibold text-white' : 'hover:bg-sky',
+                      )}
+                    >
+                      {b.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-        </aside>
-      </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
