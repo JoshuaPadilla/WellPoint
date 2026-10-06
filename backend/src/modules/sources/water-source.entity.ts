@@ -3,26 +3,26 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity('water_sources')
 export class WaterSource {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  type: 'spring' | 'river' | 'groundwater' | 'reservoir';
+  type!: 'spring' | 'river' | 'groundwater' | 'reservoir';
 
   @Column('double precision')
-  lat: number;
+  lat!: number;
 
   @Column('double precision')
-  lng: number;
+  lng!: number;
 
   @Column({ nullable: true })
-  barangayId: string;
+  barangayId!: string;
 
   @Column('int')
-  capacity: number;
+  capacity!: number;
 
   @Column({ default: 'ok' })
-  status: string;
+  status!: string;
 }

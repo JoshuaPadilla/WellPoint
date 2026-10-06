@@ -6,11 +6,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
 import { UserRoles } from '../enum/user_roles.enum';
+import type { Permission } from './permissions';
 import { PERMISSIONS_KEY } from './permissions.decorator';
 import { ROLE_PERMISSIONS } from './role_permissions';
-import type { Permission } from './permissions';
-import type { AuthenticatedRequest } from '../auth/jwt-auth.guard';
 
 @Injectable()
 export class PermissionGuard implements CanActivate {

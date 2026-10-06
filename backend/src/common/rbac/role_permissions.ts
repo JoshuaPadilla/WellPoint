@@ -1,11 +1,12 @@
 import { UserRoles } from '../enum/user_roles.enum';
-import { PERMISSIONS } from './permissions';
 import type { Permission } from './permissions';
+import { PERMISSIONS } from './permissions';
 
 export const ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]> = {
   admin: [...PERMISSIONS], // all
+  lgu: [...PERMISSIONS], // all
 
-  manager: [
+  water_officer: [
     'dashboard:read',
     'source:read',
     'source:create',
@@ -17,7 +18,7 @@ export const ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]> = {
     'auditlog:read',
   ],
 
-  staff: [
+  drrm: [
     'dashboard:read',
     'source:read',
     'source:create',
@@ -26,7 +27,5 @@ export const ROLE_PERMISSIONS: Record<UserRoles, readonly Permission[]> = {
     'delivery:read',
   ],
 
-  viewer: ['dashboard:read', 'source:read', 'alert:read', 'delivery:read'],
-
-  pending: [], // zero grants until an admin/manager assigns a real role
+  user: ['dashboard:read', 'source:read', 'alert:read', 'delivery:read'],
 };

@@ -25,7 +25,7 @@ export class User {
   @Column({ type: 'varchar', select: false, nullable: true })
   password!: string | null;
 
-  @Column({ type: 'enum', enum: UserRoles, default: UserRoles.PENDING })
+  @Column({ type: 'enum', enum: UserRoles, default: UserRoles.USER })
   role!: UserRoles;
 
   @CreateDateColumn()

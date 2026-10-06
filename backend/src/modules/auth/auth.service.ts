@@ -81,7 +81,7 @@ export class AuthService {
       name,
       brgy,
       password: hashPassword(password),
-      role: isFirst ? UserRoles.ADMIN : UserRoles.STAFF,
+      role: isFirst ? UserRoles.ADMIN : UserRoles.USER,
     });
 
     return this.toSession(user);
