@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { SupplyOutlook } from '@/components/SupplyOutlook'
 import { useBarangays } from '@/lib/barangays'
 import { ISSUES, setRole, setStatus, useWaterStore } from '@/lib/WaterStore'
 import type { Asset, Role } from '@/lib/WaterStore'
@@ -38,6 +39,10 @@ function Page() {
   return (
     <div>
       <h1 className="text-3xl font-extrabold">Dashboard</h1>
+
+      <div className="mt-5">
+        <SupplyOutlook />
+      </div>
 
       <div role="group" aria-label="Choose who you are" className="mt-5 flex flex-wrap gap-2">
         {PERSONAS.map((p) => (
