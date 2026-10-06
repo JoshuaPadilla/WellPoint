@@ -10,9 +10,9 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { Permissions } from '../common/rbac/permissions.decorator';
-import { SourcesService } from './sources.service';
+import { Permissions } from '../../common/rbac/permissions.decorator';
 import type { CreateSourceDto } from './sources.service';
+import { SourcesService } from './sources.service';
 
 const SOURCE_TYPES = ['spring', 'river', 'groundwater', 'reservoir'];
 

@@ -15,7 +15,7 @@
 - Handlers with **no** `@Permissions(...)` decorator are allowed through (authenticated-only baseline).
 - Permission checks are **role-derived, not user-specific**: there is no per-user override and no ownership rules.
 
-Authentication is Google OAuth through Supabase, proxied by the NestJS backend (see [Google login flow](#google-login-flow)). The bearer token is the Supabase session access token; `JwtAuthGuard` verifies its HS256 signature against `SUPABASE_JWT_SECRET`, loads the app `User` row by `sub` (the Supabase auth user id), and attaches `req.user = { id, email, name, role }`.
+Authentication is email/password: `POST /api/auth/register` and `POST /api/auth/login` return a signed JWT; `JwtAuthGuard` verifies the HS256 signature against `APP_JWT_SECRET` (falls back to `SUPABASE_JWT_SECRET`), loads the app `User` row by `sub`, and attaches `req.user = { id, email, name, role }`.
 
 ## `Permission` type
 
@@ -52,7 +52,7 @@ export enum UserRoles {
   MANAGER = "manager", // ops lead: edits sources, manages users
   STAFF = "staff", // field editor: reads + updates sources
   VIEWER = "viewer", // read-only citizen/barangay member
-  PENDING = "pending", // signed in via Google, no access until a role is granted
+  PENDING = "pending", // self-onboarded, no access until a role is granted
 }
 ```
 
@@ -101,21 +101,19 @@ Source: `backend/src/guards/permission.guard.ts`
 - Builds a `Set` from `ROLE_PERMISSIONS[user.role] ?? []`; the request passes if any required permission is present (`required.some(...)`).
 - Fails with `UnauthorizedException` if there is no `req.user`, `ForbiddenException('Insufficient permissions')` otherwise.
 
-## Google login flow
+## Email/password login flow
 
-All Supabase calls happen on the backend; the frontend never talks to Supabase directly.
+1. `POST /api/auth/register` `{ name, email, password }` → hashes the password (Node `scrypt`, `salt:hash`), creates the `User` row, and returns `{ token, user }`.
+2. `POST /api/auth/login` `{ email, password }` → verifies the scrypt hash and returns `{ token, user }`.
+3. The client sends the token as `Authorization: Bearer <token>`; `JwtAuthGuard` verifies it (HS256, signed with `APP_JWT_SECRET`), loads the user by `sub`, and `PermissionGuard` enforces the handler's `@Permissions(...)`.
+4. `GET /api/auth/me` returns the profile + granted permissions.
 
-1. `GET /api/auth/google` → `AuthService` builds the Supabase authorize URL with **PKCE** (`code_challenge_method=S256`): it generates a `code_verifier` (held server-side in an in-memory map keyed by a random `state`) and returns the URL.
-2. Frontend redirects to that URL → Google → Supabase redirects to `GET /api/auth/google/callback?code=...&state=...`.
-3. Backend exchanges `code` + the stored `code_verifier` against `{SUPABASE_URL}/auth/v1/token?grant_type=pkce`, fetches the full profile with `supabase.auth.getUser(access_token)`, upserts the app `User` row, then redirects to `{FRONTEND_URL}/auth/callback?token=<access_token>&refresh_token=<refresh_token>`.
-4. Frontend stores the tokens and calls `GET /api/auth/me` for the profile + granted permissions.
-
-Other endpoints: `POST /api/auth/refresh` (refresh token), `POST /api/auth/logout`, `PATCH /api/users/:id/role` (`user:manage`).
+Other endpoints: `POST /api/auth/logout` (stateless — client discards the token), `PATCH /api/users/:id/role` (`user:manage`).
 
 **Hackathon-only rules** (change before a real launch):
-- The configured Supabase value may be the raw **JWT secret** rather than a real service-role key; `AuthService.adminKey()` mints a short-lived `service_role` HS256 token from it if the configured key is not an `eyJ…` JWT. Put a real service-role key in `SUPABASE_SERVICE_ROLE_KEY` for production.
-- The **first** Google sign-in becomes `ADMIN`; every later sign-in becomes `STAFF`. Assign roles afterwards via `PATCH /api/users/:id/role` (requires `user:manage`).
-- `synchronize: true` auto-creates the `users` table from the entity.
+- The **first** registered account becomes `ADMIN`; every later registration becomes `STAFF`. Assign roles afterwards via `PATCH /api/users/:id/role` (requires `user:manage`).
+- JWT expiry is 7 days.
+- `synchronize: true` auto-creates/updates the `users` table from the entity.
 
 ## Porting to another project
 

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserRoles } from '../common/enum/user_roles.enum';
-import { User } from './user.entity';
+import { UserRoles } from '../../common/enum/user_roles.enum';
+import { User } from './entity/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +13,19 @@ export class UsersService {
 
   findById(id: string): Promise<User | null> {
     return this.usersRepo.findOneBy({ id });
+  }
+
+  findByEmail(email: string): Promise<User | null> {
+    return this.usersRepo.findOneBy({ email });
+  }
+
+  /** Includes the hidden `password` column. */
+  findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepo
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
   }
 
   findAll(): Promise<User[]> {
@@ -27,6 +40,7 @@ export class UsersService {
     id: string;
     email: string;
     name?: string;
+    password?: string;
     role: UserRoles;
   }): Promise<User> {
     return this.usersRepo.save(
@@ -34,6 +48,7 @@ export class UsersService {
         id: data.id,
         email: data.email,
         name: data.name,
+        password: data.password ?? null,
         role: data.role,
       }),
     );

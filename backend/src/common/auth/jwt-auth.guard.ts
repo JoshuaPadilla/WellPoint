@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { UsersService } from '../../users/users.service';
+import { UsersService } from '../../modules/users/users.service';
 import { verifyHs256 } from './jwt.util';
 
 export interface AuthUser {
@@ -43,7 +43,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid authorization header');
     }
 
-    const secret = this.configService.getOrThrow<string>('supabase.jwtSecret');
+    const secret = this.configService.getOrThrow<string>('auth.jwtSecret');
     const claims = verifyHs256(token, secret);
     if (!claims?.sub) {
       throw new UnauthorizedException('Invalid or expired token');

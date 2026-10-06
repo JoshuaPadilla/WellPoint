@@ -1,3 +1,4 @@
+import { UserRoles } from '../../../common/enum/user_roles.enum';
 import {
   Column,
   CreateDateColumn,
@@ -5,26 +6,28 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { UserRoles } from '../common/enum/user_roles.enum';
 
 @Entity('users')
 export class User {
-  /** Supabase Auth user id (uuid). */
   @PrimaryColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true })
-  name: string;
+  name!: string;
+
+  /** scrypt `salt:hash`. Hidden from normal queries. */
+  @Column({ type: 'varchar', select: false, nullable: true })
+  password!: string | null;
 
   @Column({ type: 'enum', enum: UserRoles, default: UserRoles.PENDING })
-  role: UserRoles;
+  role!: UserRoles;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

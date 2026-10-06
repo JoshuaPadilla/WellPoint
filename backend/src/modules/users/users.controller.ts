@@ -1,7 +1,14 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { UserRoles } from '../common/enum/user_roles.enum';
-import { Permissions } from '../common/rbac/permissions.decorator';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Patch,
+} from '@nestjs/common';
+import { UserRoles } from '../../common/enum/user_roles.enum';
+import { Permissions } from '../../common/rbac/permissions.decorator';
 import { UsersService } from './users.service';
 
 @Controller('users')

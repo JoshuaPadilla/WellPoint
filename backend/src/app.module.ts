@@ -1,23 +1,22 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import dbConfig from './config/db.config';
-import supabaseConfig from './config/supabase.config';
-import authConfig from './config/auth.config';
 import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
 import { PermissionGuard } from './common/rbac/permission.guard';
-import { SourcesModule } from './sources/sources.module';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
+import authConfig from './config/auth.config';
+import dbConfig from './config/db.config';
+import { AuthModule } from './modules/auth/auth.module';
+import { SourcesModule } from './modules/sources/sources.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [dbConfig, supabaseConfig, authConfig],
+      load: [dbConfig, authConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
