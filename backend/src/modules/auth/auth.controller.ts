@@ -17,13 +17,21 @@ export class AuthController {
 
   @Post('register')
   async register(
-    @Body() body: { name?: string; email?: string; password?: string },
+    @Body()
+    body: {
+      name?: string;
+      brgy?: string;
+      email?: string;
+      password?: string;
+    },
   ) {
     const name = body.name?.trim() ?? '';
+    const brgy = body.brgy?.trim() ?? '';
     const email = (body.email ?? '').trim().toLowerCase();
     const password = body.password ?? '';
 
     if (!name) throw new BadRequestException('Name is required');
+    if (!brgy) throw new BadRequestException('Barangay is required');
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       throw new BadRequestException('A valid email is required');
     }
@@ -31,7 +39,7 @@ export class AuthController {
       throw new BadRequestException('Password must be at least 6 characters');
     }
 
-    return this.authService.register(name, email, password);
+    return this.authService.register(name, brgy, email, password);
   }
 
   @Post('login')
@@ -49,7 +57,13 @@ export class AuthController {
   me(
     @Req()
     req: {
-      user?: { id: string; email: string; name: string | null; role: string };
+      user?: {
+        id: string;
+        email: string;
+        name: string | null;
+        brgy: string | null;
+        role: string;
+      };
     },
   ) {
     const user = req.user;

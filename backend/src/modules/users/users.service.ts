@@ -15,6 +15,14 @@ export class UsersService {
     return this.usersRepo.findOneBy({ id });
   }
 
+  findByIdWithBrgy(id: string): Promise<User | null> {
+    return this.usersRepo
+      .createQueryBuilder('user')
+      .addSelect('user.brgy')
+      .where('user.id = :id', { id })
+      .getOne();
+  }
+
   findByEmail(email: string): Promise<User | null> {
     return this.usersRepo.findOneBy({ email });
   }
@@ -24,6 +32,7 @@ export class UsersService {
     return this.usersRepo
       .createQueryBuilder('user')
       .addSelect('user.password')
+      .addSelect('user.brgy')
       .where('user.email = :email', { email })
       .getOne();
   }
@@ -40,6 +49,7 @@ export class UsersService {
     id: string;
     email: string;
     name?: string;
+    brgy?: string;
     password?: string;
     role: UserRoles;
   }): Promise<User> {
@@ -48,6 +58,7 @@ export class UsersService {
         id: data.id,
         email: data.email,
         name: data.name,
+        brgy: data.brgy,
         password: data.password ?? null,
         role: data.role,
       }),

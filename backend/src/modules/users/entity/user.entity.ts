@@ -1,4 +1,3 @@
-import { UserRoles } from '../../../common/enum/user_roles.enum';
 import {
   Column,
   CreateDateColumn,
@@ -6,6 +5,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserRoles } from '../../../common/enum/user_roles.enum';
 
 @Entity('users')
 export class User {
@@ -16,7 +16,10 @@ export class User {
   email!: string;
 
   @Column({ nullable: true })
-  name!: string;
+  name?: string;
+
+  @Column({ type: 'varchar', select: false, nullable: true })
+  brgy?: string;
 
   /** scrypt `salt:hash`. Hidden from normal queries. */
   @Column({ type: 'varchar', select: false, nullable: true })

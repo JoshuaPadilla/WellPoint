@@ -13,6 +13,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  brgy: string | null;
   role: string;
 }
 
@@ -49,7 +50,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    const user = await this.usersService.findById(claims.sub);
+    const user = await this.usersService.findByIdWithBrgy(claims.sub);
     if (!user) {
       throw new UnauthorizedException('Account not found');
     }
@@ -57,7 +58,8 @@ export class JwtAuthGuard implements CanActivate {
     request.user = {
       id: user.id,
       email: user.email,
-      name: user.name,
+      name: user.name ?? null,
+      brgy: user.brgy ?? null,
       role: user.role,
     };
 
