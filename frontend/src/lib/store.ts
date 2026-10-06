@@ -11,10 +11,11 @@ import { deriveDomain } from './derive'
 import type { DomainState } from './derive'
 import { activeAlerts, allAlerts, sortAlerts } from './alerts'
 import { computeMetrics } from './metrics'
-import type { Alert, BarangayDetail, Community, Metrics, Warning } from '@/data/types'
+import type { Alert, BarangayDetail, BarangayOfficial, Community, Metrics, Warning } from '@/data/types'
 
 export interface Domain extends DomainState {
   warnings: Warning[]
+  officials: BarangayOfficial[]
   alerts: Alert[]
   activeAlerts: Alert[]
   metrics: Metrics
@@ -41,12 +42,13 @@ export function buildDomain(water: WaterState, geos: GeoBarangay[], barangayAt: 
     return { ...a, barangayPsgc: b?.psgcCode ?? '', systemId }
   })
 
-  const domain = deriveDomain(communities, systems, sources, reports, water.disruption)
+  const domain = deriveDomain(communities, systems, sources, reports, water.statusOverrides)
   const active = activeAlerts(domain, water.warnings)
   const metrics = computeMetrics(domain, active)
   return {
     ...domain,
     warnings: water.warnings,
+    officials: water.officials,
     alerts: sortAlerts(allAlerts(domain, water.warnings), domain),
     activeAlerts: active,
     metrics,
@@ -62,7 +64,8 @@ export function useDomain(): Domain {
 export const barangayName = (communities: Community[], psgc: string) =>
   communities.find((c) => c.psgcCode === psgc)?.name ?? psgc
 
-/** Per-barangay drill-down: access state, vulnerability breakdown, trend, reports, alerts. */
+/** Per-barangay drill-down: access state, vulnerability breakdown, trend, reports, alerts,
+ *  source count, officials, and the serving system (if any). */
 export function barangayDetail(domain: Domain, psgcCode: string): BarangayDetail | null {
   const community = domain.communities.find((c) => c.psgcCode === psgcCode)
   if (!community) return null
@@ -71,8 +74,10 @@ export function barangayDetail(domain: Domain, psgcCode: string): BarangayDetail
   const trend = community.systemId ? (TICKS_BY_SYSTEM[community.systemId] ?? []).map((t) => t.flow) : []
   const openReports = domain.reports.filter((r) => r.barangayPsgc === psgcCode && r.status !== 'resolved')
   const alerts = domain.alerts.filter((a) => a.area === community.name)
+  const system = domain.systems.find((s) => s.barangayId === psgcCode) ?? null
   return {
     community,
+    affordability: domain.affordabilityByPsgc[psgcCode] ?? community.affordability,
     accessState: domain.accessByPsgc[psgcCode],
     vulnerabilityTier: vuln.tier,
     vulnerabilityBreakdown: {
@@ -84,5 +89,8 @@ export function barangayDetail(domain: Domain, psgcCode: string): BarangayDetail
     trend,
     openReports,
     alerts,
+    sourceCount: domain.sources.filter((s) => s.barangayPsgc === psgcCode).length,
+    officials: domain.officials.filter((o) => o.barangayPsgc === psgcCode),
+    system: system ? { name: system.name, level: system.level, serviceHours: system.serviceHours, operator: system.operator } : null,
   }
 }

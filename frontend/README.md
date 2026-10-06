@@ -54,7 +54,7 @@ npm run check       # prettier --check
 | `/dashboard/map` | 57-barangay coverage map (colored by derived access state) |
 | `/dashboard/sources` | Water sources grouped per barangay |
 | `/dashboard/alerts` | Derived early-warning alerts |
-| `/dashboard/warnings` | DRRM/LGU early warnings (issue + target barangays) |
+| `/dashboard/warnings` | DRRM early warnings (issue + target barangays) |
 | `/dashboard/deliveries` | DRRM filling stations |
 | `/dashboard/reports` | Community reports (submit + acknowledge/resolve) |
 | `/dashboard/users` | LGU role & barangay management |

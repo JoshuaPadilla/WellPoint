@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useDomain } from '@/lib/store'
 import { resetDemo, simulateDisruption, useWaterStore } from '@/lib/water-store'
-import type { DisruptionType } from '@/data/types'
+import type { BarangayStatus, DisruptionType } from '@/data/types'
 
 const DISRUPTIONS: { id: DisruptionType; label: string }[] = [
   { id: 'typhoon', label: 'Typhoon' },
@@ -13,18 +13,28 @@ const DISRUPTIONS: { id: DisruptionType; label: string }[] = [
   { id: 'maintenance', label: 'Maintenance' },
 ]
 
+function describe(b: BarangayStatus): string {
+  if (!b.available) return 'out of service'
+  if (b.quality === 'unsafe') return 'unsafe to drink'
+  if (b.quality === 'advisory') return 'under advisory'
+  if (b.flow < 40) return 'running low'
+  return 'disrupted'
+}
+
 const field = 'h-8 rounded-lg border border-line bg-white px-2.5 text-sm'
 
 export function DemoControls({ compact = false }: { compact?: boolean }) {
-  const { role, disruption } = useWaterStore()
-  const { systems } = useDomain()
+  const { role, statusOverrides } = useWaterStore()
+  const { systems, communities } = useDomain()
   const [type, setType] = useState<DisruptionType>('typhoon')
   const [systemId, setSystemId] = useState(systems[0]?.id ?? '')
 
-  const canDemo = role === 'lgu' || role === 'drrm'
+  const canDemo = role === 'lgu'
   if (!canDemo) return null
 
-  const active = disruption ? systems.find((s) => s.id === disruption.systemId) : null
+  const activePsgc = Object.keys(statusOverrides)[0] ?? ''
+  const activeCommunity = activePsgc ? communities.find((c) => c.psgcCode === activePsgc) ?? null : null
+  const active = activeCommunity ? { name: activeCommunity.name, override: statusOverrides[activePsgc] } : null
 
   return (
     <div className={cn('rounded-2xl border border-line bg-white', compact ? 'p-3' : 'p-4')}>
@@ -48,7 +58,7 @@ export function DemoControls({ compact = false }: { compact?: boolean }) {
             ))}
           </select>
         </label>
-        <Button size="sm" onClick={() => simulateDisruption(type, systemId)}>
+        <Button size="sm" onClick={() => void simulateDisruption(type, systemId)}>
           Simulate disruption
         </Button>
         <Button size="sm" variant="outline" onClick={() => void resetDemo()}>
@@ -57,7 +67,7 @@ export function DemoControls({ compact = false }: { compact?: boolean }) {
       </div>
       {active && (
         <p className="mt-2 text-xs text-ink/70">
-          Active: <span className="font-semibold text-signal">{active.name}</span> is disrupted. Press “Reset demo” to restore the known-good state.
+          Active: <span className="font-semibold text-signal">{active.name}</span> is {describe(active.override)}. Press “Reset demo” to restore the known-good state.
         </p>
       )}
     </div>

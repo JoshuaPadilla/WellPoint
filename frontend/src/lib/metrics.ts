@@ -21,7 +21,7 @@ export function computeMetrics(domain: DomainState, alerts: Alert[]): Metrics {
     if (access !== 'underserved') coveredPop += c.population
     const status = domain.statusByPsgc[c.psgcCode]
     flowWeighted += c.population * (status.available ? status.flow : 0)
-    affordabilityWeighted += c.population * c.affordability
+    affordabilityWeighted += c.population * (domain.affordabilityByPsgc[c.psgcCode] ?? c.affordability)
   }
 
   for (const a of alerts) {

@@ -1,11 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { AlertTriangle, CheckCircle2, Info, ShieldAlert } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useDomain } from '@/lib/store'
 import { getUser } from '@/lib/auth'
-import { useWaterStore } from '@/lib/water-store'
+import { setReportStatus, setStatus, setWarningStatus, useWaterStore } from '@/lib/water-store'
 import type { Alert, AlertSeverity, AlertType } from '@/data/types'
 
 export const Route = createFileRoute('/dashboard/alerts')({ component: Page })
@@ -28,6 +28,8 @@ function Page() {
   const { role } = useWaterStore()
   const myBarangay = typeof window === 'undefined' ? '' : (getUser()?.barangay ?? '')
   const scoped = role === 'citizen' || role === 'official'
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [err, setErr] = useState('')
 
   const active = useMemo(
     () => domain.activeAlerts.filter((a) => !scoped || same(a.area, myBarangay)),
@@ -37,6 +39,26 @@ function Page() {
 
   const count = (severity: AlertSeverity) => active.filter((a) => a.severity === severity).length
 
+  // LGU triages report-derived and authored-warning alerts city-wide; a barangay
+  // official resolves the report/source alerts for their own barangay. System
+  // alerts are cleared from the Systems page by the LGU/DRRM water office.
+  const canResolve = (a: Alert): boolean => {
+    if (role === 'lgu') return !!a.reportId || !!a.warningId
+    if (role === 'official') return !!a.reportId || a.id.startsWith('alert-src-')
+    return false
+  }
+
+  const resolve = async (a: Alert) => {
+    setBusyId(a.id)
+    setErr('')
+    let error: string | null = null
+    if (a.reportId) error = await setReportStatus(a.reportId, 'resolved')
+    else if (a.warningId) error = await setWarningStatus(a.warningId, 'resolved')
+    else if (a.id.startsWith('alert-src-')) setStatus(a.id.slice('alert-src-'.length), 'ok')
+    setBusyId(null)
+    if (error) setErr(error)
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-extrabold">Alerts</h1>
@@ -45,6 +67,12 @@ function Page() {
           ? `Alerts for Brgy. ${myBarangay || 'your barangay'}, derived from your system's status and nearby reports.`
           : 'City-wide early warnings derived from every system, source, and community report — not a black box.'}
       </p>
+
+      {err && (
+        <p role="alert" className="mt-4 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+          {err}
+        </p>
+      )}
 
       <div className="mt-5 flex flex-wrap gap-3">
         <Summary label="Critical" count={count('critical')} tone="bg-red-600 text-white" />
@@ -58,7 +86,14 @@ function Page() {
         </p>
       ) : (
         <ul className="mt-6 space-y-3">
-          {active.map((a) => <AlertCard key={a.id} alert={a} />)}
+          {active.map((a) => (
+            <AlertCard
+              key={a.id}
+              alert={a}
+              onResolve={canResolve(a) ? () => resolve(a) : undefined}
+              busy={busyId === a.id}
+            />
+          ))}
         </ul>
       )}
 
@@ -90,7 +125,7 @@ function Summary({ label, count, tone }: { label: string; count: number; tone: s
   )
 }
 
-function AlertCard({ alert }: { alert: Alert }) {
+function AlertCard({ alert, onResolve, busy }: { alert: Alert; onResolve?: () => void; busy?: boolean }) {
   const s = SEVERITY[alert.severity]
   const resolved = alert.status === 'resolved'
   return (
@@ -111,6 +146,16 @@ function AlertCard({ alert }: { alert: Alert }) {
           <p className="flex items-center gap-1 text-xs font-bold text-well">
             <CheckCircle2 className="size-3.5" aria-hidden="true" /> Recommended: {alert.action}
           </p>
+        )}
+        {onResolve && !resolved && (
+          <button
+            type="button"
+            onClick={onResolve}
+            disabled={busy}
+            className="rounded-lg bg-well px-3 py-1 text-xs font-bold text-white hover:bg-deep disabled:opacity-50"
+          >
+            {busy ? 'Resolving…' : 'Resolve'}
+          </button>
         )}
       </div>
     </li>

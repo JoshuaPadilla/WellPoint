@@ -4,6 +4,7 @@ import type { LucideIcon } from 'lucide-react'
 import {
   BarChart3,
   BellRing,
+  Gauge,
   LogOut,
   MapIcon,
   Megaphone,
@@ -79,12 +80,18 @@ const nav: NavItem[] = [
     to: '/dashboard/warnings',
     label: 'Warnings',
     icon: Megaphone,
-    roles: ['lgu', 'drrm'],
+    roles: ['drrm'],
   },
   {
     to: '/dashboard/insights',
     label: 'Insights',
     icon: Sparkles,
+    roles: ['lgu'],
+  },
+  {
+    to: '/dashboard/systems',
+    label: 'Water status',
+    icon: Gauge,
     roles: ['lgu'],
   },
   {

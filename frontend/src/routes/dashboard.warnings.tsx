@@ -31,7 +31,7 @@ function Page() {
   const domain = useDomain()
   const { role, warnings } = useWaterStore()
   const user = typeof window === 'undefined' ? null : getUser()
-  const canAuthor = role === 'lgu' || role === 'drrm'
+  const canAuthor = role === 'drrm'
 
   const [type, setType] = useState<WarningType>('outage')
   const [severity, setSeverity] = useState<AlertSeverity>('warning')
@@ -75,7 +75,7 @@ function Page() {
     <div>
       <h1 className="text-3xl font-extrabold">Early warnings</h1>
       <p className="mt-2 max-w-xl text-ink/70">
-        DRRM and LGU issue early warnings to affected barangays so they can prepare before an interruption or disaster.
+        DRRM issues early warnings to affected barangays so they can prepare before an interruption or disaster.
       </p>
 
       {canAuthor ? (
@@ -143,7 +143,7 @@ function Page() {
         </section>
       ) : (
         <p className="mt-5 rounded-xl border border-dashed border-line p-6 text-sm text-ink/70">
-          Early warnings are issued by DRRM and LGU.
+          Early warnings are issued by DRRM.
         </p>
       )}
 

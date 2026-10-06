@@ -3,23 +3,38 @@
 import { baselineFlow, isolationOf, pilotStatus } from './seed'
 import { vulnerability } from './vulnerability'
 import type { VulnerabilityBreakdown } from './vulnerability'
-import type { AccessState, Asset, Community, CommunityReport, DisruptionReason, ServiceStatus, WaterSystem } from '@/data/types'
-
-export interface Disruption {
-  systemId: string
-  type: DisruptionReason
-}
+import type { AccessState, Asset, BarangayStatus, Community, CommunityReport, ServiceStatus, WaterSystem } from '@/data/types'
 
 export const LOW_AFFORDABILITY = 35
 
-/** Effective status for a barangay: pilot systems use their seed ticks (plus any
- *  disruption override); everyone else gets a deterministic isolation-degraded baseline. */
-export function effectiveStatus(community: Community, disruption: Disruption | null): ServiceStatus {
+/** Effective service status for a barangay: a persisted barangay_status override
+ *  wins when present; pilot systems otherwise use their seed ticks; everyone
+ *  else gets a deterministic isolation-degraded baseline. */
+export function effectiveStatus(community: Community, overrides: Record<string, BarangayStatus>): ServiceStatus {
+  const override = overrides[community.psgcCode]
+  if (override) {
+    const reason =
+      !override.available
+        ? 'outage'
+        : override.quality === 'unsafe'
+          ? 'contamination'
+          : override.quality === 'advisory'
+            ? 'advisory'
+            : override.flow < 40
+              ? 'low-flow'
+              : null
+    return { available: override.available, flow: override.flow, quality: override.quality, reason }
+  }
   if (community.systemId) {
-    return pilotStatus(community.systemId, disruption ?? null)
+    return pilotStatus(community.systemId, null)
   }
   const isolation = isolationOf(community.areaSqKm, community.distanceToCenterKm)
   return { available: true, flow: baselineFlow(isolation), quality: 'safe', reason: null }
+}
+
+/** Effective affordability: an override value wins, else the seeded community value. */
+export function effectiveAffordability(community: Community, overrides: Record<string, BarangayStatus>): number {
+  return overrides[community.psgcCode]?.affordability ?? community.affordability
 }
 
 /** docs/architecture.md §5.2: covered ≠ accessed. */
@@ -34,8 +49,9 @@ export interface DomainState {
   systems: WaterSystem[]
   sources: Asset[]
   reports: CommunityReport[]
-  disruption: Disruption | null
+  overrides: Record<string, BarangayStatus>
   statusByPsgc: Record<string, ServiceStatus>
+  affordabilityByPsgc: Record<string, number>
   accessByPsgc: Record<string, AccessState>
   vulnerabilityByPsgc: Record<string, VulnerabilityBreakdown>
   sourceArea: Record<string, string>
@@ -46,9 +62,10 @@ export function deriveDomain(
   systems: WaterSystem[],
   sources: Asset[],
   reports: CommunityReport[],
-  disruption: Disruption | null,
+  overrides: Record<string, BarangayStatus>,
 ): DomainState {
   const statusByPsgc: Record<string, ServiceStatus> = {}
+  const affordabilityByPsgc: Record<string, number> = {}
   const accessByPsgc: Record<string, AccessState> = {}
   const vulnerabilityByPsgc: Record<string, VulnerabilityBreakdown> = {}
   const nameByPsgc = new Map(communities.map((c) => [c.psgcCode, c.name]))
@@ -57,10 +74,12 @@ export function deriveDomain(
 
   for (const c of communities) {
     const system = systems.find((s) => s.id === c.systemId) ?? null
-    const status = effectiveStatus(c, disruption)
+    const status = effectiveStatus(c, overrides)
+    const affordability = effectiveAffordability(c, overrides)
     statusByPsgc[c.psgcCode] = status
-    accessByPsgc[c.psgcCode] = accessStateOf(status, c.affordability)
-    vulnerabilityByPsgc[c.psgcCode] = vulnerability(c, system?.level ?? null)
+    affordabilityByPsgc[c.psgcCode] = affordability
+    accessByPsgc[c.psgcCode] = accessStateOf(status, affordability)
+    vulnerabilityByPsgc[c.psgcCode] = vulnerability({ ...c, affordability }, system?.level ?? null)
   }
-  return { communities, systems, sources, reports, disruption, statusByPsgc, accessByPsgc, vulnerabilityByPsgc, sourceArea }
+  return { communities, systems, sources, reports, overrides, statusByPsgc, affordabilityByPsgc, accessByPsgc, vulnerabilityByPsgc, sourceArea }
 }

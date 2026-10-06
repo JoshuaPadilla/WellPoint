@@ -1,9 +1,8 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabase'
-import type { Disruption } from './derive'
 import type {
-  Asset, AssetKind, Community, CommunityReport, ReportStatus, ReportType, Role, SourceStatus,
-  Warning, WarningStatus, WarningType, WaterSystem,
+  Asset, AssetKind, BarangayOfficial, BarangayStatus, Community, CommunityReport, DisruptionType, Quality,
+  ReportStatus, ReportType, Role, SourceStatus, Warning, WarningStatus, WarningType, WaterSystem,
 } from '@/data/types'
 
 export type { Asset, AssetKind, CommunityReport, ReportStatus, ReportType, Role, SourceStatus, Warning, WarningStatus, WarningType } from '@/data/types'
@@ -59,6 +58,15 @@ export const CAN_PLACE: Record<Role, AssetKind[]> = {
   citizen: [],
 }
 
+// Who may reposition (drag) an existing marker on the map. Separate from
+// CAN_PLACE so moving a source can be granted without also granting add/delete.
+export const CAN_MOVE: Record<Role, AssetKind[]> = {
+  lgu: [],
+  drrm: ['station'],
+  official: ['pump', 'well', 'reservoir'],
+  citizen: [],
+}
+
 // Every status a water source can have. `marker` colours the map pin; `badge` the little label.
 export const STATUSES: Record<Status, { label: string; badge: string; marker: string }> = {
   ok: { label: 'Working', badge: 'bg-sky text-well', marker: '' },
@@ -71,6 +79,26 @@ export const STATUSES: Record<Status, { label: string; badge: string; marker: st
 // Out of water or about to be — these show up in Outage alerts.
 export const isShort = (s: Status) => s === 'empty' || s === 'low'
 
+// Persisted per-barangay service overrides (supabase `barangay_status`). A row
+// replaces the seeded live values (available / flow / quality / affordability)
+// for one barangay; its absence means the deterministic seed applies. Managed by
+// the LGU water office only, and read live by every user via realtime.
+export const QUALITY_OPTIONS: { value: Quality; label: string }[] = [
+  { value: 'safe', label: 'Safe' },
+  { value: 'advisory', label: 'Advisory' },
+  { value: 'unsafe', label: 'Contaminated' },
+]
+
+// Demo disruption types map onto the fields the LGU editor writes, so the
+// "simulate disruption" control and the water-status editor share one source of
+// truth. Affordability is filled from the target barangay at run time.
+export const DISRUPTION_TO_STATUS: Record<DisruptionType, { available: boolean; flow: number; quality: Quality }> = {
+  typhoon: { available: false, flow: 0, quality: 'advisory' },
+  drought: { available: true, flow: 28, quality: 'safe' },
+  maintenance: { available: false, flow: 0, quality: 'safe' },
+  contamination: { available: true, flow: 45, quality: 'unsafe' },
+}
+
 // Who may change the status of which kind. Mirrors public.can_set_status().
 export const CAN_SET_STATUS: Record<Role, AssetKind[]> = {
   lgu: [],
@@ -78,6 +106,9 @@ export const CAN_SET_STATUS: Record<Role, AssetKind[]> = {
   official: ['pump', 'well', 'reservoir'],
   citizen: [],
 }
+
+// Only the LGU water office / water district may edit a barangay's live status.
+export const canEditBarangayStatus = (role: Role) => role === 'lgu'
 
 // Pumps and wells can run dry, so they carry a working/empty status and take reports.
 export const hasStatus = (kind: AssetKind) => kind === 'pump' || kind === 'well'
@@ -92,7 +123,8 @@ export type WaterState = {
   barangays: Community[]
   systems: WaterSystem[]
   users: ProfileUser[]
-  disruption: Disruption | null
+  statusOverrides: Record<string, BarangayStatus> // psgcCode → live status override (persisted barangay_status)
+  officials: BarangayOfficial[] // representative directory (persisted barangay_officials)
   loading: boolean // true until the first load from Supabase finishes
   error: string | null
 }
@@ -126,7 +158,8 @@ const empty: WaterState = {
   barangays: [],
   systems: [],
   users: [],
-  disruption: null,
+  statusOverrides: {},
+  officials: [],
   loading: true,
   error: null,
 }
@@ -348,6 +381,71 @@ export async function loadWarnings() {
   }
 }
 
+type BarangayStatusRow = {
+  psgc_code: string
+  available: boolean
+  flow: number | null
+  quality: string | null
+  affordability: number | null
+  set_by: string | null
+  updated_at: string
+}
+const BARANGAY_STATUS_COLUMNS = 'psgc_code, available, flow, quality, affordability, set_by, updated_at'
+
+const isQuality = (v: unknown): v is Quality => typeof v === 'string' && QUALITY_OPTIONS.some((o) => o.value === v)
+
+export async function loadBarangayStatus() {
+  try {
+    const { data, error } = await supabase().from('barangay_status').select(BARANGAY_STATUS_COLUMNS)
+    if (error) throw new Error(error.message)
+    const statusOverrides: Record<string, BarangayStatus> = {}
+    for (const r of data as BarangayStatusRow[]) {
+      if (isQuality(r.quality) && isNum(r.flow) && isNum(r.affordability)) {
+        statusOverrides[r.psgc_code] = {
+          psgcCode: r.psgc_code,
+          available: r.available,
+          flow: r.flow,
+          quality: r.quality,
+          affordability: r.affordability,
+          setBy: r.set_by ?? '',
+          updatedAt: r.updated_at,
+        }
+      }
+    }
+    set({ ...state, statusOverrides })
+  } catch {
+    /* barangay_status table not applied yet — deterministic seed governs */
+  }
+}
+
+type OfficialRow = {
+  id: string
+  barangay_psgc: string
+  position: string | null
+  name: string | null
+  contact: string | null
+  email: string | null
+}
+const OFFICIAL_COLUMNS = 'id, barangay_psgc, position, name, contact, email'
+
+export async function loadOfficials() {
+  try {
+    const { data, error } = await supabase().from('barangay_officials').select(OFFICIAL_COLUMNS).order('position')
+    if (error) throw new Error(error.message)
+    const officials = (data as OfficialRow[]).map((r) => ({
+      id: r.id,
+      barangayPsgc: r.barangay_psgc,
+      position: r.position ?? '',
+      name: r.name ?? '',
+      contact: r.contact ?? '',
+      email: r.email ?? '',
+    }))
+    set({ ...state, officials })
+  } catch {
+    /* barangay_officials table not applied yet */
+  }
+}
+
 export async function loadUsers() {
   try {
     const { data, error } = await supabase().from('profiles').select('id, name, email, role, barangay_psgc').order('name')
@@ -377,11 +475,16 @@ export function initWaterStore() {
   void loadAssets()
   void loadReports()
   void loadWarnings()
+  void loadBarangayStatus()
+  void loadOfficials()
+  void loadUsers()
   try {
     let t1: ReturnType<typeof setTimeout> | undefined
     let t2: ReturnType<typeof setTimeout> | undefined
     let t3: ReturnType<typeof setTimeout> | undefined
     let t4: ReturnType<typeof setTimeout> | undefined
+    let t5: ReturnType<typeof setTimeout> | undefined
+    let t6: ReturnType<typeof setTimeout> | undefined
     supabase()
       .channel('wellpoint')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'water_sources' }, () => {
@@ -399,6 +502,14 @@ export function initWaterStore() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'warning_barangays' }, () => {
         clearTimeout(t4)
         t4 = setTimeout(() => void loadWarnings(), 300)
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'barangay_status' }, () => {
+        clearTimeout(t5)
+        t5 = setTimeout(() => void loadBarangayStatus(), 300)
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'barangay_officials' }, () => {
+        clearTimeout(t6)
+        t6 = setTimeout(() => void loadOfficials(), 300)
       })
       .subscribe()
   } catch {
@@ -453,6 +564,8 @@ async function save(change: (table: Table) => PromiseLike<Result>) {
 }
 
 export function moveAsset(id: string, lng: number, lat: number) {
+  const asset = state.assets.find((a) => a.id === id)
+  if (!asset || !CAN_MOVE[state.role].includes(asset.kind)) return
   set({ ...state, assets: state.assets.map((a) => (a.id === id ? { ...a, lng, lat } : a)), error: null })
   if (id.startsWith('temp-')) return
   void save((t) => t.update({ lng, lat }).eq('id', id).select('id'))
@@ -501,7 +614,7 @@ export async function setReportStatus(id: string, status: ReportStatus): Promise
   }
 }
 
-// Warnings (DRRM/LGU-authored early warnings)
+// Warnings (DRRM-authored early warnings; LGU may resolve for oversight)
 export async function createWarning(input: {
   authorId: string
   type: WarningType
@@ -563,17 +676,71 @@ export async function setUserRole(userId: string, role: Role, barangayPsgc: stri
   }
 }
 
-// Demo controls: a disruption overrides the target system's derived status; reset
-// clears it and restores Supabase state to known-good.
-export function simulateDisruption(type: Disruption['type'], systemId: string) {
-  set({ ...state, disruption: { systemId, type }, error: null })
+// The LGU water office edits a barangay's live status through one persisted
+// table (barangay_status). Setting a row overrides the seeded state; clearing
+// it restores the seeded state. Both flows update the same table, so alerts
+// and scores change live for every user.
+export interface BarangayStatusInput {
+  available: boolean
+  flow: number
+  quality: Quality
+  affordability: number
+}
+
+export async function setBarangayStatus(psgcCode: string, input: BarangayStatusInput): Promise<string | null> {
+  try {
+    const { error } = await supabase()
+      .from('barangay_status')
+      .upsert(
+        {
+          psgc_code: psgcCode,
+          available: input.available,
+          flow: Math.round(input.flow),
+          quality: input.quality,
+          affordability: Math.round(input.affordability),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'psgc_code' },
+      )
+    if (error) return friendly(error.message)
+    void loadBarangayStatus()
+    return null
+  } catch (e) {
+    return friendly((e as Error).message)
+  }
+}
+
+export async function clearBarangayStatus(psgcCode: string): Promise<string | null> {
+  try {
+    const { error } = await supabase().from('barangay_status').delete().eq('psgc_code', psgcCode)
+    if (error) return friendly(error.message)
+    void loadBarangayStatus()
+    return null
+  } catch (e) {
+    return friendly((e as Error).message)
+  }
+}
+
+// Demo "simulate disruption" writes a barangay_status row for the system's
+// barangay, so the same derivation and realtime path applies.
+export async function simulateDisruption(type: DisruptionType, systemId: string): Promise<string | null> {
+  const barangay = state.barangays.find((b) => b.systemId === systemId)
+  if (!barangay) return 'No barangay is linked to that system.'
+  const s = DISRUPTION_TO_STATUS[type]
+  return setBarangayStatus(barangay.psgcCode, {
+    available: s.available,
+    flow: s.flow,
+    quality: s.quality,
+    affordability: barangay.affordability,
+  })
 }
 
 export async function resetDemo() {
-  set({ ...state, disruption: null, error: null })
+  set({ ...state, statusOverrides: {}, error: null })
   try {
     await supabase().from('reports').delete().not('id', 'is', null)
     await supabase().from('warnings').delete().not('id', 'is', null)
+    await supabase().from('barangay_status').delete().not('id', 'is', null)
     await supabase().from('water_sources').update({ status: 'ok' }).not('id', 'is', null)
   } catch {
     /* best effort; the client-side reset is what the score depends on */
@@ -581,4 +748,5 @@ export async function resetDemo() {
   void loadAssets()
   void loadReports()
   void loadWarnings()
+  void loadBarangayStatus()
 }

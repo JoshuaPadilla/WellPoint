@@ -22,6 +22,7 @@ import { Route as DashboardMapRouteImport } from './routes/dashboard.map'
 import { Route as DashboardReportsRouteImport } from './routes/dashboard.reports'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSourcesRouteImport } from './routes/dashboard.sources'
+import { Route as DashboardSystemsRouteImport } from './routes/dashboard.systems'
 import { Route as DashboardUsersRouteImport } from './routes/dashboard.users'
 import { Route as DashboardWarningsRouteImport } from './routes/dashboard.warnings'
 
@@ -90,6 +91,11 @@ const DashboardSourcesRoute = DashboardSourcesRouteImport.update({
   path: '/sources',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSystemsRoute = DashboardSystemsRouteImport.update({
+  id: '/systems',
+  path: '/systems',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardUsersRoute = DashboardUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
+  '/dashboard/systems': typeof DashboardSystemsRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/dashboard/warnings': typeof DashboardWarningsRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
+  '/dashboard/systems': typeof DashboardSystemsRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/dashboard/warnings': typeof DashboardWarningsRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/dashboard/reports': typeof DashboardReportsRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/sources': typeof DashboardSourcesRoute
+  '/dashboard/systems': typeof DashboardSystemsRoute
   '/dashboard/users': typeof DashboardUsersRoute
   '/dashboard/warnings': typeof DashboardWarningsRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
+    | '/dashboard/systems'
     | '/dashboard/users'
     | '/dashboard/warnings'
     | '/dashboard/'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
+    | '/dashboard/systems'
     | '/dashboard/users'
     | '/dashboard/warnings'
     | '/dashboard'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/dashboard/reports'
     | '/dashboard/settings'
     | '/dashboard/sources'
+    | '/dashboard/systems'
     | '/dashboard/users'
     | '/dashboard/warnings'
     | '/dashboard/'
@@ -305,6 +317,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSourcesRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/systems': {
+      id: '/dashboard/systems'
+      path: '/systems'
+      fullPath: '/dashboard/systems'
+      preLoaderRoute: typeof DashboardSystemsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/users': {
       id: '/dashboard/users'
       path: '/users'
@@ -331,6 +350,7 @@ interface DashboardRouteChildren {
   DashboardReportsRoute: typeof DashboardReportsRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardSourcesRoute: typeof DashboardSourcesRoute
+  DashboardSystemsRoute: typeof DashboardSystemsRoute
   DashboardUsersRoute: typeof DashboardUsersRoute
   DashboardWarningsRoute: typeof DashboardWarningsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -345,6 +365,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardReportsRoute: DashboardReportsRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardSourcesRoute: DashboardSourcesRoute,
+  DashboardSystemsRoute: DashboardSystemsRoute,
   DashboardUsersRoute: DashboardUsersRoute,
   DashboardWarningsRoute: DashboardWarningsRoute,
   DashboardIndexRoute: DashboardIndexRoute,

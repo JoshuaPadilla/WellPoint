@@ -326,7 +326,7 @@ function BarangayMap() {
             Report a problem
           </Link>
         )}
-        {(role === 'lgu' || role === 'drrm') && (
+        {role === 'drrm' && (
           <Link
             to="/dashboard/warnings"
             className="rounded-full bg-aqua px-4 py-2 text-sm font-bold text-white shadow-md hover:bg-well"
@@ -371,6 +371,10 @@ function BarangayMap() {
               </dd>
             </div>
             <div className="rounded-lg bg-mist px-2 py-1.5">
+              <dt className="text-ink/60">Water sources</dt>
+              <dd className="font-semibold">{detail.sourceCount}</dd>
+            </div>
+            <div className="rounded-lg bg-mist px-2 py-1.5">
               <dt className="text-ink/60">Flow</dt>
               <dd className="font-semibold">
                 {Math.round(detail.status.flow)}%
@@ -386,10 +390,28 @@ function BarangayMap() {
             <div className="rounded-lg bg-mist px-2 py-1.5">
               <dt className="text-ink/60">Affordability</dt>
               <dd className="font-semibold">
-                {detail.community.affordability}
+                {detail.affordability}
+              </dd>
+            </div>
+            <div className="rounded-lg bg-mist px-2 py-1.5">
+              <dt className="text-ink/60">System</dt>
+              <dd className="font-semibold">
+                {detail.system ? `Level ${detail.system.level} · ${detail.system.serviceHours}h/day` : 'No pilot system'}
               </dd>
             </div>
           </dl>
+          {detail.officials.length > 0 && (
+            <div className="mt-2 space-y-1 text-xs">
+              <p className="font-bold text-ink/60">Official contact</p>
+              {detail.officials.map((o) => (
+                <p key={o.id} className="text-ink/70">
+                  {o.position}: {o.name}
+                  {o.contact && <> · {o.contact}</>}
+                  {o.email && <> · {o.email}</>}
+                </p>
+              ))}
+            </div>
+          )}
           {detail.alerts.length > 0 && (
             <ul className="mt-2 space-y-1">
               {detail.alerts.slice(0, 2).map((a) => (

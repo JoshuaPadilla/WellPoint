@@ -5,6 +5,8 @@
 --
 -- WARNING: drops demo data. Back up anything you need first.
 
+drop table if exists public.barangay_officials cascade;
+drop table if exists public.barangay_status cascade;
 drop table if exists public.warning_barangays cascade;
 drop table if exists public.warnings cascade;
 drop table if exists public.reports cascade;
@@ -12,18 +14,6 @@ drop table if exists public.water_sources cascade;
 drop table if exists public.barangays cascade;
 drop table if exists public.water_systems cascade;
 drop table if exists public.profiles cascade;
-
--- =====================================================================
--- profiles (identity + role + scope)
--- =====================================================================
-create table public.profiles (
-  id uuid primary key references auth.users (id) on delete cascade,
-  name text,
-  email text,
-  role text not null default 'citizen' check (role in ('citizen','official','lgu','drrm')),
-  barangay_psgc text null references public.barangays (psgc_code),
-  last_login_at timestamptz
-);
 
 -- =====================================================================
 -- water_systems (the 5 pilot systems, static reference data)
@@ -51,6 +41,18 @@ create table public.barangays (
   population integer not null default 0,
   affordability integer not null default 50,
   system_id uuid null references public.water_systems (id)
+);
+
+-- =====================================================================
+-- profiles (identity + role + scope)
+-- =====================================================================
+create table public.profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  name text,
+  email text,
+  role text not null default 'citizen' check (role in ('citizen','official','lgu','drrm')),
+  barangay_psgc text null references public.barangays (psgc_code),
+  last_login_at timestamptz
 );
 
 -- =====================================================================
@@ -82,7 +84,7 @@ create table public.reports (
 );
 
 -- =====================================================================
--- warnings (DRRM/LGU-authored early warnings)
+-- warnings (DRRM-authored early warnings; LGU may resolve for oversight)
 -- =====================================================================
 create table public.warnings (
   id uuid primary key default gen_random_uuid(),
@@ -155,8 +157,8 @@ $$;
 create or replace function public.can_triage_report(barangay_psgc text)
 returns boolean language sql stable as $$
   select
-    public.user_role() = 'official'
-    and barangay_psgc is not distinct from public.user_barangay()
+    public.user_role() = 'lgu'
+    or (public.user_role() = 'official' and barangay_psgc is not distinct from public.user_barangay())
 $$;
 
 -- =====================================================================
@@ -206,7 +208,7 @@ create policy "reports_delete" on public.reports for delete to authenticated
 alter table public.warnings enable row level security;
 create policy "warnings_read" on public.warnings for select to authenticated using (true);
 create policy "warnings_insert" on public.warnings for insert to authenticated
-  with check (public.user_role() in ('lgu','drrm'));
+  with check (public.user_role() = 'drrm');
 create policy "warnings_update" on public.warnings for update to authenticated
   using (public.user_role() = 'lgu' or (public.user_role() = 'drrm' and author_id = auth.uid()))
   with check (public.user_role() = 'lgu' or (public.user_role() = 'drrm' and author_id = auth.uid()));
@@ -216,9 +218,61 @@ create policy "warnings_delete" on public.warnings for delete to authenticated
 alter table public.warning_barangays enable row level security;
 create policy "warning_barangays_read" on public.warning_barangays for select to authenticated using (true);
 create policy "warning_barangays_insert" on public.warning_barangays for insert to authenticated
-  with check (public.user_role() in ('lgu','drrm'));
+  with check (public.user_role() = 'drrm');
 create policy "warning_barangays_delete" on public.warning_barangays for delete to authenticated
-  using (public.user_role() = 'lgu' or public.user_role() = 'drrm');
+  using (public.user_role() = 'drrm');
+
+-- =====================================================================
+-- barangay_status (LGU/Water-District-managed per-barangay service overrides)
+-- A row replaces the seeded/derived live values (available, flow, quality,
+-- affordability) for one barangay; its absence means the seeded/deterministic
+-- state applies. This is the persisted source of truth behind both the
+-- "simulate disruption" demo control and the LGU water-status editor, so a
+-- change raises or clears alerts live for every user.
+-- =====================================================================
+create table public.barangay_status (
+  psgc_code text primary key references public.barangays (psgc_code) on delete cascade,
+  available boolean not null,
+  flow integer not null check (flow between 0 and 200),
+  quality text not null check (quality in ('safe','advisory','unsafe')),
+  affordability integer not null check (affordability between 0 and 100),
+  set_by uuid references public.profiles (id),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.barangay_status enable row level security;
+create policy "barangay_status_read" on public.barangay_status for select to authenticated using (true);
+create policy "barangay_status_insert" on public.barangay_status for insert to authenticated
+  with check (public.user_role() = 'lgu');
+create policy "barangay_status_update" on public.barangay_status for update to authenticated
+  using (public.user_role() = 'lgu')
+  with check (public.user_role() = 'lgu');
+create policy "barangay_status_delete" on public.barangay_status for delete to authenticated
+  using (public.user_role() = 'lgu');
+
+-- =====================================================================
+-- barangay_officials (representative / official directory per barangay)
+-- Readable by all signed-in users so the drill-down can show who to contact;
+-- managed by the LGU.
+-- =====================================================================
+create table public.barangay_officials (
+  id uuid primary key default gen_random_uuid(),
+  barangay_psgc text not null references public.barangays (psgc_code) on delete cascade,
+  position text not null,
+  name text not null,
+  contact text,
+  email text
+);
+
+alter table public.barangay_officials enable row level security;
+create policy "barangay_officials_read" on public.barangay_officials for select to authenticated using (true);
+create policy "barangay_officials_insert" on public.barangay_officials for insert to authenticated
+  with check (public.user_role() = 'lgu');
+create policy "barangay_officials_update" on public.barangay_officials for update to authenticated
+  using (public.user_role() = 'lgu')
+  with check (public.user_role() = 'lgu');
+create policy "barangay_officials_delete" on public.barangay_officials for delete to authenticated
+  using (public.user_role() = 'lgu');
 
 -- =====================================================================
 -- Seed data
@@ -301,3 +355,11 @@ insert into public.water_sources (id, kind, name, lng, lat, status, barangay_psg
   ('00000000-0000-4000-8000-000000000005', 'well',      'Mercedes well',      124.868, 11.795, 'ok',     '0806005027', '10000000-0000-4000-8000-000000000003'),
   ('00000000-0000-4000-8000-000000000006', 'well',      'Bangon spring',      124.938, 11.862, 'low',    '0806005003', '10000000-0000-4000-8000-000000000004'),
   ('00000000-0000-4000-8000-000000000007', 'well',      'Canlapwas spring',   124.962, 11.872, 'unsafe', '0806005014', '10000000-0000-4000-8000-000000000005');
+
+-- Demo barangay officials (placeholder directory — replace with the LGU roster)
+insert into public.barangay_officials (barangay_psgc, position, name, contact, email) values
+  ('0806005034', 'Barangay Captain', 'Maria Santos',     '0917 000 0001', 'brgy.poblacion1@catbalogan.gov.ph'),
+  ('0806005051', 'Barangay Captain', 'Jose Ramirez',     '0917 000 0002', 'brgy.sanandres@catbalogan.gov.ph'),
+  ('0806005027', 'Barangay Captain', 'Ana Reyes',        '0917 000 0003', 'brgy.mercedes@catbalogan.gov.ph'),
+  ('0806005003', 'Barangay Captain', 'Pedro Garcia',     '0917 000 0004', 'brgy.bangon@catbalogan.gov.ph'),
+  ('0806005014', 'Barangay Captain', 'Liza Mendoza',     '0917 000 0005', 'brgy.canlapwas@catbalogan.gov.ph');

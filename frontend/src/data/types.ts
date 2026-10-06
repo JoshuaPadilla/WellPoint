@@ -56,8 +56,31 @@ export interface ServiceStatus {
   reason: DisruptionReason | null
 }
 
-export type DisruptionReason = 'drought' | 'typhoon' | 'maintenance' | 'contamination'
-export type DisruptionType = DisruptionReason
+export type DisruptionReason = 'drought' | 'typhoon' | 'maintenance' | 'contamination' | 'low-flow' | 'advisory' | 'outage'
+export type DisruptionType = 'drought' | 'typhoon' | 'maintenance' | 'contamination'
+
+/** A persisted per-barangay status override (supabase `barangay_status`). A row
+ *  replaces the seeded/derived live values for one barangay; no row means the
+ *  deterministic seed applies. Managed by the LGU water office. */
+export interface BarangayStatus {
+  psgcCode: string
+  available: boolean
+  flow: number // % of nominal (0-200)
+  quality: Quality
+  affordability: number // 0-100
+  setBy: string
+  updatedAt: string
+}
+
+/** A barangay representative/official (supabase `barangay_officials`). */
+export interface BarangayOfficial {
+  id: string
+  barangayPsgc: string
+  position: string
+  name: string
+  contact: string
+  email: string
+}
 
 export type AccessState = 'served' | 'partial' | 'underserved'
 export type VulnerabilityTier = 'low' | 'medium' | 'high'
@@ -127,6 +150,7 @@ export interface Metrics {
 
 export interface BarangayDetail {
   community: Community
+  affordability: number // effective (override wins over seeded)
   accessState: AccessState
   vulnerabilityTier: VulnerabilityTier
   vulnerabilityBreakdown: {
@@ -138,4 +162,7 @@ export interface BarangayDetail {
   trend: number[]
   openReports: CommunityReport[]
   alerts: Alert[]
+  sourceCount: number
+  officials: BarangayOfficial[]
+  system: { name: string; level: ServiceLevel; serviceHours: number; operator: string } | null
 }

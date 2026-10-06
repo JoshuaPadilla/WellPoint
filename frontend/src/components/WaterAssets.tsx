@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useBarangays } from '@/lib/barangays'
 import {
-  CAN_PLACE, CAN_SET_STATUS, KINDS, REPORT_TYPES, STATUSES,
+  CAN_MOVE, CAN_PLACE, CAN_SET_STATUS, KINDS, REPORT_TYPES, STATUSES,
   moveAsset, removeAsset, setStatus, useWaterStore,
 } from '@/lib/water-store'
 import type { Asset, AssetKind, Role, Status } from '@/lib/water-store'
@@ -33,7 +33,7 @@ export function RolePanel() {
   const hint = {
     citizen: 'Find which water sources are available near you.',
     official: 'Register water sources and manage reports for your barangay.',
-    lgu: 'City-wide view. Open the summary, alerts, warnings, and users from the map.',
+    lgu: 'City-wide view. Open the summary, alerts, and users from the map.',
     drrm: 'City-wide view. Issue early warnings to affected barangays.',
   }[role]
   return (
@@ -49,6 +49,7 @@ export function AssetMarkers() {
     <>
       {assets.map((a) => {
         const canEdit = CAN_PLACE[role].includes(a.kind)
+        const canMove = CAN_MOVE[role].includes(a.kind)
         const Icon = ICONS[a.kind]
         const count = reports.filter((r) => r.barangayPsgc === a.barangayPsgc && r.status !== 'resolved').length
         // Any status other than "Working" colours the pin; otherwise each kind has its own colour.
@@ -56,12 +57,12 @@ export function AssetMarkers() {
           STATUSES[a.status].marker ||
           (a.kind === 'reservoir' ? 'bg-deep' : a.kind === 'station' ? 'bg-aqua' : a.kind === 'well' ? 'bg-teal-600' : 'bg-well')
         return (
-          // The key changes with edit rights so MapLibre rebuilds the marker with the right draggable setting.
+          // The key changes with move rights so MapLibre rebuilds the marker with the right draggable setting.
           <MapMarker
-            key={`${a.id}-${canEdit}`}
+            key={`${a.id}-${canMove}`}
             longitude={a.lng}
             latitude={a.lat}
-            draggable={canEdit}
+            draggable={canMove}
             onDragEnd={(ll) => moveAsset(a.id, ll.lng, ll.lat)}
           >
             <MarkerContent>
@@ -76,7 +77,7 @@ export function AssetMarkers() {
             </MarkerContent>
             <MarkerTooltip className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-ink shadow">{a.name}</MarkerTooltip>
             <MarkerPopup closeButton className="w-64 rounded-xl border border-line bg-white p-4 text-ink shadow-lg">
-              <AssetPopup asset={a} role={role} canEdit={canEdit} />
+              <AssetPopup asset={a} role={role} canEdit={canEdit} canMove={canMove} />
             </MarkerPopup>
           </MapMarker>
         )
@@ -85,7 +86,7 @@ export function AssetMarkers() {
   )
 }
 
-function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdit: boolean }) {
+function AssetPopup({ asset, role, canEdit, canMove }: { asset: Asset; role: Role; canEdit: boolean; canMove: boolean }) {
   const { reports } = useWaterStore()
   const { barangayOf } = useBarangays()
   const area = barangayOf(asset) ?? asset.name
@@ -135,10 +136,10 @@ function AssetPopup({ asset, role, canEdit }: { asset: Asset; role: Role; canEdi
         </div>
       )}
 
-      {canEdit && (
+      {(canMove || canEdit) && (
         <div className="space-y-2">
-          <p className="text-ink/70">Drag the marker to move it.</p>
-          <Button size="sm" variant="outline" onClick={() => removeAsset(asset.id)}>Remove</Button>
+          {canMove && <p className="text-ink/70">Drag the marker to move it.</p>}
+          {canEdit && <Button size="sm" variant="outline" onClick={() => removeAsset(asset.id)}>Remove</Button>}
         </div>
       )}
     </div>

@@ -109,8 +109,8 @@ Legend: ✓ = granted, — = denied. All access is scoped to Catbalogan City dat
 | Register a water source | — | ✓ (own) | — | station only |
 | Set source status | — | ✓ (own) | — | station only |
 | Submit report | — | — | ✓ (own) | — |
-| Acknowledge / resolve report (inbox) | — | ✓ (own) | — | — |
-| Author warning | ✓ | — | — | ✓ |
+| Acknowledge / resolve report (inbox) | ✓ | ✓ (own) | — | — |
+| Author warning | — | — | — | ✓ |
 | Resolve / cancel warning | ✓ | — | — | ✓ (own) |
 | Assign roles / barangays | ✓ | — | — | — |
 | Run `simulate` / `reset demo` | ✓ | — | — | ✓ |
@@ -119,7 +119,7 @@ Legend: ✓ = granted, — = denied. All access is scoped to Catbalogan City dat
 **Production enforcement notes**
 - `official` identity is tied to a `profiles.barangay_psgc` so "own barangay" is an entity-level filter, not a string match.
 - `lgu` and `drrm` are city-wide roles issued by the LGU admin (stored in `profiles.role`).
-- `citizen` submits reports for their own barangay; `official` triages that inbox. `lgu` has no report screen — it sees report-derived alerts city-wide.
+- `citizen` submits reports for their own barangay; `official` triages that inbox. `lgu` has no report inbox — it resolves report-derived and warning alerts city-wide from the Alerts page.
 - Water-source registration/status is `official` (own barangay) + `drrm` (stations); `lgu` is read-only on sources (oversight via the map and alerts).
 - Every role transition (e.g., report ack) re-derives alerts client-side; a role cannot influence derivation by mutating status.
 
@@ -220,7 +220,7 @@ stateDiagram-v2
   resolved --> [*]
 ```
 
-Governing rules: `official`/`citizen` cannot transition states; only `lgu` can; every transition re-derives alerts.
+Governing rules: `lgu` (any barangay) and `official` (own barangay) may transition states; `citizen` cannot; every transition re-derives alerts.
 
 ### Demo state
 

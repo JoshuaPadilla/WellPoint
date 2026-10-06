@@ -5,15 +5,17 @@ import type { LucideIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { useBarangays } from '@/lib/barangays'
-import { KINDS, STATUSES, useWaterStore } from '@/lib/water-store'
-import type { Asset, AssetKind } from '@/lib/water-store'
+import { CAN_SET_STATUS, KINDS, STATUSES, setStatus, useWaterStore } from '@/lib/water-store'
+import type { Asset, AssetKind, Status } from '@/lib/water-store'
 
 export const Route = createFileRoute('/dashboard/sources')({ component: Page })
 
 const ICONS: Record<AssetKind, LucideIcon> = { pump: Droplet, well: Droplets, reservoir: Waves, station: GlassWater }
 const OUTSIDE = 'Outside the barangay boundaries'
+const field = 'h-7 rounded-md border border-line bg-white px-1.5 text-xs'
 
 function Source({ a }: { a: Asset }) {
+  const { role } = useWaterStore()
   const Icon = ICONS[a.kind]
   return (
     <li className="flex items-center justify-between gap-3 rounded-lg bg-mist px-3 py-2 text-sm">
@@ -22,8 +24,23 @@ function Source({ a }: { a: Asset }) {
         {a.name}
         <span className="font-normal text-ink/60">{KINDS[a.kind]}</span>
       </span>
-      <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', STATUSES[a.status].badge)}>
-        {STATUSES[a.status].label}
+      <span className="flex items-center gap-2">
+        {CAN_SET_STATUS[role].includes(a.kind) ? (
+          <select
+            className={field}
+            value={a.status}
+            onChange={(e) => setStatus(a.id, e.target.value as Status)}
+            aria-label={`Status for ${a.name}`}
+          >
+            {Object.entries(STATUSES).map(([v, s]) => (
+              <option key={v} value={v}>{s.label}</option>
+            ))}
+          </select>
+        ) : (
+          <span className={cn('rounded-full px-2 py-0.5 text-xs font-bold', STATUSES[a.status].badge)}>
+            {STATUSES[a.status].label}
+          </span>
+        )}
       </span>
     </li>
   )
