@@ -1,12 +1,5 @@
-@import 'tailwindcss';
-@import '@fontsource-variable/inter';
 
-@theme {
-  --font-sans: 'Inter Variable', system-ui, sans-serif;
-  --color-served: #16a34a;
-  --color-partial: #d97706;
-  --color-underserved: #dc2626;
-}
+@import "tailwindcss";
 
 * {
   box-sizing: border-box;
@@ -20,5 +13,5 @@ body,
 
 body {
   margin: 0;
-  font-family: var(--font-sans);
 }
+
