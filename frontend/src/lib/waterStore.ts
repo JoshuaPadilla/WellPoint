@@ -27,16 +27,35 @@ export const CAN_PLACE: Record<Role, AssetKind[]> = {
 
 type State = { role: Role; assets: Asset[]; reports: Report[] }
 
-// Sample positions only. Replace with the real pumps once the LGU adds them.
+// Fake demo data. Positions are approximate and a few pumps are empty or reported so every dashboard view has something to show.
+// Replace with the real pumps once the LGU adds them.
 const seed: Asset[] = [
   { id: 'a1', kind: 'pump', name: 'Poblacion pump', lng: 124.8838, lat: 11.7762, status: 'ok' },
-  { id: 'a2', kind: 'pump', name: 'Muñoz pump', lng: 124.8826, lat: 11.7842, status: 'ok' },
+  { id: 'a2', kind: 'pump', name: 'Muñoz pump', lng: 124.8826, lat: 11.7842, status: 'empty' },
   { id: 'a3', kind: 'pump', name: 'San Roque pump', lng: 124.8345, lat: 11.8075, status: 'ok' },
   { id: 'a4', kind: 'reservoir', name: 'Maulong reservoir', lng: 124.878, lat: 11.796, status: 'ok' },
   { id: 'a5', kind: 'station', name: 'City hall filling station', lng: 124.8855, lat: 11.774, status: 'ok' },
+  { id: 'a6', kind: 'pump', name: 'Mercedes pump', lng: 124.8905, lat: 11.7705, status: 'empty' },
+  { id: 'a7', kind: 'pump', name: 'Guindapunan pump', lng: 124.901, lat: 11.789, status: 'ok' },
+  { id: 'a8', kind: 'pump', name: 'Maulong pump', lng: 124.8795, lat: 11.7945, status: 'empty' },
+  { id: 'a9', kind: 'pump', name: 'Canlapwas pump', lng: 124.87, lat: 11.765, status: 'ok' },
+  { id: 'a10', kind: 'pump', name: 'Pupua pump', lng: 124.86, lat: 11.8, status: 'empty' },
+  { id: 'a11', kind: 'station', name: 'Cagutian filling station', lng: 124.881, lat: 11.781, status: 'ok' },
 ]
 
-const KEY = 'wellpoint.demo.v1'
+const ago = (minutes: number) => Date.now() - minutes * 60_000
+const seedReports: Report[] = [
+  { id: 'r1', assetId: 'a2', issue: 'empty', note: 'Nothing comes out since this morning.', at: ago(35) },
+  { id: 'r2', assetId: 'a2', issue: 'low', note: '', at: ago(180) },
+  { id: 'r3', assetId: 'a6', issue: 'empty', note: 'Queue of about 20 households.', at: ago(95) },
+  { id: 'r4', assetId: 'a8', issue: 'empty', note: '', at: ago(260) },
+  { id: 'r5', assetId: 'a8', issue: 'dirty', note: 'Brown water the day before it ran dry.', at: ago(1500) },
+  { id: 'r6', assetId: 'a10', issue: 'empty', note: 'Dry for two days.', at: ago(2900) },
+  { id: 'r7', assetId: 'a7', issue: 'low', note: 'Very slow, takes 10 minutes to fill a pail.', at: ago(60) },
+  { id: 'r8', assetId: 'a1', issue: 'dirty', note: 'Cloudy water.', at: ago(420) },
+]
+
+const KEY = 'wellpoint.demo.v2' // bumped so browsers drop the old saved demo and load this data
 
 const isRole = (v: unknown): v is Role => ROLES.some((r) => r.id === v)
 const isKind = (v: unknown): v is AssetKind => v === 'pump' || v === 'reservoir' || v === 'station'
@@ -65,7 +84,7 @@ function load(): State {
   } catch {
     /* fall through to the seed */
   }
-  return { role: 'citizen', assets: seed, reports: [] }
+  return { role: 'citizen', assets: seed, reports: seedReports }
 }
 
 // crypto.randomUUID only exists on https or localhost, so fall back when it is missing.
