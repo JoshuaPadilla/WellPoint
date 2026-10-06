@@ -2,12 +2,15 @@
 
 @theme {
   --font-sans: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #0b2530;
-  --color-well: #1f7a8c;
-  --color-deep: #134b58;
-  --color-mist: #eef3f4;
-  --color-line: #cddadd;
+  --color-ink: #03045e;
+  --color-well: #0077b6;
+  --color-deep: #023e8a;
+  --color-mist: #f8fbfd;
+  --color-line: #e2e8f0;
   --color-signal: #e0a100;
+  --color-aqua: #00b4d8;
+  --color-foam: #90e0ef;
+  --color-sky: #caf0f8;
 }
 
 * {
@@ -20,6 +23,11 @@ body,
   min-height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -28,7 +36,7 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--color-signal);
+  outline: 3px solid var(--color-aqua);
   outline-offset: 2px;
 }
 
@@ -44,5 +52,23 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .flow-line {
     animation: none;
+  }
+}
+
+/* Gentle float for the hero image */
+@keyframes float {
+  50% {
+    transform: translateY(-12px);
+  }
+}
+.float {
+  animation: float 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .float {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
   }
 }
