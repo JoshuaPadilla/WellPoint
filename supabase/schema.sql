@@ -130,32 +130,35 @@ create trigger on_auth_user_created
 -- =====================================================================
 -- RLS helpers
 -- =====================================================================
+-- SECURITY DEFINER so these can read public.profiles from inside the profiles
+-- RLS policy without re-entering it (which otherwise recurses until Postgres
+-- raises "stack depth limit exceeded").
 create or replace function public.user_role()
-returns text language sql stable as $$
+returns text language sql stable security definer set search_path = public as $$
   select coalesce((select role from public.profiles where id = auth.uid()), 'citizen')
 $$;
 
 create or replace function public.user_barangay()
-returns text language sql stable as $$
+returns text language sql stable security definer set search_path = public as $$
   select (select barangay_psgc from public.profiles where id = auth.uid())
 $$;
 
 create or replace function public.can_place(kind text, barangay_psgc text)
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select
     (public.user_role() = 'drrm' and kind = 'station')
     or (public.user_role() = 'official' and kind in ('pump','well','reservoir') and barangay_psgc is not distinct from public.user_barangay())
 $$;
 
 create or replace function public.can_set_status(kind text, barangay_psgc text)
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select
     (public.user_role() = 'drrm' and kind = 'station')
     or (public.user_role() = 'official' and kind in ('pump','well','reservoir') and barangay_psgc is not distinct from public.user_barangay())
 $$;
 
 create or replace function public.can_triage_report(barangay_psgc text)
-returns boolean language sql stable as $$
+returns boolean language sql stable security definer set search_path = public as $$
   select
     public.user_role() = 'lgu'
     or (public.user_role() = 'official' and barangay_psgc is not distinct from public.user_barangay())
