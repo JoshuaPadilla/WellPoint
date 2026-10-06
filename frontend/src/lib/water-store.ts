@@ -1,11 +1,11 @@
 import { useSyncExternalStore } from 'react'
 import { supabase } from './supabase'
 import type {
-  Asset, AssetKind, BarangayOfficial, BarangayStatus, Community, CommunityReport, DisruptionType, Quality,
+  Asset, AssetKind, BarangayStatus, Community, CommunityReport, DisruptionType, Quality,
   ReportStatus, ReportType, Role, SourceStatus, Warning, WarningStatus, WarningType, WaterSystem,
 } from '@/data/types'
 
-export type { Asset, AssetKind, CommunityReport, ReportStatus, ReportType, Role, SourceStatus, Warning, WarningStatus, WarningType } from '@/data/types'
+export type { Asset, AssetKind, BarangayStatus, CommunityReport, ReportStatus, ReportType, Role, SourceStatus, Warning, WarningStatus, WarningType } from '@/data/types'
 
 // Physical assets, reports, warnings, barangays, and systems live in Supabase and
 // sync here with realtime subscriptions. The current role and any active demo
@@ -124,7 +124,6 @@ export type WaterState = {
   systems: WaterSystem[]
   users: ProfileUser[]
   statusOverrides: Record<string, BarangayStatus> // psgcCode → live status override (persisted barangay_status)
-  officials: BarangayOfficial[] // representative directory (persisted barangay_officials)
   loading: boolean // true until the first load from Supabase finishes
   error: string | null
 }
@@ -159,7 +158,6 @@ const empty: WaterState = {
   systems: [],
   users: [],
   statusOverrides: {},
-  officials: [],
   loading: true,
   error: null,
 }
@@ -418,34 +416,6 @@ export async function loadBarangayStatus() {
   }
 }
 
-type OfficialRow = {
-  id: string
-  barangay_psgc: string
-  position: string | null
-  name: string | null
-  contact: string | null
-  email: string | null
-}
-const OFFICIAL_COLUMNS = 'id, barangay_psgc, position, name, contact, email'
-
-export async function loadOfficials() {
-  try {
-    const { data, error } = await supabase().from('barangay_officials').select(OFFICIAL_COLUMNS).order('position')
-    if (error) throw new Error(error.message)
-    const officials = (data as OfficialRow[]).map((r) => ({
-      id: r.id,
-      barangayPsgc: r.barangay_psgc,
-      position: r.position ?? '',
-      name: r.name ?? '',
-      contact: r.contact ?? '',
-      email: r.email ?? '',
-    }))
-    set({ ...state, officials })
-  } catch {
-    /* barangay_officials table not applied yet */
-  }
-}
-
 export async function loadUsers() {
   try {
     const { data, error } = await supabase().from('profiles').select('id, name, email, role, barangay_psgc').order('name')
@@ -476,7 +446,6 @@ export function initWaterStore() {
   void loadReports()
   void loadWarnings()
   void loadBarangayStatus()
-  void loadOfficials()
   void loadUsers()
   try {
     let t1: ReturnType<typeof setTimeout> | undefined
@@ -484,7 +453,6 @@ export function initWaterStore() {
     let t3: ReturnType<typeof setTimeout> | undefined
     let t4: ReturnType<typeof setTimeout> | undefined
     let t5: ReturnType<typeof setTimeout> | undefined
-    let t6: ReturnType<typeof setTimeout> | undefined
     supabase()
       .channel('wellpoint')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'water_sources' }, () => {
@@ -506,10 +474,6 @@ export function initWaterStore() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'barangay_status' }, () => {
         clearTimeout(t5)
         t5 = setTimeout(() => void loadBarangayStatus(), 300)
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'barangay_officials' }, () => {
-        clearTimeout(t6)
-        t6 = setTimeout(() => void loadOfficials(), 300)
       })
       .subscribe()
   } catch {

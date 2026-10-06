@@ -73,10 +73,10 @@ _Select one_
 **13. Core Functions**
 _Maximum 5 functions_
 > 1. Water-security dashboard: status banner plus KPI cards (coverage, reliability, active alerts, affordability).
-> 2. Coverage and status map of all 57 real barangay boundaries, colored by derived access state, with source markers and service levels.
-> 3. Explainable alerts and early warning with severity, cause, recommended action, and vulnerability-weighted response priority.
-> 4. Community report submission that persists to Supabase and updates alerts live.
-> 5. Demo controls: simulate typhoon/drought/contamination/maintenance and reset to a known-good state.
+> 2. Coverage and status map of all 57 real barangay boundaries, colored by derived access state; each drill-down shows water-source count, serving system, and the assigned barangay official with contact.
+> 3. Explainable alerts and early warning with severity, cause, recommended action, and vulnerability-weighted response priority, plus a full resolution loop (report triage, warning resolve, source status, LGU status update).
+> 4. Community reporting: submissions persist to Supabase and update alerts live; barangay officials acknowledge and resolve their own barangay's reports.
+> 5. LGU water-office tools: per-barangay status editor (served, flow %, quality, affordability) with Restore-seeded, user & role management, and boundary-checked source registration on a full-screen map.
 
 ---
 
@@ -84,15 +84,15 @@ _Maximum 5 functions_
 
 **14. Prototype Status**
 _Select one + maximum 50 words_
-> **Working Prototype** — all core functions work: dashboard, 57-barangay map, derived alerts, report submission with live Supabase sync, and disruption simulation/reset. Water data is deterministic simulated data; barangay boundaries are real. `npm run typecheck` and `build` pass.
+> **Working Prototype** — all core functions work: dashboard, 57-barangay map, derived alerts, community reports with barangay-official triage, LGU warnings, emergency deliveries, the LGU per-barangay status editor, user & role management, and boundary-checked source registration. Water data is deterministic simulated data; barangay boundaries are real. `npm run typecheck` and `build` pass.
 
 **15. User and System Workflow**
 _Maximum 5 major steps_
-> 1. User opens WellPoint and signs in; the Supabase `profiles` role sets the view (LGU, official, citizen, DRRM).
-> 2. The client loads the 57-barangay GeoJSON and the deterministic seed, and syncs sources, reports, and warnings from Supabase.
+> 1. User opens WellPoint and signs in; the Supabase `profiles` role and barangay set the view (LGU, official, citizen, DRRM).
+> 2. The client loads the 57-barangay GeoJSON and the deterministic seed, and syncs sources, reports, warnings, and LGU status overrides from Supabase.
 > 3. Derived logic computes access state, vulnerability, alerts, and water-security metrics from the current signals.
-> 4. The user reads the dashboard, map, and alerts; a barangay official or resident submits a report.
-> 5. The report persists to Supabase, Realtime re-derives alerts live, and staff acknowledge, resolve, or act on the recommended action.
+> 4. A resident or official submits a report; the barangay official acknowledges/resolves it, and LGU/DRRM issue or resolve warnings — every change updates all views live via Realtime.
+> 5. The LGU sets per-barangay status (served, flow %, quality, affordability) or assigns an official; map colors, alerts, and the score re-derive for every user.
 
 **16. Technology and Data Used**
 _Structured list_
@@ -100,7 +100,7 @@ _Structured list_
 > - **Frontend:** React 19 + TanStack Router (Vite 8) SPA; shadcn/ui + Tailwind CSS v4; MapLibre GL for maps.
 > - **Backend/data:** Supabase (PostgreSQL + Auth + Realtime) via `@supabase/supabase-js`; no separate server.
 > - **Logic:** pure TypeScript modules — `data/types.ts` and `lib/{seed,alerts,metrics,vulnerability}.ts`.
-> - **Data:** deterministic client seed (`baseSeed 20261006`) — 57 real PSGC-coded barangay boundaries (GeoJSON), 5 pilot systems, water sources, and 6-tick service status; water/telemetry values are simulated.
+> - **Data:** deterministic client seed (`baseSeed 20261006`) — 57 real PSGC-coded barangay boundaries (GeoJSON), 5 pilot systems, water sources, and 6-tick service status; user-authored Supabase rows (`water_sources`, `reports`, `warnings`, `barangay_status`, `profiles`); water/telemetry values are simulated.
 > - **Optional API:** Open-Meteo (supply outlook; degrades gracefully).
 > - **Quality/deploy:** ESLint, Prettier, `tsc --noEmit`; static host + Supabase.
 
@@ -109,7 +109,7 @@ _Maximum 5 items_
 > 1. Needs a reachable Supabase project (Postgres + Auth + Realtime) and its anon key; there is no separate backend.
 > 2. Internet is needed for Supabase, Carto map tiles, and optional Open-Meteo; the map degrades to a tile-less blank style offline and the client seed still renders.
 > 3. Water-service and telemetry data are simulated; there is no live sensor, PAGASA, or DOST integration in the prototype.
-> 4. Authentication is real, but role management has no UI — roles and barangays are set in the Supabase `profiles` table.
+> 4. Officials come from registered user accounts — a barangay shows "None assigned" until the LGU assigns one of its registered users as official.
 > 5. Access state and vulnerability are derived from a documented model on simulated inputs — demonstration-grade, not a certified assessment.
 
 **18. User Experience and Accessibility**
@@ -118,7 +118,7 @@ _Maximum 75 words_
 
 **19. User Testing / Feedback**
 _Maximum 75 words / optional_
-> Not yet conducted. Internal team walkthroughs verified the full demo path (dashboard → map → alerts → report → simulate → reset), and Reset demo restores a known-good state.
+> Internal team walkthroughs verified the full loop: a resident report → barangay official acknowledge/resolve → LGU per-barangay status edit → alerts, map colors, and the city score update across roles without a refresh. External testing and reviewer feedback: Not yet conducted.
 
 ---
 
@@ -126,7 +126,7 @@ _Maximum 75 words / optional_
 
 **20. Proposed Operational Use and Implementing Office**
 _Maximum 100 words_
-> WellPoint would run in the City Water/Engineering Office, with the MDRRMO and barangay offices as partners. Staff use it daily to monitor all 57 barangays and, during disasters, to prioritize response: they read the dashboard and map, triage community reports, and act on alerts. Barangay officials submit reports and residents check status. The implementing office owns the Supabase project and accounts. In production it ingests existing flow-meter and PAGASA/DOST data; where telemetry is absent, staff enter data through the same forms.
+> WellPoint would run in the City Water/Engineering Office, with the MDRRMO and barangay offices as partners. LGU staff monitor all 57 barangays, triage community reports, set per-barangay status (served, flow %, quality, affordability), and assign officials from registered accounts. Barangay officials maintain their own barangay's sources, reports, and inline statuses; residents check status. The implementing office owns the Supabase project and accounts. In production it ingests existing flow-meter and PAGASA/DOST data; where telemetry is absent, staff enter data through the same forms.
 
 **21. Deployment Requirements**
 _Maximum 6 items_
@@ -157,7 +157,7 @@ _Maximum 100 words_
 
 **25. Expected Reach / Coverage**
 _Short quantitative/text answer_
-> All 57 barangays of Catbalogan City and their households; the pilot covers 5 water systems. Direct users: the City Water/Engineering Office, 57 barangay councils, and the MDRRMO. Replicable to any Region VIII LGU by loading its own barangay boundaries and records.
+> All 57 barangays of Catbalogan City and their households; the pilot covers 5 pilot water systems. Direct users: the City Water/Engineering Office, 57 barangay officials (one assignable per registered official account), and the MDRRMO. Residents in every barangay read status and report problems. Replicable to any Region VIII LGU by loading its own barangay boundaries and records.
 
 **26. Success Indicators**
 _Maximum 3 indicators_
@@ -179,16 +179,16 @@ _Maximum 75 words_
 
 **29. Sustainability and Maintenance**
 _Maximum 100 words_
-> The City Water/Engineering Office would own and operate WellPoint, with MDRRMO and barangay offices as partners; a developer or vendor maintains the code. Ongoing needs: a Supabase project (free tier is enough for a pilot), a static host, periodic updates, role and account management in the `profiles` table, and keeping barangay and water data current. Data management is lightweight because records are scoped by LGU and barangay. Funding is minimal (near-zero hosting) and the standard web stack keeps maintenance low and portable.
+> The City Water/Engineering Office would own and operate WellPoint, with MDRRMO and barangay offices as partners; a developer or vendor maintains the code. Ongoing needs: a Supabase project (free tier is enough for a pilot), a static host, periodic updates, user and role management, and keeping barangay and water data current. Data management is lightweight because records are scoped by LGU and barangay. Funding is minimal (near-zero hosting) and the standard web stack keeps maintenance low and portable.
 
 **30. Scalability and Replicability**
 _Maximum 100 words_
-> Every record is scoped by LGU and barangay, so onboarding a new LGU means adding its barangay GeoJSON and data records, not forking the app. The dashboard, coverage map, alerts, and reports are independent modules adoptable one at a time. The map falls back to a tile-less style offline, and the SPA is mobile-first for low-bandwidth areas. The documented production path moves the same pure derived functions and types behind Supabase Edge Functions for live telemetry and multi-LGU tenancy, with the UI unchanged.
+> Every record is scoped by LGU and barangay, so onboarding a new LGU means adding its barangay GeoJSON and data records, not forking the app. The dashboard, coverage map, alerts, reports, status editor, and source registration are independent modules adoptable one at a time. The map falls back to a tile-less style offline, and the SPA is mobile-first for low-bandwidth areas. The documented production path moves the same pure derived functions and types behind Supabase Edge Functions for live telemetry and multi-LGU tenancy, with the UI unchanged.
 
 **31. Next Development Priorities**
 _Maximum 3 priorities_
 > 1. Integrate real data: existing flow meters plus PAGASA/DOST feeds, with staff manual entry as fallback.
-> 2. Add role-management UI and multi-LGU tenancy/scoping in Supabase.
+> 2. Multi-LGU tenancy/scoping in Supabase and role-management refinement for the water district.
 > 3. Pilot with the Catbalogan City water office, then add SMS/email alerts and validated accessibility testing.
 
 ---

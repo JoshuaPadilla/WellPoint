@@ -5,7 +5,6 @@
 --
 -- WARNING: drops demo data. Back up anything you need first.
 
-drop table if exists public.barangay_officials cascade;
 drop table if exists public.barangay_status cascade;
 drop table if exists public.warning_barangays cascade;
 drop table if exists public.warnings cascade;
@@ -175,9 +174,11 @@ create policy "barangays_read" on public.barangays for select to authenticated u
 alter table public.water_systems enable row level security;
 create policy "water_systems_read" on public.water_systems for select to authenticated using (true);
 
--- profiles: own row, plus LGU can read/update all (role management)
+-- profiles: own row, plus LGU can read/update all (role management), and every
+-- signed-in user can read official rows so the drill-down shows who to contact.
 alter table public.profiles enable row level security;
-create policy "profiles_read_own" on public.profiles for select to authenticated using (id = auth.uid() or public.user_role() = 'lgu');
+create policy "profiles_read_own" on public.profiles for select to authenticated
+  using (id = auth.uid() or public.user_role() = 'lgu' or role = 'official');
 create policy "profiles_update_own" on public.profiles for update to authenticated
   using (id = auth.uid() or public.user_role() = 'lgu')
   with check (id = auth.uid() or public.user_role() = 'lgu');
@@ -251,30 +252,6 @@ create policy "barangay_status_update" on public.barangay_status for update to a
   using (public.user_role() = 'lgu')
   with check (public.user_role() = 'lgu');
 create policy "barangay_status_delete" on public.barangay_status for delete to authenticated
-  using (public.user_role() = 'lgu');
-
--- =====================================================================
--- barangay_officials (representative / official directory per barangay)
--- Readable by all signed-in users so the drill-down can show who to contact;
--- managed by the LGU.
--- =====================================================================
-create table public.barangay_officials (
-  id uuid primary key default gen_random_uuid(),
-  barangay_psgc text not null references public.barangays (psgc_code) on delete cascade,
-  position text not null,
-  name text not null,
-  contact text,
-  email text
-);
-
-alter table public.barangay_officials enable row level security;
-create policy "barangay_officials_read" on public.barangay_officials for select to authenticated using (true);
-create policy "barangay_officials_insert" on public.barangay_officials for insert to authenticated
-  with check (public.user_role() = 'lgu');
-create policy "barangay_officials_update" on public.barangay_officials for update to authenticated
-  using (public.user_role() = 'lgu')
-  with check (public.user_role() = 'lgu');
-create policy "barangay_officials_delete" on public.barangay_officials for delete to authenticated
   using (public.user_role() = 'lgu');
 
 -- =====================================================================
@@ -359,10 +336,6 @@ insert into public.water_sources (id, kind, name, lng, lat, status, barangay_psg
   ('00000000-0000-4000-8000-000000000006', 'well',      'Bangon spring',      124.938, 11.862, 'low',    '0806005003', '10000000-0000-4000-8000-000000000004'),
   ('00000000-0000-4000-8000-000000000007', 'well',      'Canlapwas spring',   124.962, 11.872, 'unsafe', '0806005014', '10000000-0000-4000-8000-000000000005');
 
--- Demo barangay officials (placeholder directory — replace with the LGU roster)
-insert into public.barangay_officials (barangay_psgc, position, name, contact, email) values
-  ('0806005034', 'Barangay Captain', 'Maria Santos',     '0917 000 0001', 'brgy.poblacion1@catbalogan.gov.ph'),
-  ('0806005051', 'Barangay Captain', 'Jose Ramirez',     '0917 000 0002', 'brgy.sanandres@catbalogan.gov.ph'),
-  ('0806005027', 'Barangay Captain', 'Ana Reyes',        '0917 000 0003', 'brgy.mercedes@catbalogan.gov.ph'),
-  ('0806005003', 'Barangay Captain', 'Pedro Garcia',     '0917 000 0004', 'brgy.bangon@catbalogan.gov.ph'),
-  ('0806005014', 'Barangay Captain', 'Liza Mendoza',     '0917 000 0005', 'brgy.canlapwas@catbalogan.gov.ph');
+-- Barangay officials come from public.profiles (role = 'official', barangay_psgc = that
+-- barangay), so no placeholder directory is seeded. Register an official account and the
+-- LGU assigns it on the barangay map / Users & roles page.

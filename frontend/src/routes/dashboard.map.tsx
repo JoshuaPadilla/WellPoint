@@ -9,7 +9,7 @@ import { SummaryPanel } from '@/components/SummaryPanel'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { cn } from '@/lib/utils'
 import { AssetMarkers } from '@/components/WaterAssets'
-import { useWaterStore } from '@/lib/water-store'
+import { setUserRole, useWaterStore } from '@/lib/water-store'
 import { barangayDetail, useDomain } from '@/lib/store'
 import type { AccessState, VulnerabilityTier } from '@/data/types'
 
@@ -40,6 +40,61 @@ const VULN_LABEL: Record<VulnerabilityTier, string> = {
   low: 'Low',
   medium: 'Medium',
   high: 'High',
+}
+
+// LGU-only control in the drill-down: assign a registered user as the official
+// of a barangay when none is on file yet.
+function AssignOfficial({ psgc }: { psgc: string }) {
+  const { role, users } = useWaterStore()
+  const [userId, setUserId] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [done, setDone] = useState(false)
+  const [err, setErr] = useState('')
+  if (role !== 'lgu') return null
+
+  const candidates = users.filter((u) => u.role === 'citizen' || (u.role === 'official' && u.barangayPsgc !== psgc))
+
+  const assign = async () => {
+    if (!userId) return
+    setBusy(true)
+    setErr('')
+    setDone(false)
+    const error = await setUserRole(userId, 'official', psgc)
+    setBusy(false)
+    if (error) setErr(error)
+    else {
+      setDone(true)
+      window.setTimeout(() => setDone(false), 2000)
+    }
+  }
+
+  return (
+    <div className="mt-2 space-y-1 text-xs">
+      <div className="flex items-center gap-1.5">
+        <select
+          className="h-7 rounded-md border border-line bg-white px-1.5 text-xs"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+          aria-label="Assign a user as official"
+        >
+          <option value="">Assign an official…</option>
+          {candidates.map((u) => (
+            <option key={u.id} value={u.id}>{u.name || u.email} · {u.role}</option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="rounded-md bg-well px-2 py-1 text-xs font-bold text-white hover:bg-deep disabled:opacity-50"
+          onClick={() => void assign()}
+          disabled={busy || !userId}
+        >
+          Assign
+        </button>
+      </div>
+      {done && <p className="font-semibold text-emerald-700">Assigned as official.</p>}
+      {err && <p className="text-orange-700">{err}</p>}
+    </div>
+  )
 }
 
 type Props = {
@@ -400,18 +455,20 @@ function BarangayMap() {
               </dd>
             </div>
           </dl>
-          {detail.officials.length > 0 && (
-            <div className="mt-2 space-y-1 text-xs">
-              <p className="font-bold text-ink/60">Official contact</p>
-              {detail.officials.map((o) => (
+          <div className="mt-2 space-y-1 text-xs">
+            <p className="font-bold text-ink/60">Barangay official</p>
+            {detail.officials.length > 0 ? (
+              detail.officials.map((o) => (
                 <p key={o.id} className="text-ink/70">
-                  {o.position}: {o.name}
-                  {o.contact && <> · {o.contact}</>}
+                  {o.name || '(unnamed)'}
                   {o.email && <> · {o.email}</>}
                 </p>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <p className="text-ink/60">None assigned yet.</p>
+            )}
+            <AssignOfficial psgc={detail.community.psgcCode} />
+          </div>
           {detail.alerts.length > 0 && (
             <ul className="mt-2 space-y-1">
               {detail.alerts.slice(0, 2).map((a) => (

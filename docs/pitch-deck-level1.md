@@ -74,40 +74,41 @@ Large text, one idea per slide, no walls of bullets. Diagrams: reuse the system 
 **Title: "One live access picture for all 57 barangays."**
 
 - **WellPoint** = a water-security access & early-warning platform for LGU water offices.
-- **What it does:** maps access state across all 57 real barangay boundaries, raises explainable early-warning alerts, lets barangay officials report problems, and ranks who to serve first.
-- **The improvement:** instead of scattered logs, one screen shows who is *secure*, who is *at risk*, and *why* — with a recommended action per alert.
-- **What's different:** access state is **derived** from live signals (never hand-labeled), and alerts combine **real geography + live trend** so a warning can fire *before* full failure.
+- **What it does:** maps access state across all 57 real barangay boundaries, raises explainable early-warning alerts, lets barangay officials report and triage problems, and ranks who to serve first.
+- **The improvement:** one screen shows who is *secure*, who is *at risk*, and *why*; staffing errors no longer hide behind labels — the LGU sets per-barangay status (served, flow %, quality, affordability) and officials come from real registered accounts.
+- **What's different:** access state is **derived** from live signals (never hand-labeled), alerts can fire *before* full failure, and newly registered water sources are boundary-checked against the barangay polygon before they are saved.
 
 *Visual:* the coverage map (green/amber/red) — your single strongest image.
 
 ### Slide 4 — Utilization
 **Title: "Five minutes a day for the water office."**
 
-- **Primary user:** LGU Water / Engineering Office staff.
+- **Primary user:** LGU Water / Engineering Office staff (and DRRM during emergencies).
 - **Journey:**
   1. Open dashboard → read city status band + 4 KPIs (coverage, reliability, active alerts, affordability).
-  2. Open the Map → see served / partial / underserved per barangay; tap one for its drill-down.
-  3. Open Alerts → each alert states the **cause** and the **recommended action** in plain language.
-  4. A barangay official submits a report (area, type, description) in under 20 seconds.
-  5. DRRM uses Deliveries to send relief **underserved-first**.
-- **Input the user gives:** a short report or a source status update.
-- **Result the user gets:** a live, prioritized picture and an action to take.
+  2. Open the Map → see served / partial / underserved per barangay; tap one for a drill-down with **water-source count, serving system, and the assigned barangay official's contact**.
+  3. Open Alerts → each alert states the **cause** and the **recommended action** in plain language; report-driven alerts are triaged by the barangay official (acknowledge → resolve).
+  4. A barangay official submits a report in under 20 seconds, or registers a new source — the map checks it is inside **their own barangay** before saving.
+  5. The LGU edits per-barangay status (**Water status** page) and assigns roles/officials (**Users** page); DRRM issues warnings and plans deliveries **underserved-first**.
+- **Input the user gives:** a short report, a source status, a warning, or an LGU status update.
+- **Result the user gets:** a live, prioritized picture and an action to take — reflected to every role without a refresh.
 
-*Visual:* 3 annotated screenshots (Dashboard, Map, Alerts) — not walls of text.
+*Visual:* 3 annotated screenshots (Dashboard, Map with drill-down, Water status) — not walls of text.
 
 ### Slide 5 — System
 **Title: "Small by design — so it can actually be deployed."**
 
 - **Diagram (reuse `docs/architecture.md` §2):** Browser UI → Supabase (Postgres + Auth + Realtime); derived logic runs as pure functions; real GeoJSON boundaries feed the map.
 - **Tech:** React 19 + TanStack Router + Vite; Supabase (Postgres, Auth, Realtime); MapLibre GL; TypeScript strict.
-- **Data:** real PSGC-coded barangay boundaries for all 57 Catbalogan barangays; water/service data is **simulated and clearly labeled**; community reports and source updates persist in Supabase.
+- **Data:** real PSGC-coded barangay boundaries for all 57 Catbalogan barangays; water/service data is **simulated and clearly labeled**; community reports, source updates, warnings, and LGU per-barangay status overrides persist in Supabase.
+- **Security:** every write is bounded by row-level security per role and barangay — officials can only edit their own barangay; only the LGU sets status or roles.
 - **Requirements:** one `npm run dev` + a Supabase project. No backend, no Docker, no paid API keys.
-- **Current limitations (say them first — it builds trust):** telemetry is simulated; no live PAGASA/DOST feed yet; role management has no UI; map needs internet for basemap tiles (degrades gracefully offline).
+- **Current limitations (say them first — it builds trust):** telemetry is simulated; no live PAGASA/DOST feed yet; officials must come from registered user accounts; map needs internet for basemap tiles (degrades gracefully offline).
 
 ### Slide 6 — Adoption
 **Title: "Adding your LGU is records, not a rewrite."**
 
-- **Where used:** LGU water/engineering office; barangay officials report; DRRM distributes relief.
+- **Where used:** LGU water/engineering office; barangay officials report and triage; DRRM distributes relief.
 - **Who operates it:** the LGU water office (or its existing IT vendor) — standard React/Postgres skills.
 - **To deploy:** one Supabase project + a static host. Near-zero cost (free tier + free static hosting); ~PHP 0–1,500/month if hosted.
 - **Maintenance:** one typed data model file, pure documented functions — a new developer reads the model in one file.
@@ -137,12 +138,12 @@ Speaker: **[Presenter]**. Numbers in brackets = elapsed time. Pause after every 
 > Two things make it different. First, access state is **derived** from live signals — not a label someone typed, so the score can't be gamed. Second, alerts combine **real geography with live trend**, so a warning can fire **before** a shortage fully hits."
 
 > **[1:30] Slide 4 — Utilization**
-> "For the user, it's five minutes a day. The water office opens the dashboard: a city status band and four numbers — coverage, reliability, active alerts, affordability. Then the map: green is served, amber is partial, red is underserved. Then alerts: each one states the cause and the recommended action. A barangay official reports from the field. DRRM sends relief to the most vulnerable barangays first."
+> "For the user, it's five minutes a day. The water office opens the dashboard: a city status band and four numbers — coverage, reliability, active alerts, affordability. Then the map: green is served, amber is partial, red is underserved — and tapping a barangay shows its water-source count, its serving system, and the official you can call. Alerts each state the cause and the recommended action. A barangay official reports from the field, and the LGU sets the status it knows: served or not, flow, quality, affordability. DRRM sends relief to the most vulnerable barangays first."
 
 > **[2:15] Slide 5 — System**
 > "Technically, we kept it deliberately small — because implementability is forty percent of this round.
 > A React single-page app talks directly to Supabase for data, auth, and realtime. There is **no backend**. The derived logic is plain, testable TypeScript. The map uses the **real PSGC-coded boundaries of all 57 barangays**.
-> And I'll be upfront about the limits: the water data is **simulated** and labeled as such, there's no live PAGASA feed yet, and role management is table-driven. We'd rather show you something honest that runs."
+> And I'll be upfront about the limits: the water data is **simulated** and labeled as such, and there's no live PAGASA feed yet. Roles are real — the LGU assigns statuses and officials from registered accounts, bounded by security rules per barangay. We'd rather show you something honest that runs."
 
 > **[3:05] Slide 6 — Adoption**
 > "Adoption is the part we care about most. One command starts it. One Supabase project and any static host run it — near-zero cost.
@@ -158,7 +159,7 @@ Speaker: **[Presenter]**. Numbers in brackets = elapsed time. Pause after every 
 
 ## 4. Five-minute live demo script (click path)
 
-**Before the judges arrive:** press **Reset demo** (Settings → Demo controls) so the known-good state is loaded. Have the login credentials for each role on a sticky note. Pre-fill any report fields.
+**Before the judges arrive:** log in as the **LGU** account and press **Reset demo** (Settings → Demo controls) so the known-good state is loaded. Have login credentials for each role (LGU, DRRM, official, resident) on a sticky note. If a barangay has no official yet, assign one on the Map drill-down — the card says "None assigned yet" until you do. Pre-fill any report fields.
 
 1. **Dashboard** (`/dashboard`) — *[0:00–0:45]*
    "Notice the banner: Catbalogan is at **Watch**. Four numbers explain why — coverage, reliability, active alerts, affordability. The score is built from these, so you always see *why*."
@@ -166,16 +167,18 @@ Speaker: **[Presenter]**. Numbers in brackets = elapsed time. Pause after every 
 
 2. **Map** (`/dashboard/map`) — *[0:45–1:45]*
    "Green is served, amber is partial, red is underserved — and this state is **derived** from each system's live status, not labeled. **Every one of these 57 boundaries is real**, PSGC-coded, and each carries a vulnerability tier computed from its geography. Canlapwas is critical; Poblacion 1 is secure. **The same city, very different access.**"
-   *Tap one red barangay to open its drill-down.*
+   *Tap one red barangay to open its drill-down — it shows the water-source count, the serving system and its service hours, and the assigned official.*
+   *LGU-only, the drill-down also offers "Assign an official…" — pick a registered user and it appears on the card for every role.*
 
-3. **Alerts** (`/dashboard/alerts`) — *[1:45–2:30]*
+3. **Water status** (`/dashboard/systems`) — *[1:45–2:30]*
+   "This is the LGU's own view — the water office types in what it knows: served or not, flow percentage, quality, affordability, for every one of the 57 barangays. Watch it change the map and the alerts live."
+   *LGU-only: set one barangay to low flow → jump back to Map/Alerts to show the derived impact → **Restore seeded**.*
+
+4. **Alerts + Reports** (`/dashboard/alerts`, `/dashboard/reports`) — *[2:30–3:15]*
    "Each alert states the cause and the recommended action in plain language — 'Deploy emergency water to Barangay Canlapwas within 6 hours.' This is our documented rule set, not a black box."
+   *Switch to the barangay-official account: acknowledge then resolve the report → jump to Alerts to show it cleared live.*
 
-4. **Reports** (`/dashboard/reports`) — *[2:30–3:15]*
-   "A barangay official reports a contamination event. Fields are pre-filled; watch it appear as an alert **without a refresh**."
-   *Submit → jump to Alerts to show the new live alert.*
-
-5. **Simulate a typhoon** (Dashboard → Demo controls → San Andres) — *[3:15–4:15]*
+5. **Simulate a typhoon** (LGU account → Settings → Demo controls → San Andres) — *[3:15–4:15]*
    "Now a typhoon hits San Andres. Watch the reliability score drop and a new critical alert appear — no refresh."
    *Let the change land. Optionally open Insights to show the recommendation that appears for the LGU.*
 
@@ -205,40 +208,40 @@ Copy these into the workbook. Watch the word limits.
 
 **C. Proposed solution**
 - **10.0 Solution Name:** "WellPoint"
-- **11.0 Solution Summary (≤75w):** "WellPoint is a water-security access and early-warning platform for LGU water offices. It maps access state across all 57 real Catbalogan barangay boundaries, derives explainable early-warning alerts from live service, source, and community-report signals, and ranks which barangays to serve first. Barangay officials report problems in seconds; DRRM distributes relief to the most vulnerable areas first."
+- **11.0 Solution Summary (≤75w):** "WellPoint is a water-security access and early-warning platform for LGU water offices. It maps access state across all 57 real Catbalogan barangay boundaries, derives explainable early-warning alerts from live service, source, and community-report signals, and ranks which barangays to serve first. Barangay officials report and triage problems in seconds; the LGU sets per-barangay status; DRRM distributes relief to the most vulnerable areas first."
 - **12.0 Solution Type:** "Decision-Support System / Dashboard (web application)"
 - **13.0 Core Functions (≤5):**
   1. "Access dashboard: city status band + coverage, reliability, alerts, affordability KPIs."
-  2. "Coverage map: 57 real barangay boundaries colored by derived access state, with vulnerability tiers."
-  3. "Early-warning alerts: documented thresholds, plain-language cause and recommended action."
-  4. "Community reporting: barangay officials submit outages/contamination; feeds alerts live."
+  2. "Coverage map: 57 real barangay boundaries colored by derived access state, with a drill-down showing water-source count, serving system, and the assigned barangay official."
+  3. "Early-warning alerts: documented thresholds, plain-language cause and recommended action, and a full resolution loop (report triage → warning/source/status resolve)."
+  4. "LGU water-office tools: per-barangay status editor (served, flow %, quality, affordability), user & role assignment, and boundary-checked source registration."
   5. "Prioritized response: rule-based recommendations and underserved-first delivery planning."
 
 **D. Prototype, technical functionality, and user experience**
-- **14.0 Prototype Status (select + ≤50w):** "**Working Prototype** — full login/roles, live dashboard and map, derived alerts, Supabase-backed reports and warnings with realtime updates, emergency deliveries, and a deterministic demo with reset. Water/telemetry data is simulated and labeled; boundaries are real."
-- **15.0 User and System Workflow (≤5 steps):** "1) Staff sign in (role-scoped). 2) Dashboard + map show derived access state per barangay. 3) Alerts fire from documented rules weighted by vulnerability. 4) Officials/residents submit reports; LGU/DRRM author warnings — both persist in Supabase and update live. 5) LGU acts on ranked recommendations; DRRM plans underserved-first deliveries."
-- **16.0 Technology and Data Used:** "React 19, TanStack Router, Vite, TypeScript (strict), Tailwind/shadcn-ui, MapLibre GL; Supabase (Postgres + Auth + Realtime). Data: real PSGC-coded barangay boundaries (57) and area/distance metadata; simulated deterministic water-service and source data; user-authored reports/warnings/sources in Supabase; optional Open-Meteo weather projection."
-- **17.0 Dependencies & Limitations (≤5):** "(1) Requires internet + a Supabase project; (2) water/telemetry data is simulated, not live; (3) no PAGASA/DOST or flow-meter integration yet; (4) role management is table-driven, no admin UI; (5) map basemap tiles need connectivity (degrades to a tile-less style offline)."
+- **14.0 Prototype Status (select + ≤50w):** "**Working Prototype** — full login/roles, live dashboard and map, derived alerts, Supabase-backed reports/warnings with realtime updates, LGU per-barangay status editor and user & role management, boundary-checked source registration, emergency deliveries, and a deterministic demo with reset. Water/telemetry data is simulated and labeled; boundaries are real."
+- **15.0 User and System Workflow (≤5 steps):** "1) Staff sign in (role-scoped). 2) Dashboard + map show derived access state per barangay. 3) Alerts fire from documented rules weighted by vulnerability. 4) Officials/residents submit reports; officials triage and LGU/DRRM author or resolve warnings — all persist and update live. 5) The LGU sets or restores per-barangay status; DRRM plans underserved-first deliveries."
+- **16.0 Technology and Data Used:** "React 19, TanStack Router, Vite, TypeScript (strict), Tailwind/shadcn-ui, MapLibre GL; Supabase (Postgres + Auth + Realtime). Data: real PSGC-coded barangay boundaries (57) and area/distance metadata; simulated deterministic water-service and source data; user-authored reports/warnings/sources and LGU status overrides in Supabase; optional Open-Meteo weather projection."
+- **17.0 Dependencies & Limitations (≤5):** "(1) Requires internet + a Supabase project; (2) water/telemetry data is simulated, not live; (3) no PAGASA/DOST or flow-meter integration yet; (4) officials come from registered user accounts — a barangay shows 'None assigned' until the LGU assigns one; (5) map basemap tiles need connectivity (degrades to a tile-less style offline)."
 - **18.0 UX & Accessibility (≤75w):** "Designed for a 5-second answer: a status band and four KPIs first, then map, then alerts. Status is conveyed by icon and text, never color alone. Plain language throughout; mobile-first with ≥44px tap targets and WCAG-AA contrast. Role-based navigation hides irrelevant features. All names are local barangays, so staff recognize their own areas instantly."
-- **19.0 User Testing / Feedback (optional):** "[Not yet conducted / list reviewers and the one change you made from their feedback.]"
+- **19.0 User Testing / Feedback (optional):** "Internal team walkthroughs verified the full loop — resident report → official acknowledge/resolve → LGU status edit → alerts, map, and score update across roles without refresh. External testing: not yet conducted."
 
 **E. Implementation and feasibility**
-- **20.0 Operational Use & Implementing Office (≤100w):** "Operated by the LGU Water/Engineering Office as a daily monitoring and response console; barangay officials use the report form from the field; DRRM uses the deliveries view during emergencies. It replaces no existing system — it unifies scattered status into one live picture. The same deployment can be run by a municipal water utility or the city's IT office with standard web skills."
-- **21.0 Deployment Requirements (≤6):** "1) Supabase project (free tier sufficient); 2) any static web host; 3) internet connectivity; 4) a browser (mobile or desktop); 5) staff accounts with roles; 6) short staff orientation on reports and alerts."
+- **20.0 Operational Use & Implementing Office (≤100w):** "Operated by the LGU Water/Engineering Office as a daily monitoring and response console; barangay officials report, triage, and maintain their own barangay's sources; DRRM issues warnings and plans deliveries during emergencies. The LGU sets per-barangay status and assigns officials from registered accounts. It replaces no existing system — it unifies scattered status into one live picture. The same deployment can be run by a municipal water utility or the city's IT office with standard web skills."
+- **21.0 Deployment Requirements (≤6):** "1) Supabase project (free tier sufficient); 2) any static web host; 3) internet connectivity; 4) a browser (mobile or desktop); 5) staff accounts with roles; 6) short staff orientation on reports, status, and alerts."
 - **22.0 Indicative Cost and Time:** "Near PHP 0 for a pilot (Supabase free tier + free static host); ~PHP 0–1,500/month if hosted. Initial deployment: 1–2 weeks (data setup, accounts, orientation)."
 - **23.0 Key Risks / Constraints (≤3):** "(1) No live telemetry — mitigated by manual entry through existing forms; (2) data quality/coverage — mitigated by starting with pilot systems and expanding; (3) sustained LGU ownership — mitigated by low cost, standard stack, and a documented runbook."
 
 **F. Expected impact**
 - **24.0 Expected Outcome & Benefit (≤100w):** "WellPoint turns water security from a reactive complaint process into a proactive, equitable one. The water office sees the whole city at a glance and knows which barangay is cut off and why. Alerts fire before a shortage becomes a crisis, and response priority goes to isolated, low-income, disaster-vulnerable barangays first. Over time this shortens outage duration, targets limited resources, and improves safe, affordable access — directly serving the challenge's equity and resilience goals."
-- **25.0 Expected Reach / Coverage:** "Initial pilot: all 57 barangays of Catbalogan City (~[population]); 5 pilot water systems. Replicable per municipality across Region VIII."
+- **25.0 Expected Reach / Coverage:** "Initial pilot: all 57 barangays of Catbalogan City (~[population]); 5 pilot water systems; 57 barangay officials (one per registered official account). Replicable per municipality across Region VIII."
 - **26.0 Success Indicators (≤3):** "(1) Median time from disruption to LGU awareness; (2) share of alerts acted on within the recommended window; (3) access coverage % in previously underserved barangays."
 
 **G. Innovation, sustainability, scalability**
 - **27.0 Current vs. Proposed (≤100w):** "Today, water status is gathered from logs, radio calls, and resident complaints, then pieced together manually. WellPoint replaces that with one live, geographic access picture that is updated automatically as reports and statuses change. Instead of a static report, the LGU gets explainable early-warning alerts and a ranked list of who to serve first — moving the office from reacting to complaints to preventing shortages."
 - **28.0 Innovative Element (≤75w):** "Access state and vulnerability are **derived**, not labeled: a barangay is 'served' only if its system is available, flowing, safe, and affordable. Alerts fuse real geography (isolation, area, distance) with live trend, so warnings can fire before full failure — and every rule and threshold is visible, not a black box."
 - **29.0 Sustainability & Maintenance (≤100w):** "Maintained by the LGU IT office or its existing web vendor. Ongoing needs: a Supabase project (free tier), a static host, and periodic data updates. The codebase is one typed data model plus pure, documented functions, so handover is fast. Data management follows existing water-office workflows; manual entry covers gaps until telemetry is connected."
-- **30.0 Scalability & Replicability (≤100w):** "Every record is scoped by LGU and barangay, so a new municipality is added as records plus its own GeoJSON boundaries using the same loader — not a fork of the app. Features (dashboard, map, alerts, reports, deliveries) are independent routes, so an LGU can adopt them one at a time. The stack is standard web technology already used by many LGU vendors."
-- **31.0 Next Priorities (≤3):** "1) Pilot with the Catbalogan City water office; 2) integrate real flow-meter and PAGASA/DOST data; 3) expand to neighboring municipalities."
+- **30.0 Scalability & Replicability (≤100w):** "Every record is scoped by LGU and barangay, so a new municipality is added as records plus its own GeoJSON boundaries using the same loader — not a fork of the app. Features (dashboard, map, alerts, reports, status editor, source registration) are independent routes, so an LGU can adopt them one at a time. The stack is standard web technology already used by many LGU vendors."
+- **31.0 Next Priorities (≤3):** "1) Pilot with the Catbalogan City water office; 2) integrate real flow-meter and PAGASA/DOST data; 3) multi-LGU tenancy, SMS/email alerts, and validated accessibility."
 
 **H. Submission and demonstration**
 - 32.0 Designated Presenter: **[Presenter]**
@@ -263,21 +266,23 @@ Answer in one breath, then stop. Never bluff: **"That's a production enhancement
   "Yes — that's why we kept it small. One command locally, one Supabase project, any static host, near-zero cost. No backend, no Docker, no paid keys. The stack is what LGU IT vendors already use."
 
 **Feasibility / operations**
-- **Where does real data come from?** Existing flow meters and water-office service logs; PAGASA/DOST feeds; barangay reports. Where telemetry is missing, staff enter data through the same forms — it already works.
+- **Where does real data come from?** Existing flow meters and water-office service logs; PAGASA/DOST feeds; barangay reports. Where telemetry is missing, staff enter data through the same forms — the LGU sets per-barangay status the same way.
 - **What if the venue Wi-Fi dies?** The seed is client-side, so the dashboard and score still render; the map falls back to a tile-less style. The demo keeps working.
 - **How much to run?** Near PHP 0 on free tiers; ~PHP 0–1,500/month hosted.
 - **Who maintains it?** The LGU IT office or its existing web vendor — one typed model file, pure functions.
 
 **Relevance / equity**
-- **How is this different from what LGUs have?** It unifies status, coverage, affordability, and community reports into one access-focused picture with explainable alerts, instead of scattered logs.
+- **How is this different from what LGUs have?** It unifies status, coverage, affordability, officials, and community reports into one access-focused picture with explainable alerts, instead of scattered logs.
 - **How does it actually make access equitable?** Response priority is severity-weighted and **underserved-first**, so isolated, low-affordability barangays are served first at equal severity.
 - **Why these 57 barangays?** They are Catbalogan's real, PSGC-coded boundaries — the judges' own city.
+- **How is a barangay official chosen?** Officials are real registered users. The LGU assigns a role and barangay to any account on the **Users** page, or inline on the Map drill-down when the card says "None assigned yet."
 
 **Technical (Level 1 judges)**
 - **Why no backend?** Deliberate: it's 40% feasibility. Derived logic is pure TypeScript with stable signatures — it moves behind an Edge Function in production without changing the UI.
 - **How do you prevent a fake score?** Access state and metrics are *derived*, never stored or seeded, so the score can't be gamed by its own labels.
 - **Is the code quality real?** Strict TypeScript, one domain contract, documented rules, and green `typecheck` + `build` are submission gates.
-- **Security / roles?** Supabase Auth + row-level security scope data by role and barangay.
+- **Security / roles?** Supabase Auth + row-level security scope data by role and barangay — officials only touch their own barangay, and only the LGU sets status or roles.
+- **How does an alert get cleared?** Report-driven alerts are cleared by the barangay official (acknowledge → resolve); warning-driven by the author (resolve/cancel); source-status by the official on the Sources page; and system-status by the LGU setting or restoring per-barangay status. Every resolution travels live to all users via Realtime.
 
 **Hostile / "gotcha" questions**
 - **"Isn't this just a map?"** "A map shows where things are. This derives *access* — covered is not the same as accessed — and turns it into an action list with priority."
@@ -289,11 +294,12 @@ Answer in one breath, then stop. Never bluff: **"That's a production enhancement
 ## 7. Pre-demo checklist (do this the night before)
 
 - [ ] **Create demo accounts** for each role (LGU, DRRM, Barangay official, Resident) in Supabase, with the correct `profiles.role` and `barangay_psgc`. Write the credentials down — auth is real and there is no demo-account seed.
+- [ ] As **LGU**, open **Users** and confirm each official account is assigned to the right barangay (or assign on the Map drill-down when a card says "None assigned yet").
 - [ ] `cd frontend && npm run typecheck && npm run build` — both green.
-- [ ] Supabase reachable from the venue; apply `supabase/schema.sql`.
-- [ ] Fresh load → press **Reset demo** → confirm known-good state (Canlapwas critical, Mercedes resolved).
-- [ ] Rehearse the **full demo twice, timed**, including the reset.
-- [ ] Screenshots of Dashboard / Map / Alerts ready as a fallback if the live app fails.
+- [ ] Supabase reachable from the venue; apply `supabase/schema.sql` (current). If you already applied it and get a "stack depth limit exceeded" error on saving, also run the current `SECURITY DEFINER` helper functions from the schema.
+- [ ] Fresh load → as LGU press **Reset demo** → confirm known-good state (Canlapwas critical, Mercedes resolved).
+- [ ] Rehearse the **full demo twice, timed**, including the reset and the official-assignment step.
+- [ ] Screenshots of Dashboard / Map (with drill-down) / Water status / Alerts ready as a fallback if the live app fails.
 - [ ] Fill the **Unified Pitching Data Form** and the deck (Slides 1 & 7 from the template).
 - [ ] Deck on a USB drive **and** in the cloud; offline copy of the deck as PDF.
 - [ ] Presenter knows the timing marks: pitch ends **4:30**, demo ends **4:45**.

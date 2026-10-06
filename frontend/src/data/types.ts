@@ -72,13 +72,11 @@ export interface BarangayStatus {
   updatedAt: string
 }
 
-/** A barangay representative/official (supabase `barangay_officials`). */
+/** A barangay official — a real registered user with role 'official' scoped to that barangay. */
 export interface BarangayOfficial {
   id: string
   barangayPsgc: string
-  position: string
   name: string
-  contact: string
   email: string
 }
 

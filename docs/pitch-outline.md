@@ -35,14 +35,15 @@ Rules: no walls of bullets, no tiny fonts, one diagram, plain language.
 
 ## 3. Live demo script (click-path)
 
-Start from a clean load and press **Reset demo** (Dashboard → Demo controls).
+Start from a clean load and, as **LGU**, press **Reset demo** (Settings → Demo controls). Have credentials per role ready.
 
 1. **Dashboard** (`/dashboard`) — "Notice the banner: Catbalogan is at *Watch*. Four KPIs explain why: coverage, reliability, active alerts, affordability." *(Pause so judges read the score's breakdown.)*
-2. **Coverage** (`/dashboard/map`) — "Green is served, amber is partial, red is underserved — and this access state is *derived* from each system's live status, not labeled. Every one of the 57 barangay boundaries is real, and each one also carries a vulnerability tier computed from its geography. Canlapwas is critical; Poblacion 1 is secure. The same city, very different access."
-3. **Alerts** (`/dashboard/alerts`) — "Each alert states the cause and the recommended action in plain language. This is our early-warning rule set — not a black box."
-4. **Reports** (`/dashboard/reports`) — submit a contamination report for Bangon. "A barangay official can report in under 20 seconds. It immediately appears as an alert."
-5. **Simulate a typhoon** (Dashboard → Demo controls → San Andres) — "Watch the reliability score drop and a new critical alert appear without a refresh."
-6. **Reset demo** — "Every run is deterministic, so the demo is repeatable."
+2. **Coverage** (`/dashboard/map`) — "Green is served, amber is partial, red is underserved — and this access state is *derived* from each system's live status, not labeled. Every one of the 57 barangay boundaries is real, and each one also carries a vulnerability tier computed from its geography. Canlapwas is critical; Poblacion 1 is secure. The same city, very different access." *Tap a barangay to show the drill-down: water-source count, serving system, and official contact.*
+3. **Water status** (`/dashboard/systems`, LGU) — "The water office types in what it knows per barangay — served, flow, quality, affordability — and the map, alerts, and score re-derive live. Restore returns to the seeded state." *Set one barangay to low flow, show the map change, then **Restore seeded**.*
+4. **Alerts** (`/dashboard/alerts`) — "Each alert states the cause and the recommended action in plain language. This is our early-warning rule set — not a black box."
+5. **Reports** (`/dashboard/reports`) — submit a contamination report for Bangon. "A barangay official can report in under 20 seconds. It immediately appears as an alert." *Then (as official) acknowledge → resolve and watch it clear live.*
+6. **Simulate a typhoon** (LGU → Settings → Demo controls → San Andres) — "Watch the reliability score drop and a new critical alert appear without a refresh."
+7. **Reset demo** — "Every run is deterministic, so the demo is repeatable."
 
 Timing: keep it under 3 minutes with buffer. Never type free-form — pre-fill the report fields.
 
@@ -75,6 +76,6 @@ Timing: keep it under 3 minutes with buffer. Never type free-form — pre-fill t
 - **How is it different from existing LGU tools?** It unifies status, coverage, affordability, and community reports into one access-focused score with explainable alerts — instead of scattered logs.
 - **What would it cost to run?** Near PHP 0 locally (Supabase free tier + a static host); ~PHP 0–1,500/month if hosted. No paid APIs.
 - **How does it scale to other municipalities?** Data is scoped by LGU/barangay, so a new LGU is a set of records plus its own GeoJSON boundaries, not a new codebase.
-- **Prototype limitations?** No role-management UI (roles come from Supabase `profiles`), simulated water/telemetry data, and real barangay boundaries with illustrative water-source points and service attributes — all noted as Level 2/production enhancements.
+- **Prototype limitations?** Simulated water/telemetry data (clearly labeled), real barangay boundaries with illustrative water-source points and service attributes; officials must come from registered user accounts (the LGU assigns them on the Users page or the Map drill-down). No live PAGASA/DOST feed yet — all noted as Level 2/production enhancements.
 
 Never bluff: "That's a production enhancement; here's the path" is a strong answer.

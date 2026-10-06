@@ -45,10 +45,14 @@ export function buildDomain(water: WaterState, geos: GeoBarangay[], barangayAt: 
   const domain = deriveDomain(communities, systems, sources, reports, water.statusOverrides)
   const active = activeAlerts(domain, water.warnings)
   const metrics = computeMetrics(domain, active)
+  // Barangay officials come from real registered profiles (role 'official', scoped by barangay).
+  const officials: BarangayOfficial[] = water.users
+    .filter((u) => u.role === 'official' && u.barangayPsgc)
+    .map((u) => ({ id: u.id, barangayPsgc: u.barangayPsgc, name: u.name, email: u.email }))
   return {
     ...domain,
     warnings: water.warnings,
-    officials: water.officials,
+    officials,
     alerts: sortAlerts(allAlerts(domain, water.warnings), domain),
     activeAlerts: active,
     metrics,
