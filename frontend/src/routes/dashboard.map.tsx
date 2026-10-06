@@ -1,11 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { DragEvent } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import type { ExpressionSpecification } from 'maplibre-gl'
+import type { ExpressionSpecification, Map as MapLibreMap } from 'maplibre-gl'
 import { Map, MapControls, MapGeoJSON, useMap } from '@/components/ui/map'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
+import { AssetMarkers, MapBridge, RolePanel } from '@/components/WaterAssets'
+import { addAsset } from '@/lib/WaterStore'
+import type { AssetKind } from '@/lib/WaterStore'
 
 export const Route = createFileRoute('/dashboard/map')({ component: BarangayMap })
 
@@ -56,6 +60,18 @@ function BarangayMap() {
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [focus, setFocus] = useState<Focus | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const mapRef = useRef<MapLibreMap | null>(null)
+
+  // A palette item dropped on the map becomes an asset at the drop point (the store checks the role).
+  const onDrop = (e: DragEvent<HTMLElement>) => {
+    const kind = e.dataTransfer.getData('text/kind') as AssetKind
+    const map = mapRef.current
+    if (!kind || !map) return
+    e.preventDefault()
+    const r = e.currentTarget.getBoundingClientRect()
+    const ll = map.unproject([e.clientX - r.left, e.clientY - r.top])
+    addAsset(kind, ll.lng, ll.lat)
+  }
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -129,9 +145,13 @@ function BarangayMap() {
         Search for a barangay or select one on the map to see its details.
       </p>
 
+      <RolePanel />
+
       <section
         aria-label="Map of Catbalogan barangays"
-        className="relative mt-6 h-[70vh] min-h-[480px] overflow-hidden rounded-2xl border border-line bg-sky/40"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={onDrop}
+        className="relative mt-4 h-[70vh] min-h-[480px] overflow-hidden rounded-2xl border border-line bg-sky/40"
       >
         {error && (
           <p role="alert" className="p-8 text-ink">
@@ -145,6 +165,7 @@ function BarangayMap() {
           <>
             <Map theme="light" center={[124.89, 11.78]} zoom={11} className="h-full w-full">
               <FitTo focus={focus} />
+              <MapBridge mapRef={mapRef} />
               <MapControls position="bottom-right" />
               <MapGeoJSON<Props>
                 data={data}
@@ -162,6 +183,7 @@ function BarangayMap() {
                   setSheetOpen(true)
                 }}
               />
+              <AssetMarkers />
             </Map>
 
             {/* Search sits on top of the map */}
