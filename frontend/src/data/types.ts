@@ -56,8 +56,16 @@ export interface ServiceStatus {
   reason: DisruptionReason | null
 }
 
-export type DisruptionReason = 'drought' | 'typhoon' | 'maintenance' | 'contamination' | 'low-flow' | 'advisory' | 'outage'
-export type DisruptionType = 'drought' | 'typhoon' | 'maintenance' | 'contamination'
+export type DisruptionReason =
+  | 'drought'
+  | 'typhoon'
+  | 'maintenance'
+  | 'contamination'
+  | 'low-flow'
+  | 'advisory'
+  | 'outage'
+export type DisruptionType =
+  'drought' | 'typhoon' | 'maintenance' | 'contamination'
 
 /** A persisted per-barangay status override (supabase `barangay_status`). A row
  *  replaces the seeded/derived live values for one barangay; no row means the
@@ -83,7 +91,12 @@ export interface BarangayOfficial {
 export type AccessState = 'served' | 'partial' | 'underserved'
 export type VulnerabilityTier = 'low' | 'medium' | 'high'
 
-export type ReportType = 'no_water' | 'low_pressure' | 'contamination' | 'infrastructure_damage' | 'other'
+export type ReportType =
+  | 'no_water'
+  | 'low_pressure'
+  | 'contamination'
+  | 'infrastructure_damage'
+  | 'other'
 export type ReportStatus = 'new' | 'acknowledged' | 'resolved'
 
 /** A community report. Persisted in Supabase `reports`; authored by users. */
@@ -119,7 +132,8 @@ export interface Alert {
   action: string
 }
 
-export type WarningType = 'outage' | 'contamination' | 'disaster' | 'maintenance' | 'advisory'
+export type WarningType =
+  'outage' | 'contamination' | 'disaster' | 'maintenance' | 'advisory'
 export type WarningStatus = 'active' | 'resolved' | 'cancelled'
 
 /** A DRRM/LGU-authored early warning. Persisted in Supabase `warnings`. */
@@ -162,5 +176,10 @@ export interface BarangayDetail {
   alerts: Alert[]
   sourceCount: number
   officials: BarangayOfficial[]
-  system: { name: string; level: ServiceLevel; serviceHours: number; operator: string } | null
+  system: {
+    name: string
+    level: ServiceLevel
+    serviceHours: number
+    operator: string
+  } | null
 }
